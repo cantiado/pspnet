@@ -1,0 +1,31 @@
+a:link,
+a:visited,
+a:hover,
+a:focus,
+a:active {
+    color: var(--mdc-theme-on-primary)
+}
+
+h1 {
+    font-size: 40px;
+}
+
+h2 {
+    font-size: 30px;
+}
+
+main {
+    padding-top: 64px;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+}

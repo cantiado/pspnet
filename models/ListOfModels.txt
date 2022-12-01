@@ -1,0 +1,4 @@
+yolov5 - PyTorch
+Detectron2 - PyTorch
+EfficientDet - PyTorch
+EfficientDet-D0-D7 - Tensorflow 2

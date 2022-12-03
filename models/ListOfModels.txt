@@ -1,4 +1,13 @@
-yolov5 - PyTorch
+yolov5 - PyTorch:
+Link to mock report - 
+https://wandb.ai/nathanielrivas/YOLOv5/reports/PSPNet-yolov5--VmlldzozMDc5NzI5?accessToken=mfjg3jw5fncovcv7xmp729nn9co8vzpg1pxyr95y8ds6fs374jzx5vp57tmx9unw
+
 Detectron2 - PyTorch
+
+
+
 EfficientDet - PyTorch
+
+
+
 EfficientDet-D0-D7 - Tensorflow 2

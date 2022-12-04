@@ -1,6 +1,23 @@
+a:link,
+a:visited,
+a:hover,
+a:focus,
+a:active {
+    color: black
+}
+
 main {
     display:grid;
     align-items: center;
     grid-template-columns: repeat(3, 1fr);
 
+}
+
+.user-info {
+    padding: 15px;
+    text-align: center;
+}
+
+.text-field {
+    padding-top: 5px;
 }

@@ -12,7 +12,20 @@
     height: 15px;    
 }
 
-.mdc-top-app-bar__title {
+.split {
+  height: 100%;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+}
 
-  color: black;
+.right {
+  right: 0;
+  background-color: #663300ff;
+  width: 40%;
+}
+
+.left {
+  left: 0;
+  width:60%
 }

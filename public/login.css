@@ -4,6 +4,7 @@
 
 .input-box {
   position: relative;
+  left: 25px;
   width: 250px;
   margin: 20px;
 }
@@ -75,14 +76,27 @@ h2 {
   color: white;
 }
 
+.brown {
+  background-color:  #663300ff;
+  color: white;
+}
+
+.green{
+  background-color:  #b9e0a5ff;
+  color: black;
+}
+
 .button {
-  background-color: #663300ff;
   border: 2px solid black;
   border-radius: 25px;
-  color: white;
   padding: 10px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   font-size: 1em;
+  width: 150px;
+}
+
+p {
+  margin: 20px;
 }

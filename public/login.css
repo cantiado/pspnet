@@ -2,15 +2,48 @@
   background-color: #b9e0a5ff;
 }
 
-.login_input {
-
-
-    border-radius: 25px;
-    border: 2px solid black;
-    padding: 20px; 
-    width: 200px;
-    height: 15px;    
+.input-box {
+  position: relative;
+  width: 250px;
+  margin: 20px;
 }
+
+.input-box input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid black;
+  border-radius: 25px;
+  outline: none;
+  background-color: #f3f3f3ff;
+  color: black;
+  font-size: 1em;
+}
+
+.input-box span {
+  position: absolute;
+  left: 0%;
+  top: 4px;
+  padding: 10px;
+  pointer-events: none;
+  font-size: 1em;
+  color: #999999ff;
+  text-transform: uppercase;
+}
+
+div .input-box input:valid ~ span,
+div .input-box input:focus ~ span {
+  color: transparent;
+}
+
+
+h1 {
+  font-size: 40px;
+}
+
+h2 {
+  font-size: 40px;
+}
+
 
 .split {
   height: 100%;
@@ -28,4 +61,16 @@
 .left {
   left: 0;
   width:60%
+}
+
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.white-text {
+  color: white;
 }

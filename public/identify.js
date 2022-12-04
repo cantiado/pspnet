@@ -7,6 +7,10 @@ menuButton.addEventListener("click", () => {
   menu.open = true;
 });
 
+menuButton.addEventListener("click", () => {
+  console.log("login button pressed")
+})
+
 const uploadedImageList = document.querySelector("#uploaded-image-list");
 for (let i = 0; i < 25; i++) {
   const listItem = document.createElement("li");

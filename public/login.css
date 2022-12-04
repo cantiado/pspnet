@@ -74,3 +74,15 @@ h2 {
 .white-text {
   color: white;
 }
+
+.button {
+  background-color: #663300ff;
+  border: 2px solid black;
+  border-radius: 25px;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 1em;
+}

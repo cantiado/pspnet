@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PSPNet</title> 
+    <link
+      href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="./reset.css" />
+    <link rel="stylesheet" href="./common.css" />
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <header class="mdc-top-app-bar">
+      <div class="mdc-top-app-bar__row">
+        <section
+          class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start"
+        >
+          <a class="mdc-top-app-bar__title" href="./index.html" > PSPNet </a>
+          <a class="mdc-top-app-bar__title" href="">About</a>
+          <a class="mdc-top-app-bar__title" href="">Dataset</a>
+          <a class="mdc-top-app-bar__title" href="">Identify</a>
+          <a class="mdc-top-app-bar__title" href="">Contributions</a>
+        </section>
+        <section
+          class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end"
+        >
+          <button class="mdc-icon-button material-icons md-dark">
+            <div class="mdc-icon-button__ripple"></div>
+              account_circle
+          </button>
+        </section>
+      </div>
+    </header>
+    <main>
+      <div class="wrapper">
+        <h1>
+          Settings
+        </h1>
+        <h2>
+          Eamil Address
+        </h2>
+        <div>
+          <span>
+            Curretn Address:
+          </span>
+          <label class="mdc-text-field mdc-text-field--filled mdc-text-field--disabled">
+            <span class="mdc-text-field__ripple"></span>
+            <span class="mdc-floating-label" id="my-label-id">berykoolemail@gmail.com</span>
+            <input class="mdc-text-field__input" type="text" aria-labelledby="my-label-id" disabled>
+            <span class="mdc-line-ripple"></span>
+          </label>
+        </div>
+        <button id="green-button" class="mdc-button mdc-button--raised" type="button">
+          <span class="mdc-button__ripple"></span>
+          <span class="mdc-button__label">Change Email Address</span>
+        </button>
+
+        <h3>
+          Contributions
+        </h3>
+        <button id="green-button" class="mdc-button mdc-button--raised" type="button">
+          <span class="mdc-button__ripple"></span>
+          <span class="mdc-button__label">Remove Contributions</span>
+        </button>
+        <button id="green-button" class="mdc-button mdc-button--raised" type="button">
+          <span class="mdc-button__ripple"></span>
+          <span class="mdc-button__label">Download Contributions</span>
+        </button>
+      </div>
+    </main>
+    <footer>
+    </footer>
+  </body>
+</html>

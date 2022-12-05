@@ -1,0 +1,44 @@
+.mdc-top-app-bar {
+  background-color: #b9e0a5ff;
+}
+
+a:link, a:visited, a:hover, a:focus, a:active {
+    color: black;
+}
+
+.material-icons.md-24 { font-size: 36px; }
+
+.material-icons.md-dark { color: rgba(0, 0, 0, 0.54); }
+.material-icons.md-dark.md-inactive { color: rgba(0, 0, 0, 0.26); }
+
+h1 {
+  margin-top: 60px;
+  margin-bottom: 60px;
+  font-size: 40px;
+}
+
+h2 {
+  font-size: 30px; 
+}
+
+h3 {
+  font-size: 30px;
+}
+
+#green-button {
+  border: 1px solid black;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  font-size: 1em;
+  width: 300px;
+  background-color: #b9e0a5ff;
+  color: black;
+  margin-bottom: 40px;
+}
+
+.wrapper {
+  position:absolute;
+  left: 80px;
+}

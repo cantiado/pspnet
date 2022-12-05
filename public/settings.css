@@ -35,7 +35,27 @@ h3 {
   width: 300px;
   background-color: #b9e0a5ff;
   color: black;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#email {
+  margin-top: 40px;
   margin-bottom: 40px;
+}
+
+#contributions {
+  margin-bottom: 40px;
+  margin-top: 40px;
+}
+
+#delete {
+  margin-bottom: 40px;
+  margin-top: 40px;
+}
+
+#delete button {
+  width: 200px;
 }
 
 .wrapper {

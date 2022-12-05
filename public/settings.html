@@ -46,36 +46,47 @@
         <h1>
           Settings
         </h1>
-        <h2>
-          Eamil Address
-        </h2>
-        <div>
-          <span>
-            Curretn Address:
-          </span>
-          <label class="mdc-text-field mdc-text-field--filled mdc-text-field--disabled">
-            <span class="mdc-text-field__ripple"></span>
-            <span class="mdc-floating-label" id="my-label-id">berykoolemail@gmail.com</span>
-            <input class="mdc-text-field__input" type="text" aria-labelledby="my-label-id" disabled>
-            <span class="mdc-line-ripple"></span>
-          </label>
+        <div id="email">
+          <h2>
+            Eamil Address
+          </h2>
+          <div>
+            <span>
+              Current Address:
+            </span>
+            <label class="mdc-text-field mdc-text-field--filled mdc-text-field--disabled">
+              <span class="mdc-text-field__ripple"></span>
+              <span class="mdc-floating-label" id="my-label-id">berykoolemail@gmail.com</span>
+              <input class="mdc-text-field__input" type="text" aria-labelledby="my-label-id" disabled>
+              <span class="mdc-line-ripple"></span>
+            </label>
+          </div>
+          <button id="green-button" class="mdc-button mdc-button--raised" type="button">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">Change Email Address</span>
+          </button>
         </div>
-        <button id="green-button" class="mdc-button mdc-button--raised" type="button">
-          <span class="mdc-button__ripple"></span>
-          <span class="mdc-button__label">Change Email Address</span>
-        </button>
 
-        <h3>
-          Contributions
-        </h3>
-        <button id="green-button" class="mdc-button mdc-button--raised" type="button">
-          <span class="mdc-button__ripple"></span>
-          <span class="mdc-button__label">Remove Contributions</span>
-        </button>
-        <button id="green-button" class="mdc-button mdc-button--raised" type="button">
-          <span class="mdc-button__ripple"></span>
-          <span class="mdc-button__label">Download Contributions</span>
-        </button>
+        <div id="contributions">
+          <h3>
+            Contributions
+          </h3>
+          <button id="green-button" class="mdc-button mdc-button--raised" type="button">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">Remove Contributions</span>
+          </button>
+          <button id="green-button" class="mdc-button mdc-button--raised" type="button">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">Download Contributions</span>
+          </button>
+        </div>
+
+        <div id="delete">
+          <button id="green-button" class="mdc-button mdc-button--raised" type="button">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">Delete Account</span>
+          </button>
+        </div>
       </div>
     </main>
     <footer>

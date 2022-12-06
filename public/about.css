@@ -17,17 +17,22 @@ a:active {
 }
 
 .main-grid {
-    padding: 5px;
+    /* padding: 5px; */
     display: grid;
-    grid-template-columns: 100px 8fr 1fr;
+    grid-template-columns: 115px 7fr 2fr;
     column-gap: 25px;
 }
 
 .left-side {
     color: #b9e0a5;
     padding: 15px;
+    background: #b9e0a5
 }
 
 .right-side {
-    padding: 15px;
+    padding: 20px;
+}
+
+.nav-links {
+   display: inline;
 }

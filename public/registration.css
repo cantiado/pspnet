@@ -3,7 +3,12 @@ a:visited,
 a:hover,
 a:focus,
 a:active {
-    color: black
+    color: white
+}
+
+:root {
+    --mdc-theme-primary: #b9e0a5;
+    --mdc-theme-secondary: #663300;
 }
 
 main {

@@ -1,5 +1,7 @@
-import {MDCTextField} from '@material/textfield';
-import {MDCRipple} from '@material/ripple';
+// import {MDCTextField} from '@material/textfield';
+// import {MDCRipple} from '@material/ripple';
+
+const MDCTextField = mdc.textfield;
 
 const textField = new MDCTextField(document.querySelector('.mdc-text-field'));
 

@@ -8,5 +8,26 @@ a:visited,
 a:hover,
 a:focus,
 a:active {
-    color: forestgreen
+    color: black
+}
+
+.grid {
+    display: grid;
+    grid-template-rows: 60px 1fr;
+}
+
+.main-grid {
+    padding: 5px;
+    display: grid;
+    grid-template-columns: 100px 8fr 1fr;
+    column-gap: 25px;
+}
+
+.left-side {
+    color: #b9e0a5;
+    padding: 15px;
+}
+
+.right-side {
+    padding: 15px;
 }

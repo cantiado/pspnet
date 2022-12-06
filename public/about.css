@@ -8,16 +8,23 @@ a:visited,
 a:hover,
 a:focus,
 a:active {
-    color: black
+    color: black;
+    text-decoration: none;
 }
 
-.grid {
+a.anchor {
+    display: block;
+    position: relative;
+    top: -250px;
+    visibility: hidden;
+}
+
+/* .grid {
     display: grid;
     grid-template-rows: 60px 1fr;
-}
+} */
 
 .main-grid {
-    /* padding: 5px; */
     display: grid;
     grid-template-columns: 115px 7fr 2fr;
     column-gap: 25px;
@@ -25,12 +32,26 @@ a:active {
 
 .left-side {
     color: #b9e0a5;
-    padding: 15px;
-    background: #b9e0a5
+    padding: 5px;
+    padding-top: 70px;
+    background: #b9e0a5;
+    height: 100%;
+    border-right: 1px black solid;
+}
+
+ul {
+    background-color: #b9e0a5;
+    position: fixed;
+    overflow: auto;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 105px;
 }
 
 .right-side {
     padding: 20px;
+    padding-top: 70px;
 }
 
 .nav-links {

@@ -10,6 +10,7 @@
 
 .row {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
   padding: 10px;
   justify-content: space-between;
@@ -21,7 +22,34 @@
 }
 
 .image-preview {
+  width: 50%;
   height: 100px;
+}
+
+.image-preview img {
+  width: 25%;
+  max-width: 100px;
+  max-height: 100px;
+  min-width: 50px;
+  min-height: 50px;
+}
+
+.observation-details {
+  width: 50%;
+  align-self: flex-start;
+}
+
+.observation-details li {
+  padding-bottom: 5px;
+}
+
+.scientific-name {
+  font-size: 36px;
+  font-style: italic;
+}
+
+.common-name {
+  font-size: 24px;
 }
 
 #explore-header {
@@ -31,4 +59,9 @@
 
 #options {
   font-size: 24px;
+}
+
+#search-button {
+  border: none;
+  background: none;
 }

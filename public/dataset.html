@@ -13,6 +13,10 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
     />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0"
+    />
     <link rel="stylesheet" href="./reset.css" />
     <link rel="stylesheet" href="./common.css" />
     <link rel="stylesheet" href="./dataset.css" />
@@ -55,20 +59,61 @@
                 aria-labelledby="my-label-id"
               />
               <span class="mdc-line-ripple"></span>
+              <button id="search-button" type="button">
+                <span class="material-symbols-outlined"> search </span>
+              </button>
             </label>
             <span id="options">Options</span>
           </div>
           <div class="row">
-            <img class="image-preview" src="./pink-square.png" />
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi
-              voluptates asperiores vero. Saepe vel esse impedit ducimus
-              distinctio iusto temporibus nemo dolore iste, facere harum
-              quisquam libero possimus doloribus ratione.
-            </p>
+            <div class="image-preview">
+              <img src="./pink-square.png" />
+            </div>
+            <div class="observation-details">
+              <ul>
+                <li><span class="scientific-name"> Scientific Name </span></li>
+                <li><span class="common-name">Common Name</span></li>
+                <li>
+                  <span class="num-observations">No. of Observations</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="row">
+            <div class="image-preview">
+              <img src="./pink-square.png" />
+              <img src="./pink-square.png" />
+            </div>
+            <div class="observation-details">
+              <ul>
+                <li><span class="scientific-name"> Scientific Name </span></li>
+                <li><span class="common-name">Common Name</span></li>
+                <li>
+                  <span class="num-observations">No. of Observations</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="row">
+            <div class="image-preview">
+              <img src="./pink-square.png" />
+              <img src="./pink-square.png" />
+              <img src="./pink-square.png" />
+              <img src="./pink-square.png" />
+            </div>
+            <div class="observation-details">
+              <ul>
+                <li><span class="scientific-name"> Scientific Name </span></li>
+                <li><span class="common-name">Common Name</span></li>
+                <li>
+                  <span class="num-observations">No. of Observations</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </main>
+    <script src="./dataset.js"></script>
   </body>
 </html>

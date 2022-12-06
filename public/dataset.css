@@ -1,0 +1,34 @@
+.search-engine {
+    width: 95vw;
+}
+
+.flex-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-bar {
+  width: 80%;
+}
+
+.image-preview {
+  height: 100px;
+}
+
+#explore-header {
+  padding-top: 10px;
+  padding-bottom: 15px;
+}
+
+#options {
+  font-size: 24px;
+}

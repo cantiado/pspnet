@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dataset</title>
+    <link
+      href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0"
+    />
+    <link rel="stylesheet" href="./reset.css" />
+    <link rel="stylesheet" href="./common.css" />
+    <link rel="stylesheet" href="./dataset.css" />
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+  </head>
+  <body>
+    <header class="mdc-top-app-bar">
+      <div class="mdc-top-app-bar__row">
+        <section
+          class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start"
+        >
+          <a class="mdc-top-app-bar__title" href="./index.html"> PSPNet </a>
+          <!-- <span class="mdc-top-app-bar__title">
+            </span> -->
+          <a class="mdc-top-app-bar__title" href="">About</a>
+          <a class="mdc-top-app-bar__title" href="">Dataset</a>
+          <a class="mdc-top-app-bar__title" href="">Identify</a>
+          <a class="mdc-top-app-bar__title" href="">Contributions</a>
+        </section>
+        <section
+          class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end"
+        >
+          <a class="mdc-top-app-bar__title" href="">Login</a>
+        </section>
+      </div>
+    </header>
+    <main>
+      <div class="flex-container">
+        <h1 id="explore-header">Explore</h1>
+        <div class="mdc-card search-engine">
+          <div class="row">
+            <label class="mdc-text-field mdc-text-field--filled search-bar">
+              <span class="mdc-text-field__ripple"></span>
+              <span class="mdc-floating-label" id="my-label-id"
+                >Scientific names, common names, ...</span
+              >
+              <input
+                class="mdc-text-field__input"
+                type="text"
+                aria-labelledby="my-label-id"
+              />
+              <span class="mdc-line-ripple"></span>
+              <button id="search-button" type="button">
+                <span class="material-symbols-outlined"> search </span>
+              </button>
+            </label>
+            <div id="options">
+              <button id="options-button" type="button">
+                <span class="material-symbols-outlined"> settings </span>
+              </button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="image-preview">
+              <img src="./pink-square.png" />
+            </div>
+            <div class="observation-details">
+              <ul>
+                <li><span class="scientific-name"> Scientific Name </span></li>
+                <li><span class="common-name">Common Name</span></li>
+                <li>
+                  <span class="num-observations">No. of Observations</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="row">
+            <div class="image-preview">
+              <img src="./pink-square.png" />
+              <img src="./pink-square.png" />
+            </div>
+            <div class="observation-details">
+              <ul>
+                <li><span class="scientific-name"> Scientific Name </span></li>
+                <li><span class="common-name">Common Name</span></li>
+                <li>
+                  <span class="num-observations">No. of Observations</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="row">
+            <div class="image-preview">
+              <img src="./pink-square.png" />
+              <img src="./pink-square.png" />
+              <img src="./pink-square.png" />
+              <img src="./pink-square.png" />
+            </div>
+            <div class="observation-details">
+              <ul>
+                <li><span class="scientific-name"> Scientific Name </span></li>
+                <li><span class="common-name">Common Name</span></li>
+                <li>
+                  <span class="num-observations">No. of Observations</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="./dataset.js"></script>
+  </body>
+</html>

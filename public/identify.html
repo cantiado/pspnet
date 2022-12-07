@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Identify</title>
+    <link
+      href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link rel="stylesheet" href="./reset.css" />
+    <link rel="stylesheet" href="./common.css" />
+    <link rel="stylesheet" href="./identify.css" />
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+  </head>
+  <body>
+    <header class="mdc-top-app-bar">
+      <div class="mdc-top-app-bar__row">
+        <section
+          class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start"
+        >
+          <a class="mdc-top-app-bar__title" href="./index.html"> PSPNet </a>
+          <!-- <span class="mdc-top-app-bar__title">
+          </span> -->
+          <a class="mdc-top-app-bar__title" href="">About</a>
+          <a class="mdc-top-app-bar__title" href="">Dataset</a>
+          <a class="mdc-top-app-bar__title" href="">Identify</a>
+          <a class="mdc-top-app-bar__title" href="">Contributions</a>
+        </section>
+        <section
+          class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end"
+        >
+          <a class="mdc-top-app-bar__title" href="">Login</a>
+        </section>
+      </div>
+    </header>
+    <main>
+      <div class="mdc-layout-grid">
+        <div class="mdc-layout-grid__inner">
+          <div class="mdc-layout-grid__cell--span-4">
+            <div class="mdc-card container">
+              <div>
+                <label
+                  id="image-uploads-label"
+                  for="image-uploads"
+                  class="mdc-button mdc-button--outlined"
+                >
+                  Choose images to upload
+                </label>
+                <input type="file" id="image-uploads" name="image-uploads" />
+              </div>
+              <button class="mdc-button mdc-button--raised">
+                <span id="identify-button" class="mdc-button__label"
+                  >Identify</span
+                >
+              </button>
+              <div class="settings-container">
+                <span class="setting-title">Settings</span>
+                <div class="setting-entry">
+                  <span class="setting-name">Select Model</span>
+                  <button
+                    id="menu-button"
+                    class="mdc-button mdc-button--outlined mdc-menu-surface--anchor"
+                  >
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">Menu</span>
+                    <div class="mdc-menu mdc-menu-surface">
+                      <ul
+                        class="mdc-list"
+                        role="menu"
+                        aria-hidden="true"
+                        aria-orientation="vertical"
+                        tabindex="-1"
+                      >
+                        <li class="mdc-list-item" role="menuitem">
+                          <span class="mdc-list-item__ripple"></span>
+                          <span class="mdc-list-item__text">Model 1</span>
+                        </li>
+                        <li class="mdc-list-item" role="menuitem">
+                          <span class="mdc-list-item__ripple"></span>
+                          <span class="mdc-list-item__text">Model 2</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </button>
+                </div>
+                <div class="setting-entry">
+                  <span class="setting-name">Display Confidence</span>
+                  <button
+                    id="basic-switch"
+                    class="mdc-switch mdc-switch--unselected"
+                    type="button"
+                    role="switch"
+                    aria-checked="false"
+                  >
+                    <div class="mdc-switch__track"></div>
+                    <div class="mdc-switch__handle-track">
+                      <div class="mdc-switch__handle">
+                        <div class="mdc-switch__shadow">
+                          <div class="mdc-elevation-overlay"></div>
+                        </div>
+                        <div class="mdc-switch__ripple"></div>
+                        <div class="mdc-switch__icons">
+                          <svg
+                            class="mdc-switch__icon mdc-switch__icon--on"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M19.69,5.23L8.96,15.96l-4.23-4.23L2.96,13.5l6,6L21.46,7L19.69,5.23z"
+                            />
+                          </svg>
+                          <svg
+                            class="mdc-switch__icon mdc-switch__icon--off"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M20 13H4v-2h16v2z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mdc-layout-grid__cell--span-8">
+            <span id="uploaded-image-list-title">Uploaded Images</span>
+            <ul id="uploaded-image-list" class="mdc-image-list">
+              <!-- <li class="mdc-image-list__item">
+                <div class="mdc-image-list__image-aspect-container">
+                  <img class="mdc-image-list__image" src="./pink-square.png" />
+                </div>
+                <div class="mdc-image-list__supporting">
+                  <span class="mdc-image-list__label">file name</span>
+                </div>
+              </li> -->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="./identify.js"></script>
+  </body>
+</html>

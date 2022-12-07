@@ -30,12 +30,19 @@ h1,h2,p {
 }
 
 .image-section {
+    top: 500px;
     text-align: center;
 }
 
-.image-grid {
+/* .image-grid {
     display:grid;
     padding: 15px;
     column-gap: 25px;
     row-gap: 25px;
+} */
+
+.mdc-image-list__item {
+    padding: 5px;
+    width: 200px;
+    height: 200px;
 }

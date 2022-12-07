@@ -1,0 +1,41 @@
+a:link,
+a:visited,
+a:hover,
+a:focus,
+a:active {
+    color: black;
+    /* text-decoration: none; */
+}
+
+h1,h2,p {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+:root {
+    --mdc-theme-primary: #b9e0a5;
+    --mdc-theme-secondary: #663300;
+}
+
+.mdc-top-app-bar {
+    margin:0;
+    height: auto;
+    display: block;
+}
+
+.main-info {
+    position: relative;
+    top: 75px;
+    padding: 50px;
+    display: block;
+}
+
+.image-section {
+    text-align: center;
+}
+
+.image-grid {
+    display:grid;
+    padding: 15px;
+    column-gap: 25px;
+    row-gap: 25px;
+}

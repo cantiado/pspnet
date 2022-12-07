@@ -1,0 +1,108 @@
+<!-- References https://m2.material.io/components/text-fields/web#api -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Registration</title>
+	<link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet"/>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+	<link rel="stylesheet" href="./reset.css" />
+	<link rel="stylesheet" href="./common.css" />
+	<link rel="stylesheet" href="./registration.css" />
+</head>
+<body>
+	<header class="mdc-top-app-bar">
+		<div class="mdc-top-app-bar__row">
+			<section
+				class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+				<a class="mdc-top-app-bar__title" href="./index.html"> PSPNet </a>
+			</section>
+		</div>
+	</header>
+	<main>
+		<section>
+		</section>
+		<div class="user-info">
+			<h2>
+					Create an Account
+			</h2>
+			<p>Already have an account? <a href="./login.html">Login here </a> </p>
+			<div><br></div>
+			<div class = "text-field">
+				<label class="mdc-text-field mdc-text-field--filled mdc-text-field--outlined">
+					<span class="mdc-text-field__ripple"></span>
+					<span class="mdc-floating-label" id="my-label-id">First Name</span>
+					<input class="mdc-text-field__input" type="text"
+						   aria-labelledby="my-label-id"
+						   aria-controls="my-helper-id"
+						   aria-describedby="my-helper-id">
+					<span class="mdc-line-ripple"></span>
+				  </label>
+				  <div class="mdc-text-field-helper-line">
+					<div class="mdc-text-field-helper-text" id="first-name-id" aria-hidden="true">helper text</div>
+				  </div>
+			</div>
+			<div class = "text-field">
+				<label class="mdc-text-field mdc-text-field--filled mdc-text-field--outlined">
+					<span class="mdc-text-field__ripple"></span>
+					<span class="mdc-floating-label" id="my-label-id">Last Name</span>
+					<input class="mdc-text-field__input" type="text"
+						   aria-labelledby="my-label-id"
+						   aria-controls="my-helper-id"
+						   aria-describedby="my-helper-id">
+					<span class="mdc-line-ripple"></span>
+				  </label>
+				  <div class="mdc-text-field-helper-line">
+					<div class="mdc-text-field-helper-text" id="last-name-id" aria-hidden="true">helper text</div>
+				  </div>
+			</div>
+			<div class = "text-field">
+				<label class="mdc-text-field mdc-text-field--filled mdc-text-field--outlined">
+					<span class="mdc-text-field__ripple"></span>
+					<span class="mdc-floating-label" id="my-label-id">Email</span>
+					<input class="mdc-text-field__input" type="text"
+						   aria-labelledby="my-label-id"
+						   aria-controls="my-helper-id"
+						   aria-describedby="my-helper-id">
+					<span class="mdc-line-ripple"></span>
+				  </label>
+				  <div class="mdc-text-field-helper-line">
+					<div class="mdc-text-field-helper-text" id="email-id" aria-hidden="true">helper text</div>
+				  </div>
+			</div>
+			<div class = "text-field">
+				<label class="mdc-text-field mdc-text-field--filled mdc-text-field--outlined">
+					<span class="mdc-text-field__ripple"></span>
+					<span class="mdc-floating-label" id="password-field-id">Password</span>
+					<input class="mdc-text-field__input" type="text"
+						   aria-labelledby="my-label-id"
+						   aria-controls="my-helper-id"
+						   aria-describedby="my-helper-id">
+					<span class="mdc-line-ripple"></span>
+				  </label>
+				  <div class="mdc-text-field-helper-line">
+					<div class="mdc-text-field-helper-text" id="confirm-pass-id" aria-hidden="true">helper text</div>
+				  </div>
+			</div>
+			<div class = "text-field">
+				<label class="mdc-text-field mdc-text-field--filled mdc-text-field--outlined">
+					<span class="mdc-text-field__ripple"></span>
+					<span class="mdc-floating-label" id="my-label-id">Confirm Password</span>
+					<input class="mdc-text-field__input" type="text"
+						   aria-labelledby="my-label-id"
+						   aria-controls="my-helper-id"
+						   aria-describedby="my-helper-id">
+					<span class="mdc-line-ripple"></span>
+				  </label>
+				  <div class="mdc-text-field-helper-line">
+					<div class="mdc-text-field-helper-text" id="my-helper-id" aria-hidden="true">helper text</div>
+				  </div>
+			</div>
+			<div class="mdc-button mdc-button--raised" href=""> Create Account </div>
+		</div>
+	</main>
+	<script src='./registration.js'></script>
+</body>
+</html>

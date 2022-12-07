@@ -1,0 +1,37 @@
+a:link,
+a:visited,
+a:hover,
+a:focus,
+a:active {
+    color: black;
+    /* text-decoration: none; */
+}
+
+h1 {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+:root {
+    --mdc-theme-primary: #b9e0a5;
+    --mdc-theme-secondary: #663300;
+}
+
+main {
+    display:grid;
+    align-items: center;
+    grid-template-columns: 1fr 3fr 1fr;
+
+}
+
+.user-info {
+    padding: 15px;
+    text-align: center;
+}
+
+.text-field {
+    padding-top: 5px;
+}
+
+.button-container .mdc-button {
+    background-color:var(--mdc-theme-secondary);
+}

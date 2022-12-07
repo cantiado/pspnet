@@ -1,0 +1,64 @@
+:root {
+    --mdc-theme-primary: #b9e0a5;
+    --mdc-theme-secondary: #663300;
+}
+
+p {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+a:link,
+a:visited,
+a:hover,
+a:focus,
+a:active {
+    color: black;
+    text-decoration: none;
+}
+
+a.anchor {
+    display: block;
+    position: relative;
+    top: -250px;
+    visibility: hidden;
+}
+
+/* .grid {
+    display: grid;
+    grid-template-rows: 60px 1fr;
+} */
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 115px 7fr 2fr;
+    column-gap: 25px;
+}
+
+.left-side {
+    color: #b9e0a5;
+    padding: 5px;
+    padding-top: 70px;
+    background: #b9e0a5;
+    height: 100%;
+    border-right: 1px black solid;
+}
+
+ul {
+    background-color: #b9e0a5;
+    position: fixed;
+    overflow: auto;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 105px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.right-side {
+    padding: 20px;
+    padding-top: 80px;
+}
+
+.nav-links {
+   display: inline;
+}

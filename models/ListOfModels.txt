@@ -1,8 +1,8 @@
-yolov5 - PyTorch:
+yolov5 - PyTorch: https://colab.research.google.com/drive/1eOGAgyF90GoDjBt88xRCjhxRAGA3N2Pr?usp=sharing
 Link to mock report - 
 https://wandb.ai/nathanielrivas/YOLOv5/reports/PSPNet-yolov5--VmlldzozMDc5NzI5?accessToken=mfjg3jw5fncovcv7xmp729nn9co8vzpg1pxyr95y8ds6fs374jzx5vp57tmx9unw
 
-Detectron2 - PyTorch
+Detectron2 - PyTorch: https://colab.research.google.com/drive/15bh9pyf9DER8rcCneYNvlbG3Ddimkzf5?usp=sharing
 
 
 

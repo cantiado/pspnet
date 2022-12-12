@@ -1,3 +1,5 @@
+/* Author: Antonio Lang */
+
 // import {MDCTextField} from '@material/textfield';
 // import {MDCRipple} from '@material/ripple';
 

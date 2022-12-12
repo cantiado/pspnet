@@ -1,3 +1,4 @@
+// Author: Carl
 const MDCMenu = mdc.menu.MDCMenu;
 const menu = new MDCMenu(document.querySelector(".mdc-menu"));
 // menu.open = true;

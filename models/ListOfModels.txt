@@ -12,3 +12,4 @@ EfficientDet - PyTorch
 
 
 EfficientDet-D0-D7 - Tensorflow 2
+ 

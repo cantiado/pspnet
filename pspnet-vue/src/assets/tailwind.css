@@ -1,0 +1,13 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+.label{
+  @apply mb-6 mt-6 font-bold uppercase text-inputColor inline;
+}
+
+.input{
+  @apply py-2.5 px-1.5 w-full border rounded-full;
+}

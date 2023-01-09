@@ -2,7 +2,7 @@
   <div class="w-full grid grid-cols-10">
     <div class="col-span-6 grid place-content-center">
       <h1 class="text-4xl">Login to Your Account</h1>
-      <form class="mt-7 mb-7 mx-auto text-left p-10 max-w-md">
+      <form @submit.prevent="handleLogin" class="mt-7 mb-7 mx-auto text-left p-10 max-w-md">
         <label class="label">Email:</label>
         <input v-model="email" class="input" type="email" required>
 
@@ -26,13 +26,30 @@
 
 <script>
 import { ref } from 'vue'
+import axios from 'axios'
+
 export default {
   name: 'LoginView',
   setup(){
     const pass = ref('')
     const email = ref('')
 
-    return {pass, email}
+    const handleLogin = async () => {
+      const path = 'http://127.0.0.1:5000/login'
+      let login_credentials = {
+        password : pass.value,
+        email : email.value
+      }
+      axios.post(path, login_credentials)
+      .then ((res) => {
+        console.log(res.data)
+      })
+      .catch((err) => {
+        console.error(err)
+      })
+    }
+
+    return {pass, email, handleLogin}
   }
 }
 </script>

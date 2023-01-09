@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "autoprefixer": "^10",
+    "axios": "^1.2.2",
     "core-js": "^3.8.3",
     "postcss": "^8",
     "tailwindcss": "^3",

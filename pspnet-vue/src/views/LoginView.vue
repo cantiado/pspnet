@@ -9,6 +9,8 @@
         <label class="label">Password:</label>
         <input v-model="pass" class="input" type="password" required>
 
+        <div v-if="error" class="error"> {{error}}</div>
+
         <div class="flex justify-center">
           <button class="bg-soil text-white button">SIGN IN</button>
         </div>
@@ -26,7 +28,7 @@
 
 <script>
 import { ref } from 'vue'
-import axios from 'axios'
+import useLogin from '@/composables/userlog'
 
 export default {
   name: 'LoginView',
@@ -34,22 +36,16 @@ export default {
     const pass = ref('')
     const email = ref('')
 
-    const handleLogin = async () => {
-      const path = 'http://127.0.0.1:5000/login'
-      let login_credentials = {
-        password : pass.value,
-        email : email.value
-      }
-      axios.post(path, login_credentials)
-      .then ((res) => {
-        console.log(res.data)
-      })
-      .catch((err) => {
-        console.error(err)
-      })
-    }
+    const {error, login} = useLogin()
 
-    return {pass, email, handleLogin}
+    const handleLogin = async () => {
+      const res = await login(email.value, pass.value)
+      console.log(res.data)
+      if (!error.value){
+        console.log('Sucessful Login')
+      }
+    }
+    return {pass, email, handleLogin, error}
   }
 }
 </script>
@@ -65,5 +61,9 @@ export default {
 
 .button{
   @apply border-0 rounded-3xl mt-5 py-2.5 px-5 hover:shadow-lg shadow-inner
+}
+
+.error{
+  @apply bg-red-100 rounded-lg py-4 text-base text-red-700 m-3 text-center
 }
 </style>

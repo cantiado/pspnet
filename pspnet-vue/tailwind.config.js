@@ -5,7 +5,10 @@ module.exports = {
     extend: {
       colors: {
         'soil': '#663300ff',
-        'inputColor': '#aaa'
+        'inputColor': '#aaa',
+        'tortilla': '#9a7b4f',
+        'brown': '#231709',
+        'pecan': '#4a2511'
       }
     },
   },

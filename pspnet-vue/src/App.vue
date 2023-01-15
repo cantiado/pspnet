@@ -15,7 +15,9 @@
 import Nav from "./components/Nav.vue"
 
 export default {
-  components: {Nav}
+  components: {Nav},
+  setup(){
+  }
 }
 </script>
 

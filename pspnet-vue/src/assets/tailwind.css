@@ -4,3 +4,23 @@
 
 @tailwind utilities;
 
+.label{
+  @apply mb-6 mt-6 font-bold uppercase text-inputColor inline;
+}
+
+.input{
+  @apply py-2.5 px-1.5 w-full border rounded-full;
+}
+
+.button{
+  @apply border-0 rounded-3xl mt-5 py-2.5 px-5 hover:shadow-lg shadow-inner
+}
+
+.error{
+  @apply bg-red-100 rounded-lg py-4 text-base text-red-700 m-3 text-center
+}
+
+.form{
+  @apply mt-7 mb-7 mx-auto text-left p-10 max-w-md
+}
+

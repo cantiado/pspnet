@@ -19,5 +19,12 @@ export default {
 </script>
 
 <style>
-
+  .grid {
+    display: grid;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: -webkit-fill-available;
+    height: auto;
+  }
 </style>

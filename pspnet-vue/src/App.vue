@@ -4,6 +4,7 @@
       <router-link class = "mx-2 col-span-1" :to="{name: 'home'}">Home</router-link> 
       <router-link class = "mx-2 col-span-2" :to="{name: 'about'}">About</router-link> 
       <router-link class = "mx-2 col-span-3" :to="{name: 'login'}">Login</router-link>
+      <router-link class = "mx-2 col-span-4" :to="{name: 'identify'}">Identify</router-link>
     </Nav>
     <div class="flex flex-grow">
       <router-view/>

@@ -7,6 +7,8 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "@headlessui/vue": "^1.7.7",
+    "@heroicons/vue": "^2.0.13",
     "autoprefixer": "^10",
     "axios": "^1.2.2",
     "core-js": "^3.8.3",

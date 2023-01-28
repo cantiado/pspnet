@@ -55,6 +55,7 @@ export default {
       display: grid;
       grid-template-columns: 140px 8fr 1fr;
       column-gap: 25px;
+      position: relative;
   }
   .left-side {
     color: #b9e0a5;

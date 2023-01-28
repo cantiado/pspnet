@@ -25,10 +25,7 @@ export default {
 <style>
     .nav-rail {
         background-color: #b9e0a5ff;
-        position: fixed;
-        top: 85px;
-        left: 0px;
-        width: min-content;
+        position: sticky;
         height: 100%;
     }
     .nav-links {

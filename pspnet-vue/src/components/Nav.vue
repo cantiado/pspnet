@@ -21,7 +21,7 @@ export default {
 <style>
   .grid {
     display: grid;
-    position: fixed;
+    position: sticky;
     left: 0;
     top: 0;
     width: -webkit-fill-available;

@@ -1,8 +1,8 @@
 <template>
   <div class="w-full grid place-content-center bg-[url('../assets/registeration_image.jpg')] bg-no-repeat bg-cover bg-top">
     <div class=" bg-gray-50 rounded-md max-w-md">
-      <h1 class="text-4xl mt-10">Create an Account</h1>
-      <h2 class="text-1xl">Already have an account?
+      <h1 class="text-4xl mt-10 text-center">Create an Account</h1>
+      <h2 class="text-1xl text-center">Already have an account?
         <router-link class="underline text-blue-500" :to="{name: 'login'}">Login here</router-link>
       </h2>
       <form class="form" @submit.prevent="handleCreateAccount">
@@ -40,8 +40,8 @@ export default {
     const store = authStore()
 
 
-    const handleCreateAccount = () => {
-      error_msg.value = store.createUser({
+    const handleCreateAccount = async () => {
+      error_msg.value = await store.createUser({
         'email' : email.value,
         'password' : pass.value,
         'firstname' : firstname.value,
@@ -52,7 +52,7 @@ export default {
       }
     }
 
-    return {email, pass, firstname, lastname, handleCreateAccount, store}
+    return {email, pass, firstname, lastname, handleCreateAccount, store, error_msg}
   }
 }
 </script>
@@ -60,7 +60,7 @@ export default {
 <style lang="postcss" scoped>
 
 .input{
-  @apply rounded-none my-2
+  @apply rounded-md my-2
 }
 
 

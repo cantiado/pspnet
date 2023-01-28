@@ -8,7 +8,8 @@ module.exports = {
         'inputColor': '#aaa',
         'tortilla': '#9a7b4f',
         'brown': '#231709',
-        'pecan': '#4a2511'
+        'pecan': '#4a2511',
+        'plant': '#b9e0a5ff'
       }
     },
   },

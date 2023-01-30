@@ -97,7 +97,7 @@ def register():
       return jsonify({'message': 'Email Already in Use.'}), 401
     db.session.add(newUser)
     db.session.commit()
-    return 201
+    return {'message': 'success'} , 201
 
 #testing protected route that requires jwt
 @app.route('/protected', methods = ['POST'])

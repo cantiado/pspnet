@@ -47,7 +47,7 @@ export default {
         'firstname' : firstname.value,
         'lastname' : lastname.value
       })
-      if(!error_msg){
+      if(!error_msg.value){
         router.push({name : 'login'})
       }
     }

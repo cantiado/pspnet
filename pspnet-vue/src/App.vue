@@ -1,10 +1,10 @@
 <template>
   <div class="flex flex-col  h-screen">
-    <nav class="flex justify-start bg-plant">
-      <router-link class = "mx-2 item-left" :to="{name: 'home'}">PSPNet</router-link> 
+    <nav class="flex justify-start bg-plant h-24 items-center">
+      <router-link class = "mx-2" :to="{name: 'home'}">PSPNet</router-link> 
       <router-link v-if="currentRoute != 'login' && currentRoute != 'register'" class = "mx-2" :to="{name: 'about'}">About</router-link> 
       <div v-if="!((currentRoute === 'login') || (currentRoute === 'register'))" class="grow flex justify-end">
-        <button v-if="!store.isAuthenticated()" @click="toLogin" class="btn bg-gray-50 rounded-md">Login</button>
+        <button v-if="!store.isAuthenticated()" @click="toLogin" type="button" class="btn bg-gray-50 rounded-md">Login</button>
         <ProfileIcon v-else/>
       </div>
     </nav>
@@ -43,11 +43,12 @@ export default {
 
 
 <style lang="postcss" scoped>
+/* Some button styles are from https://tailwind-elements.com/docs/standard/components/login-form/ */
 
 
-/*.btn {
-  @apply font-bold px-4 py-0.5
-}*/
+#app .btn {
+  @apply inline-block px-7 py-3 bg-gray-50 text-black font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-gray-100 hover:shadow-lg focus:bg-gray-100 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-200 active:shadow-lg transition duration-150 ease-in-out
+}
 
 nav {
   padding: 30px;

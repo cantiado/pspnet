@@ -19,5 +19,15 @@ export default {
 </script>
 
 <style>
-
+  .grid {
+    display: grid;
+    position: sticky;
+    left: 0;
+    top: 0;
+    width: -webkit-fill-available;
+    height: auto;
+  }
+  .bg-green-200 {
+    background: #b9e0a5;
+  }
 </style>

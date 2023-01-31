@@ -19,7 +19,7 @@ export default {
 </script>
 
 <style>
-  .grid {
+  /* .grid {
     display: grid;
     position: sticky;
     left: 0;
@@ -29,5 +29,5 @@ export default {
   }
   .bg-green-200 {
     background: #b9e0a5;
-  }
+  } */
 </style>

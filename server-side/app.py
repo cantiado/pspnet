@@ -38,28 +38,30 @@ class User(db.Model):
 #  db.session.commit()
 
 #creates wrapper function for routes that require authorized tokens. 
+#code adapted from blog post https://stackabuse.com/single-page-apps-with-vue-js-and-flask-jwt-authentication/
 def token_required(f):
   @wraps(f)
   def authorize(*args, **kwargs):
     token = request.headers.get('token')
 
     invalid_msg = {
-      'message' : 'Invalid token. Re-authroization requried',
+      'message' : 'Invalid token.',
       'authenticated' : False
     }
     expired_msg = {
-      'message' : 'Expired token. Re-authorization required',
+      'message' : 'Expired token.',
       'authenticated' : False
     }
     try:
-      data = jwt.decode(token, app.config['SECRET_KEY'])
+      data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
       user = User.query.filter_by(email=data['sub']).first()
       if not user:
         raise RuntimeError('User not found')
       return f(user, *args, **kwargs)
     except ExpiredSignatureError:
       return jsonify(expired_msg), 401
-    except InvalidTokenError:
+    except (InvalidTokenError, Exception) as e:
+      print(e)
       return jsonify(invalid_msg), 401
     
   return authorize
@@ -100,10 +102,13 @@ def register():
     return {'message': 'success'} , 201
 
 #testing protected route that requires jwt
-@app.route('/protected', methods = ['POST'])
+@app.route('/userdata/', methods = ['GET'])
 @token_required
-def protected(user):
-  return jsonify({'name' : user.firstname})
+def userdata(user):
+  return {
+    'name' : user.firstname + " " + user.lastname,
+    'email' : user.email,
+  }, 201
 
 if __name__ == "__main__":
   app.run(debug=True)

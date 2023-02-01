@@ -10,6 +10,6 @@ export function register(userData){
   return axios.post(url + 'register/', userData)
 }
 
-export function testProtect(userData, jwt){
-  return axios.post(url + 'protected/',userData,  )
+export function getUserData(jwt){
+  return axios.get(url + 'userdata/', { headers: { token : jwt}})
 }

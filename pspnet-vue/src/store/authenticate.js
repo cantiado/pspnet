@@ -1,4 +1,4 @@
-import { authenticate, register} from '@/api'
+import { authenticate, register, getUserData} from '@/api'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { Buffer } from 'buffer'
@@ -51,6 +51,20 @@ export const authStore = defineStore('authenticate', () => {
     console.log('now', now)
     return now < exp
   }
-  return { loginUser, createUser, isAuthenticated, loading_data}
+
+  const userData = async () => {
+    try{
+      const token = localStorage.getItem('userToken')
+      const res = await getUserData(token)
+      console.log(res.data)
+      const name = res.data.name
+      const email = res.data.email
+      return {name, email}
+    }catch(err){
+      console.log(err.response.data.message)
+    }
+  }
+
+  return { loginUser, createUser, isAuthenticated, userData, loading_data}
 })
 //note: axios will throw an error anytime the server responds with 4xx/5xx error. (i.e Bad Request 400)

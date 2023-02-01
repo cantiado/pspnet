@@ -20,10 +20,11 @@
 import { computed } from '@vue/runtime-core'
 import { useRouter } from 'vue-router'
 import { authStore } from './store/authenticate'
+import Footer from './components/Footer.vue'
 import ProfileIcon from '@/components/ProfileIcon.vue'
 
 export default {
-  components: {ProfileIcon},
+  components: {ProfileIcon, Footer},
   setup(){
     const store = authStore()
     const router = useRouter()

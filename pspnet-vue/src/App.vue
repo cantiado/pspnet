@@ -1,11 +1,14 @@
 <template>
-  <div class="flex flex-col h-screen">
-    <Nav>
-      <router-link class = "mx-2 col-span-1" :to="{name: 'home'}">Home</router-link> 
-      <router-link class = "mx-2 col-span-2" :to="{name: 'about'}">About</router-link> 
-      <router-link class = "mx-2 col-span-3" :to="{name: 'login'}">Login</router-link>
-      <router-link class = "mx-2 col-span-4" :to="{name: 'identify'}">Identify</router-link>
-    </Nav>
+  <div class="flex flex-col  h-screen">
+    <nav class="flex justify-start bg-plant h-24 items-center">
+      <router-link class = "mx-2" :to="{name: 'home'}">PSPNet</router-link> 
+      <router-link v-if="currentRoute != 'login' && currentRoute != 'register'" class = "mx-2" :to="{name: 'identify'}">Identify</router-link>
+      <router-link v-if="currentRoute != 'login' && currentRoute != 'register'" class = "mx-2" :to="{name: 'about'}">About</router-link> 
+      <div v-if="!((currentRoute === 'login') || (currentRoute === 'register'))" class="grow flex justify-end">
+        <button v-if="!store.isAuthenticated()" @click="toLogin" type="button" class="btn bg-gray-50 rounded-md">Login</button>
+        <ProfileIcon v-else/>
+      </div>
+    </nav>
     <div class="flex flex-grow">
       <router-view/>
     </div>
@@ -14,24 +17,39 @@
 </template>
 
 <script>
-import Nav from "./components/Nav.vue"
-import Footer from "./components/Footer.vue"
+import { computed } from '@vue/runtime-core'
+import { useRouter } from 'vue-router'
+import { authStore } from './store/authenticate'
+import ProfileIcon from '@/components/ProfileIcon.vue'
 
 export default {
-  components: {Nav, Footer},
+  components: {ProfileIcon},
   setup(){
+    const store = authStore()
+    const router = useRouter()
+    const toLogin = () => {
+      if (store.isAuthenticated()){
+      }
+      else{
+        router.push({name : 'login'})
+      }
+    }
+    const currentRoute = computed(() => {
+      return router.currentRoute.value.name
+    })
+
+    return { currentRoute, toLogin, store }
   }
 }
 </script>
 
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+<style lang="postcss" scoped>
+/* Some button styles are from https://tailwind-elements.com/docs/standard/components/login-form/ */
+
+
+#app .btn {
+  @apply inline-block px-7 py-3 bg-gray-50 text-black font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-gray-100 hover:shadow-lg focus:bg-gray-100 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-200 active:shadow-lg transition duration-150 ease-in-out
 }
 
 nav {

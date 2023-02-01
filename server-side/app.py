@@ -2,11 +2,17 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
+from functools import wraps
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+import jwt
+import datetime
+
 
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
+app.config['SECRET_KEY'] = '95fd1e474cbc4b49a3286dc09cba7510'
 CORS(app, resources={r"/*":{'origins':"*"}})
 db = SQLAlchemy(app)
 
@@ -31,39 +37,79 @@ class User(db.Model):
 #  db.session.add(testUser)
 #  db.session.commit()
 
-@app.route('/login', methods = ['POST'])
+#creates wrapper function for routes that require authorized tokens. 
+#code adapted from blog post https://stackabuse.com/single-page-apps-with-vue-js-and-flask-jwt-authentication/
+def token_required(f):
+  @wraps(f)
+  def authorize(*args, **kwargs):
+    token = request.headers.get('token')
+
+    invalid_msg = {
+      'message' : 'Invalid token.',
+      'authenticated' : False
+    }
+    expired_msg = {
+      'message' : 'Expired token.',
+      'authenticated' : False
+    }
+    try:
+      data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+      user = User.query.filter_by(email=data['sub']).first()
+      if not user:
+        raise RuntimeError('User not found')
+      return f(user, *args, **kwargs)
+    except ExpiredSignatureError:
+      return jsonify(expired_msg), 401
+    except (InvalidTokenError, Exception) as e:
+      print(e)
+      return jsonify(invalid_msg), 401
+    
+  return authorize
+
+@app.route('/login/', methods = ['POST'])
 def login():
-  response_login = {'status':'success'}
+  invalid_msg = {'message' : 'Invalid login credentials'}
   if request.method == 'POST':
     login_credentials=request.get_json()
     password = login_credentials.get('password')
     email = login_credentials.get('email')
     testUser = User.query.filter_by(email = email).first()
-    if testUser is None:
-      response_login = {'status' : 'failure'}
+    if not testUser:
+      return jsonify(invalid_msg), 401
     else:
       if not bcrypt.check_password_hash(testUser.password, password):
-        response_login = {'status' : 'failure'}
+        return jsonify(invalid_msg), 401
+      else:
+        token = jwt.encode({
+          'sub' : testUser.email,
+          'iat' : datetime.datetime.utcnow(),
+          'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
+          app.config['SECRET_KEY'])
+        response_login = {
+          'token' : token
+        }
+        return jsonify(response_login), 200
 
-  return jsonify(response_login)
-
-@app.route('/register', methods = ['POST'])
+@app.route('/register/', methods = ['POST'])
 def register():
-  response_create = {'status':''}
   if request.method == 'POST':
     user_data = request.get_json()
     newUser = User(**user_data)
     if User.query.filter_by(email = newUser.email).first() is not None:
-      return jsonify({'status': 'Email Already in Use.'})
+      return jsonify({'message': 'Email Already in Use.'}), 401
     db.session.add(newUser)
     db.session.commit()
+    return {'message': 'success'} , 201
 
-  return jsonify(response_create)
+#testing protected route that requires jwt
+@app.route('/userdata/', methods = ['GET'])
+@token_required
+def userdata(user):
+  return {
+    'name' : user.firstname + " " + user.lastname,
+    'email' : user.email,
+  }, 201
 
 if __name__ == "__main__":
   app.run(debug=True)
     
-    
-
-
-  

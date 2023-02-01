@@ -4,6 +4,8 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import IdentifyView from '../views/IdentifyView.vue'
 import UserProfile from '../views/UserProfile.vue'
+import AccountSettingsView from '../views/AccountSettingsView.vue'
+import GallaryView from '../views/GallaryView.vue'
 
 const routes = [
   {
@@ -33,12 +35,22 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: UserProfile
-},
-{
-  path: '/identify',
-  name: 'identify',
-  component: IdentifyView
-}
+  },
+  {
+    path: '/identify',
+    name: 'identify',
+    component: IdentifyView
+  },
+  {
+    path : '/gallary',
+    name : 'gallary',
+    component : GallaryView
+  },
+  {
+    path : '/settings',
+    name : 'settings',
+    component : AccountSettingsView
+  }
 ]
 
 const router = createRouter({

@@ -1,3 +1,5 @@
+<!-- Author: Antonio Lang -->
+
 <template>
     <div class="nav-rail">
         <nav class="nav-links">
@@ -25,7 +27,6 @@ export default {
 <style>
     .nav-rail {
         background-color: #b9e0a5ff;
-        position: sticky;
         height: 100%;
     }
     .nav-links {
@@ -33,6 +34,7 @@ export default {
     }
     .nav-rail li {
         margin-bottom: 20px;
+        color: black;
     }
     .nav-rail-ul {
         position: sticky;

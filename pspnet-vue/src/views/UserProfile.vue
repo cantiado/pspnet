@@ -1,21 +1,25 @@
 <!-- Author: Antonio Lang -->
 
 <template>
-  <div class="col span-2 gap-4 p-2">
-    <div>
-        <h1>{{ first_name }} {{ last_name }}</h1>
-        <p>Created account on {{ create_date }}</p>
-        <p>Verified Labeler: {{ verified }}</p>
-        <p>No. of Contributions: {{ num_images }}</p>
+  <div class="col span-2 gap-5 p-10">
+    <div class="user-info m-1">
+      <div>
+          <h1 class="text-4xl font-bold">{{ first_name }} {{ last_name }}</h1>
+          <div class="inline-flex flex-row">
+            <div class="p-2">Created account on {{ create_date }}</div>
+            <div class="p-2">Verified Labeler: <span v-if="verified">Yes</span> <span v-else>No</span> </div>
+            <div class="p-2">No. of Contributions: {{ num_images }}</div>
+          </div>
+      </div>
+      <div class="user-bio">
+          <p>{{ user_bio }}</p>
+      </div>
     </div>
-    <div class="user-bio">
-        <p>{{ user_bio }}</p>
-    </div>
-    <div class="user-image-gallery">
-      <h2>Images Contributed</h2>
+    <div class="user-image-gallery m-2">
+      <h2 class="text-lg font-bold">Images Contributed</h2>
           <ul class="mdc-image-list my-image-list">
             <li class="mdc-image-list__item">
-              <UserImg src_path="sage.jpg"/>
+              <UserImg src_path="user_images/sage.jpg"/>
             </li>
           </ul>
     </div>
@@ -48,5 +52,10 @@ export default {
 </script>
 
 <style>
-
+.user-info {
+  justify-items: left;
+}
+.flex {
+  justify-content: center;
+}
 </style>

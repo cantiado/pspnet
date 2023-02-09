@@ -92,6 +92,8 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { ChevronDownIcon } from '@heroicons/vue/20/solid'
 import ImageCard from "../components/ImageCard.vue"
 
+var id = 0;
+
 export default {
   components: {
     Menu, MenuButton, MenuItem, MenuItems, ChevronDownIcon, ImageCard
@@ -106,36 +108,46 @@ export default {
         { name: 'Model 3' },
         { name: 'Model 4' },
       ],
-      dropzoneFile: null,
-      files: []
+      // dropzoneFile: null,
+      files: {}
     }
   },
+  computed: {
+
+  },
   mounted() {
-    this.dropzoneFile = document.getElementById('dropzone-file');
+    // this.dropzoneFile = document.getElementById('dropzone-file');
   },
   methods: {
     setModel(model) {
       this.selectedModel = model.name;
     },
     uploadImages(event) {
-      if (this.dropzoneFile.files.length != 0) {
+      if (event.target.files.length != 0) {
         this.uploadedImages = true;
         for (let file of event.target.files) {
-          this.files.push({ name: file.name, path: URL.createObjectURL(file) })
+          this.files[id] = { id: id, name: file.name, path: URL.createObjectURL(file), object: file };
+          id++;
+          // this.files.push({ name: file.name, path: URL.createObjectURL(file) })
         }
       }
-      else {
-        this.uploadedImages = false;
-      }
+      console.log("after upload:", this.files)
+      // else {
+      //   this.uploadedImages = false;
+      // }
     },
     deleteFile(file) {
-      this.files = this.files.filter((f) => f !== file);
-      console.log(this.files)
-      console.log(this.dropzoneFile.files)
-      for (const f of this.dropzoneFile.files) {
-        console.log(f)
-      }
-      if (this.files.length == 0) this.uploadedImages = false;
+      delete this.files[file.id];
+      console.log(this.files);
+      if (Object.keys(this.files).length == 0) this.uploadedImages = false;
+      console.log("after delete:", this.files)
+      // this.files = this.files.filter((f) => f !== file);
+      // console.log(this.files)
+      // console.log(this.dropzoneFile.files)
+      // for (const f of this.dropzoneFile.files) {
+      //   console.log(f)
+      // }
+      // if (this.files.length == 0) this.uploadedImages = false;
     }
   }
 }

@@ -24,17 +24,25 @@
                 <div>
                     <br>
                     <h1 class="about-section" id="dataset">Dataset</h1>
-                    <p class="about-paragraph">Our dataset is...</p>
+                    <p class="about-paragraph">The current data set used to train our models is the Pl@ntNet-300K data set. In the future, we are hoping to receive the specific data set to the wildfire research project. However, gathering the data is a labor and time insensive project and likely will not be completed in time to train on.</p>
                 </div>
                 <div>
                     <br>
                     <h1 class="about-section" id="research">Research</h1>
-                    <p class="about-paragraph">Related research includes...</p>
+                    <p class="about-paragraph">Related research includes the <a href="https://plantnet.org/en/">Pl@ntNet</a> research project. This aimed to create a model which is able to classify a plant species within a given photo.</p>
                 </div>
                 <div>
                     <br>
                     <h1 class="about-section" id="resources">Resources</h1>
-                    <p class="about-paragraph">If you would like to learn more, check out these resources...</p>
+                    <p class="about-paragraph">If you would like to learn more, check out these resources:</p>
+                    <ul>
+                      <li>
+                        <a href="https://www.unr.edu/nevada-today/news/2022/20m-dollar-fire-science-project">NSHE Awarded $20 million National Science Foundation research award for fire science</a>
+                      </li>
+                      <li>
+                        <a href="https://www.cse.unr.edu/~lyang/">Project advisor Dr. Lei Yang</a>
+                      </li>
+                    </ul>
                 </div>
             </div>
   </div>
@@ -62,7 +70,7 @@ export default {
     padding: 5px;
     background: #b9e0a5;
     height: 100%;
-    border-right: 1px black solid;
+    /* border-right: 1px black solid; */
   }
   .right-side {
     padding: 20px;

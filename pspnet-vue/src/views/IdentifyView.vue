@@ -3,14 +3,14 @@
   <div class="w-full flex flex-row flex-wrap">
     <div class="basis-1/3 flex flex-col p-5">
       <form method="POST" action="" enctype="multipart/form-data">
-        <div id="file-upload" class="flex items-center justify-center font-sans">
+        <div  @drop="dropImages" @dragover="(event) => event.preventDefault()" id="file-upload" class="flex items-center justify-center font-sans">
           <label for="dropzone-file" class="mx-auto cursor-pointer flex w-full max-w-lg flex-col items-center rounded-xl border-2 border-dashed border-blue-400 bg-white p-6 text-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
             <h2 class="mt-4 text-xl font-medium text-gray-700 tracking-wide">Choose Images</h2>
             <p class="mt-2 text-gray-500 tracking-wide">Upload or drag & drop your file PNG or JPEG. </p>
-            <input @change="uploadImages" id="dropzone-file" type="file" accept="image/png, image/jpeg" class="hidden" multiple />
+            <input @change="uploadImages" id="dropzone-file" type="file" :accept="FILETYPES" class="hidden" multiple />
           </label>
         </div>
         <div v-if="!uploadedImages" class="m-5 flex flex-col items-center">
@@ -76,7 +76,7 @@
         </transition>
       </Menu>
     </div>
-    <div v-if="uploadedImages" class="basis-2/3 grid grid-cols-3 gap-4 p-5">
+    <div v-if="uploadedImages" class="basis-2/3 h-[80vh] grid grid-cols-3 gap-4 p-5 overflow-auto auto-rows-max">
       <ImageCard v-for="file of files" @destroy="deleteFile(file)" :filePath="file.path" :fileName="file.name"/>
     </div>
     <div v-else class="basis-2/3 p-5">
@@ -109,7 +109,8 @@ export default {
         { name: 'Model 4' },
       ],
       // dropzoneFile: null,
-      files: {}
+      files: {},
+      FILETYPES: "image/png, image/jpeg"
     }
   },
   computed: {
@@ -136,9 +137,26 @@ export default {
       //   this.uploadedImages = false;
       // }
     },
+    dropImages(event) {
+      event.preventDefault();
+      if (event.dataTransfer.items) {
+        [...event.dataTransfer.items].forEach((item, i) => {
+          if (item.kind === "file") {
+            const file = item.getAsFile();
+            // console.log(file)
+            if (this.FILETYPES.includes(file.type)) {
+              this.files[id] = { id: id, name: file.name, path: URL.createObjectURL(file), object: file };
+              id++;
+            }
+            else console.log(`File ${file.name} is not of type "${this.FILETYPES}""`);
+          }
+        })
+      }
+      console.log("after upload:", this.files)
+    },
     deleteFile(file) {
       delete this.files[file.id];
-      console.log(this.files);
+      // console.log(this.files);
       if (Object.keys(this.files).length == 0) this.uploadedImages = false;
       console.log("after delete:", this.files)
       // this.files = this.files.filter((f) => f !== file);

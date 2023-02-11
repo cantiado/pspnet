@@ -63,18 +63,18 @@ export default {
       display: grid;
       grid-template-columns: 140px 8fr 1fr;
       column-gap: 25px;
-      position: relative;
+      position: absolute;
   }
   .left-side {
     color: #b9e0a5;
     padding: 5px;
     background: #b9e0a5;
+    position:sticky
   }
   .right-side {
     padding: 20px;
     justify-items: left;
     column-gap: 25px;
-    position:relative;
   }
   .nav-links {
    display: inline;

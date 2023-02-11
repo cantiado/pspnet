@@ -69,13 +69,12 @@ export default {
     color: #b9e0a5;
     padding: 5px;
     background: #b9e0a5;
-    height: 100%;
-    /* border-right: 1px black solid; */
   }
   .right-side {
     padding: 20px;
     justify-items: left;
     column-gap: 25px;
+    position:relative;
   }
   .nav-links {
    display: inline;

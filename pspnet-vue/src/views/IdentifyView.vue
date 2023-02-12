@@ -1,8 +1,8 @@
 <!-- Author: Carl Antiado -->
 <template>
   <div class="w-full flex flex-row flex-wrap">
-    <div class="basis-1/3 flex flex-col p-5">
-      <form method="POST" action="" enctype="multipart/form-data">
+    <div class="basis-1/3 h-[79vh] flex flex-col p-5">
+      <form method="POST" action="" @submit="postImages" enctype="multipart/form-data">
         <div  @drop="dropImages" @dragover="(event) => event.preventDefault()" id="file-upload" class="flex items-center justify-center font-sans">
           <label for="dropzone-file" class="mx-auto cursor-pointer flex w-full max-w-lg flex-col items-center rounded-xl border-2 border-dashed border-blue-400 bg-white p-6 text-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -37,6 +37,7 @@
           </button>
         </div>
       </form>
+      <List :items="files" @destroy="(file) => deleteFile(file)" />
       <span class="text-xl m-5">Settings</span>
       <Menu as="div" class="relative inline-block">
         <div class="grid grid-cols-2 gap-4 text-right items-center">
@@ -76,7 +77,7 @@
         </transition>
       </Menu>
     </div>
-    <div v-if="uploadedImages" class="basis-2/3 h-[80vh] grid grid-cols-3 gap-4 p-5 overflow-auto auto-rows-max">
+    <div v-if="uploadedImages" class="basis-2/3 h-[79vh] grid grid-cols-3 gap-4 p-5 overflow-auto auto-rows-max">
       <ImageCard v-for="file of files" @destroy="deleteFile(file)" :filePath="file.path" :fileName="file.name"/>
     </div>
     <div v-else class="basis-2/3 p-5">
@@ -91,12 +92,13 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { ChevronDownIcon } from '@heroicons/vue/20/solid'
 import ImageCard from "../components/ImageCard.vue"
+import List from "../components/List.vue"
 
 var id = 0;
 
 export default {
   components: {
-    Menu, MenuButton, MenuItem, MenuItems, ChevronDownIcon, ImageCard
+    Menu, MenuButton, MenuItem, MenuItems, ChevronDownIcon, ImageCard, List
   },
   data() {
     return {
@@ -166,6 +168,14 @@ export default {
       //   console.log(f)
       // }
       // if (this.files.length == 0) this.uploadedImages = false;
+    },
+    postImages() {
+      const dropzoneFileInput = document.getElementById('dropzone-file');
+      const newFileList = new DataTransfer();
+      for (const file of files) {
+        newFileList.items.add(file.object);
+      }
+      dropzoneFileInput.files = newFileList.files;
     }
   }
 }

@@ -186,10 +186,13 @@ export default {
 
 <style>
 .container {
+    border-width: 2px;
+    border-radius: 10px;
     gap: 20px;
     display: grid;
     height: 650px;
     overflow: auto;
     margin: 15px;
+    padding: 10px;
 }
 </style>

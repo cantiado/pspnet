@@ -2,7 +2,7 @@
 <template>
   <div class="w-full flex flex-row flex-wrap">
     <div class="basis-1/3 h-[79vh] flex flex-col p-5">
-      <form method="POST" action="" @submit="postImages" enctype="multipart/form-data">
+      <form method="POST" action="http://127.0.0.1:5000/identify" enctype="multipart/form-data">
         <div  @drop="dropImages" @dragover="(event) => event.preventDefault()" id="file-upload" class="flex items-center justify-center font-sans">
           <label for="dropzone-file" class="mx-auto cursor-pointer flex w-full max-w-lg flex-col items-center rounded-xl border-2 border-dashed border-blue-400 bg-white p-6 text-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -10,7 +10,7 @@
             </svg>
             <h2 class="mt-4 text-xl font-medium text-gray-700 tracking-wide">Choose Images</h2>
             <p class="mt-2 text-gray-500 tracking-wide">Upload or drag & drop your file PNG or JPEG. </p>
-            <input @change="uploadImages" id="dropzone-file" type="file" :accept="FILETYPES" class="hidden" multiple />
+            <input @change="uploadImages" id="dropzone-file" type="file" name="dropzone-file" :accept="FILETYPES" class="hidden" multiple />
           </label>
         </div>
         <div v-if="!uploadedImages" class="m-5 flex flex-col items-center">
@@ -135,6 +135,7 @@ export default {
         }
       }
       console.log("after upload:", this.files)
+      this.modifyFileList()
       // else {
       //   this.uploadedImages = false;
       // }
@@ -153,14 +154,17 @@ export default {
             else console.log(`File ${file.name} is not of type "${this.FILETYPES}""`);
           }
         })
+        this.uploadedImages = true;
       }
       console.log("after upload:", this.files)
+      this.modifyFileList()
     },
     deleteFile(file) {
       delete this.files[file.id];
       // console.log(this.files);
       if (Object.keys(this.files).length == 0) this.uploadedImages = false;
       console.log("after delete:", this.files)
+      this.modifyFileList()
       // this.files = this.files.filter((f) => f !== file);
       // console.log(this.files)
       // console.log(this.dropzoneFile.files)
@@ -169,13 +173,15 @@ export default {
       // }
       // if (this.files.length == 0) this.uploadedImages = false;
     },
-    postImages() {
+    modifyFileList() {
       const dropzoneFileInput = document.getElementById('dropzone-file');
-      const newFileList = new DataTransfer();
-      for (const file of files) {
-        newFileList.items.add(file.object);
+      var newFileList = new DataTransfer();
+      for (const id in this.files) {
+        newFileList.items.add(this.files[id].object);
       }
+      // console.log("help", newFileList.files)
       dropzoneFileInput.files = newFileList.files;
+      // console.log("post", dropzoneFileInput.files)
     }
   }
 }

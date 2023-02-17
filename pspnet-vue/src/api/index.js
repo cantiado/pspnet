@@ -17,3 +17,7 @@ export function getUserData(jwt){
 export function updateUserData(userData, jwt){
   return axios.put(url + 'settings/', userData, {headers : {token : jwt}})
 }
+
+export function getProfileData(userData, jwt){
+  return axios.put(url + 'profile/', userData, {headers: {token: jwt}})
+}

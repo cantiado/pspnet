@@ -142,7 +142,7 @@ def userdata(user):
   }, 201
 
 @app.route('/profile/', methods = ['GET'])
-@token_required
+# @token_required
 def profile():
   all_img = Image.query.get("image_id")
   return jsonify(all_img), 201

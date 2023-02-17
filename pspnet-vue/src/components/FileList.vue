@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-full border-2 border-gray-300 min-h-[200px] max-h-[250px] flex flex-col items-center"
+    class="w-full border-2 border-gray-300 min-h-[100px] flex flex-col items-center"
   >
     <div class="relative w-full">
       <label

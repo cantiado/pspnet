@@ -59,7 +59,8 @@ export const authStore = defineStore('authenticate', () => {
       console.log(res.data)
       const name = res.data.name
       const email = res.data.email
-      return {name, email}
+      const role = res.data.role
+      return {name, email, role}
     }catch(err){
       console.log(err.response.data.message)
     }

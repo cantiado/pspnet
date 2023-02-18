@@ -13,6 +13,13 @@
         <div>{{email}}</div>
         <div class="update">Update</div>
       </div>
+
+      <div class="flex justify-between grow card">
+        <div class="setting">Role</div>
+        <div>{{role}}</div>
+        <div class="update">Update</div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -28,15 +35,17 @@ export default {
     const store = authStore()
     const name = ref('')
     const email = ref('')
+    const role = ref('')
 
 
     onMounted(async () => {
       const data = await store.userData()
       name.value = data.name
       email.value = data.email
+      role.value = data.role
     })
 
-    return { name, email }
+    return { name, email, role}
   }
 }
 </script>

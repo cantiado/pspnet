@@ -108,6 +108,7 @@ def userdata(user):
   return {
     'name' : user.firstname + " " + user.lastname,
     'email' : user.email,
+    'role' : user.role
   }, 201
 
 if __name__ == "__main__":

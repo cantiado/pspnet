@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
+from flask_migrate import Migrate
 from functools import wraps
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 import jwt
@@ -15,8 +16,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
 app.config['SECRET_KEY'] = '95fd1e474cbc4b49a3286dc09cba7510'
 CORS(app, resources={r"/*":{'origins':"*"}})
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 db.init_app(app)
+
 
 class User(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -24,6 +27,8 @@ class User(db.Model):
   lastname = db.Column(db.String(20), nullable=False)
   email = db.Column(db.String(20), unique=True, nullable=False)
   password = db.Column(db.String(255), nullable=False)
+  role = db.Column(db.String(20), default = "researcher")
+  #NOTE user role is set by an administrator. 
 
   def __init__(self, firstname, lastname, email, password):
     self.firstname = firstname
@@ -31,11 +36,6 @@ class User(db.Model):
     self.email = email
     self.password = bcrypt.generate_password_hash(password, 10)
 
-#The following code was used to add a single test element to the user DB
-#testUser = User(userID=2, firstname="Andrew", lastname="Ramirez", email="andrewramirez@unr.edu", password="1041131")
-#with app.app_context():
-#  db.session.add(testUser)
-#  db.session.commit()
 
 #creates wrapper function for routes that require authorized tokens. 
 #code adapted from blog post https://stackabuse.com/single-page-apps-with-vue-js-and-flask-jwt-authentication/

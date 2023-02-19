@@ -32,8 +32,8 @@ export default {
         }
     },
     mounted() {
-        axios
-        .get('http://127.0.0.1:5000/datasets/', this.ds_name)
+        axios.post('http://127.0.0.1:5000/datasets/',
+        {ds_name: this.ds_name})
         .then(response => (
             this.img_paths = response.data,
             console.log(this.img_paths),

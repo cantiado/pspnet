@@ -165,13 +165,13 @@ def explore_data():
 
 @app.route('/datasets/', methods = ['GET', 'POST'])
 def dataset_prev_data():
-  # ds_name = request.get_json()
-  ds_name = 'test'
+  ds_name = request.get_json()
   paths = []
-  print(ds_name)
-  img_paths = db.session.query(Image.path).filter_by(dataset_name = ds_name)
+  img_paths = db.session.query(Image.path).filter_by(dataset_name = ds_name['ds_name'])
   for img_path in img_paths:
     paths.append(img_path[0].replace('/src/assets/',''))
+  print(paths)
+  # return jsonify("hello world"), 201
   return jsonify(paths), 201
 
 if __name__ == "__main__":

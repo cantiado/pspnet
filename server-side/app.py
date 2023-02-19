@@ -142,11 +142,37 @@ def userdata(user):
   }, 201
 
 @app.route('/profile/', methods = ['GET'])
-# @token_required
+@token_required
 def profile():
   all_img = Image.query.get("image_id")
   return jsonify(all_img), 201
 
+@app.route('/explore/', methods=['GET'])
+def explore_data():
+  # SELECT COUNT(*) FROM image WHERE dataset_name = 
+  #   (SELECT DISTINCT dataset_name FROM image);
+  unique_ds = db.session.query(Image.dataset_name).distinct()
+  response_data = {}
+  ds_names = []
+  ds_img_counts = []
+  for dataset in unique_ds:
+    img_count = db.session.query(Image.path).filter_by(dataset_name = dataset[0]).count()
+    ds_names.append(dataset[0])
+    ds_img_counts.append(img_count)
+  response_data['ds_names'] = ds_names
+  response_data['ds_counts'] = ds_img_counts
+  return jsonify(response_data), 201
+
+@app.route('/datasets/', methods = ['GET', 'POST'])
+def dataset_prev_data():
+  # ds_name = request.get_json()
+  ds_name = 'test'
+  paths = []
+  print(ds_name)
+  img_paths = db.session.query(Image.path).filter_by(dataset_name = ds_name)
+  for img_path in img_paths:
+    paths.append(img_path[0].replace('/src/assets/',''))
+  return jsonify(paths), 201
+
 if __name__ == "__main__":
   app.run(debug=True)
-    

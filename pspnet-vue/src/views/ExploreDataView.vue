@@ -1,3 +1,5 @@
+<!-- Author: Antonio Lang -->
+
 <template>
     <div class="p-10">
         <div class="grid gap-4">
@@ -164,11 +166,12 @@
                 </div>
             </div>
             <div class="container">
-            <!-- <div class="grid gap-4 h-32"> -->
+                <li v-for="(value, index) in ds_names" datasets>
+                    <DataSetPrev :ds_name="value" :ds_count="ds_counts[index]"/>
+                </li>
+                <!-- <DataSetPrev/>
                 <DataSetPrev/>
-                <DataSetPrev/>
-                <DataSetPrev/>
-                <DataSetPrev/>
+                <DataSetPrev/> -->
             </div>
         </div>
     </div>
@@ -177,9 +180,29 @@
 
 <script>
 import DataSetPrev from '@/components/DataSetPrev.vue';
+import axios from 'axios';
 
 export default {
     name : 'ExploreDataView',
+    data() {
+        return {
+            ds_names: null,
+            ds_counts: null,
+            error: null
+        }
+    },
+    mounted() {
+        axios
+        .get('http://127.0.0.1:5000/explore/')
+        .then(response => (
+            this.ds_names = response.data['ds_names'],
+            this.ds_counts = response.data['ds_counts'],
+            console.log(response),
+            console.log(response.data['ds_names'])
+            ))
+        .catch(this.error = "Failed to retreive data")
+
+    },
     components: {DataSetPrev}
 }
 </script>
@@ -191,8 +214,11 @@ export default {
     gap: 20px;
     display: grid;
     height: 650px;
-    overflow: auto;
-    margin: 15px;
+    overflow-y: scroll;
+    margin: 17px;
     padding: 10px;
+}
+.container li {
+    list-style-type: none;
 }
 </style>

@@ -21,3 +21,11 @@ export function updateUserData(userData, jwt){
 export function getProfileData(userData, jwt){
   return axios.put(url + 'profile/', userData, {headers: {token: jwt}})
 }
+
+export function getExplore(){
+  return axios.put(url + 'explore/')
+}
+
+export function getDatasets(ds_name) {
+  return axios.put(url + 'datasets/')
+}

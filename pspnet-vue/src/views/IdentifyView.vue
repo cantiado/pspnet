@@ -1,7 +1,8 @@
 <!-- Author: Carl Antiado -->
 <template>
   <div class="w-full h-[79vh] flex flex-row">
-    <div class="basis-1/3 p-5 flex flex-col gap-2">
+    <div class="basis-1/3 p-5 h-full overflow-auto">
+      <!-- flex flex-col gap-2 -->
       <div @drop="dropImages" @dragover="(event) => event.preventDefault()">
         <label
           class="p-5 flex items-center justify-center gap-4 border-2 rounded-xl border-dashed border-blue-400 cursor-pointer"
@@ -36,10 +37,52 @@
         :accept="FILETYPES"
         multiple
       />
-      <List :files="files" @destroy="(fileId) => deleteFile(fileId)" />
-      <div>
+      <FileList
+        :files="files"
+        @destroy="(fileId) => deleteFile(fileId)"
+        class="mt-3"
+      />
+      <div class="mt-3 flex flex-col gap-3">
         <h1 class="text-lg font-bold">Dataset Information</h1>
-        <div class="flex gap-3 items-center">
+        <div class="grid grid-cols-2 gap-3 text-right">
+          <label
+            for="dataset-name"
+            class="min-w-max block font-medium text-gray-900 dark:text-white"
+            >Dataset name:</label
+          >
+          <input
+            v-model="datasetName"
+            type="text"
+            id="dataset-name"
+            placeholder="example-dataset-name"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          />
+          <label
+            for="dataset-notes"
+            class="min-w-max block font-medium text-gray-900 dark:text-white"
+            >Dataset notes:</label
+          >
+          <textarea
+            v-model="datasetNotes"
+            type="text"
+            id="dataset-notes"
+            placeholder="Optional"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          ></textarea>
+          <label
+            for="dataset-geoloc"
+            class="min-w-max block font-medium text-gray-900 dark:text-white"
+            >Dataset geolocation:</label
+          >
+          <input
+            v-model="datasetGeoloc"
+            type="text"
+            id="dataset-geoloc"
+            placeholder="Name, coords., etc."
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          />
+        </div>
+        <!-- <div class="flex gap-3 items-center">
           <label
             for="dataset-name"
             class="min-w-max block font-medium text-gray-900 dark:text-white"
@@ -53,6 +96,34 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           />
         </div>
+        <div class="flex gap-3 items-start">
+          <label
+          for="dataset-notes"
+          class="min-w-max block font-medium text-gray-900 dark:text-white"
+          >Dataset notes:</label
+          >
+          <textarea
+          v-model="datasetNotes"
+          type="text"
+          id="dataset-notes"
+          placeholder="Optional"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          ></textarea>
+        </div>
+        <div class="flex gap-3 items-center">
+          <label
+            for="dataset-geoloc"
+            class="min-w-max block font-medium text-gray-900 dark:text-white"
+            >Dataset geolocation:</label
+          >
+          <input
+            v-model="datasetGeoloc"
+            type="text"
+            id="dataset-geoloc"
+            placeholder="Name, coords., etc."
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          />
+        </div> -->
         <RadioGroup v-model="visibility">
           <RadioGroupLabel class="sr-only">Dataset visibility</RadioGroupLabel>
           <div class="grid grid-cols-3 border-2">
@@ -83,14 +154,23 @@
           </div>
         </RadioGroup>
         <!-- TODO: add notes, geolocation -->
-        
       </div>
-      <div
-        class="grid items-center gap-4"
-        :class="
-          !uploadedImages || !selectedModel ? 'grid-cols-3' : 'grid-cols-2'
-        "
-      >
+      <div class="mt-3">
+        <span v-if="!uploadedImages" class="text-red-400 text-sm"
+          >Please upload images.
+        </span>
+        <span v-else-if="!datasetName" class="text-red-400 text-sm">
+          Please enter a dataset name.
+        </span>
+        <span v-else-if="!visibility" class="text-red-400 text-sm">
+          Please select a visibility setting.
+        </span>
+        <span v-else-if="!selectedModel" class="text-red-400 text-sm"
+          >Please select a model.
+        </span>
+        <span v-if="errorMsg" class="text-red-400 text-sm">{{ errorMsg }}</span>
+      </div>
+      <div class="grid items-center gap-4 mt-3 grid-cols-2">
         <Menu as="div" class="relative inline-block">
           <div class="flex flex-row gap-4 text-right items-center">
             <MenuButton
@@ -112,7 +192,7 @@
             leave-to-class="transform scale-95 opacity-0"
           >
             <MenuItems
-              class="absolute left-0 mt-2 w-40 h-25 overflow-auto origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+              class="absolute right-0 mt-2 w-full h-25 overflow-auto origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
             >
               <div v-for="model in models" class="px-1 py-1">
                 <MenuItem v-slot="{ active }">
@@ -120,7 +200,7 @@
                     @click="setModel(model)"
                     :class="[
                       active ? 'bg-green-200' : 'text-gray-900',
-                      'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                      'group flex w-full justify-center items-center rounded-md px-2 py-2 text-sm',
                     ]"
                   >
                     {{ model.name }}
@@ -134,7 +214,7 @@
           @click="postImages"
           class="py-1 min-w-max p-1 rounded-full"
           :class="
-            !uploadedImages || !selectedModel
+            !uploadedImages || !datasetName || !visibility || !selectedModel
               ? 'bg-gray-200'
               : 'bg-green-300 hover:bg-green-200'
           "
@@ -142,12 +222,14 @@
         >
           <span class="m-3 text-xl font-bold">Identify</span>
         </button>
-        <span v-if="!uploadedImages" class="mt-1 text-red-400 text-sm"
-          >Please upload images.</span
+      </div>
+      <div class="mt-10 flex justify-center items-center">
+        <button
+          @click="reset"
+          class="inline-flex justify-center rounded-md border border-transparent bg-red-400 px-4 py-2 text-sm font-bold text-slate-900 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
         >
-        <span v-else-if="!selectedModel" class="mt-1 text-red-400 text-sm"
-          >Please select a model.</span
-        >
+          RESET
+        </button>
       </div>
     </div>
     <div class="basis-2/3 p-5">
@@ -170,6 +252,76 @@
       </div>
     </div>
   </div>
+  <TransitionRoot appear :show="successfulSubmit" as="template">
+    <Dialog
+      as="div"
+      @close="() => (successfulSubmit = false)"
+      class="relative z-10"
+    >
+      <TransitionChild
+        as="template"
+        enter="duration-300 ease-out"
+        enter-from="opacity-0"
+        enter-to="opacity-100"
+        leave="duration-200 ease-in"
+        leave-from="opacity-100"
+        leave-to="opacity-0"
+      >
+        <div class="fixed inset-0 bg-black bg-opacity-25" />
+      </TransitionChild>
+
+      <div class="fixed inset-0 overflow-y-auto">
+        <div
+          class="flex min-h-full items-center justify-center p-4 text-center"
+        >
+          <TransitionChild
+            as="template"
+            enter="duration-300 ease-out"
+            enter-from="opacity-0 scale-95"
+            enter-to="opacity-100 scale-100"
+            leave="duration-200 ease-in"
+            leave-from="opacity-100 scale-100"
+            leave-to="opacity-0 scale-95"
+          >
+            <DialogPanel
+              class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+            >
+              <DialogTitle
+                as="h3"
+                class="text-lg font-medium leading-6 text-gray-900"
+              >
+                Upload successful!
+              </DialogTitle>
+              <div class="mt-2">
+                <p class="text-sm text-gray-500">
+                  Your images were successfully submitted. You can monitor the
+                  status of your images' identification in your Job Status page,
+                  or you can submit another set of images.
+                </p>
+              </div>
+
+              <div class="mt-4 flex flex-row gap-2">
+                <button
+                  type="button"
+                  class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  @click="() => (successfulSubmit = false)"
+                >
+                  Job Status
+                </button>
+                <button
+                  type="button"
+                  class="text-xs font-normal px-4 py-2 rounded-md hover:bg-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
+                  @click="reset"
+                >
+                  New dataset
+                </button>
+              </div>
+            </DialogPanel>
+          </TransitionChild>
+        </div>
+      </div>
+    </Dialog>
+  </TransitionRoot>
 </template>
 
 <script>
@@ -182,10 +334,15 @@ import {
   RadioGroupLabel,
   RadioGroupOption,
   RadioGroupDescription,
+  TransitionRoot,
+  TransitionChild,
+  Dialog,
+  DialogPanel,
+  DialogTitle,
 } from "@headlessui/vue";
 import { ChevronDownIcon } from "@heroicons/vue/20/solid";
 import ImageCard from "../components/ImageCard.vue";
-import List from "../components/FileList.vue";
+import FileList from "../components/FileList.vue";
 
 var id = 0;
 
@@ -197,11 +354,16 @@ export default {
     MenuItems,
     ChevronDownIcon,
     ImageCard,
-    List,
+    FileList,
     RadioGroup,
     RadioGroupLabel,
     RadioGroupOption,
     RadioGroupDescription,
+    TransitionRoot,
+    TransitionChild,
+    Dialog,
+    DialogPanel,
+    DialogTitle,
   },
   data() {
     return {
@@ -211,12 +373,15 @@ export default {
       files: {}, // { id: { name, path, object } }
       FILETYPES: "image/png, image/jpeg",
       datasetName: "",
+      datasetNotes: "",
+      datasetGeoloc: "",
       visibility: "",
+      successfulSubmit: false,
+      errorMsg: "",
     };
   },
   computed: {},
-  mounted() {
-  },
+  mounted() {},
   methods: {
     setModel(model) {
       this.selectedModel = model.name;
@@ -232,7 +397,7 @@ export default {
           };
           id++;
         }
-        console.log("after upload:", this.files);
+        // console.log("after upload:", this.files);
         this.modifyFileList();
       }
     },
@@ -257,20 +422,20 @@ export default {
         });
         this.uploadedImages = true;
       }
-      console.log("after upload:", this.files);
+      // console.log("after upload:", this.files);
       this.modifyFileList();
     },
     deleteFile(fileId) {
       delete this.files[fileId];
       if (Object.keys(this.files).length == 0) this.uploadedImages = false;
-      console.log("after delete:", this.files);
+      // console.log("after delete:", this.files);
       this.modifyFileList();
     },
     modifyFileList() {
       const imageInput = document.getElementById("image-input");
       var newFileList = new DataTransfer();
-      for (const { object } of this.files) {
-        newFileList.items.add(object);
+      for (const fileId in this.files) {
+        newFileList.items.add(this.files[fileId].object);
       }
       imageInput.files = newFileList.files;
     },
@@ -281,12 +446,32 @@ export default {
       for (const image of imageInput.files) {
         images.append("image-input", image);
       }
-      const response = fetch(url, {
+      fetch(url, {
         method: "POST",
+        mode: "no-cors",
         body: images,
       })
-        .then(() => console.log("successfully posted images"))
-        .catch((err) => console.log(err));
+        .then((res) => {
+          // console.log(res)
+          // console.log("successfully posted images");
+          this.errorMsg = "";
+          this.successfulSubmit = true;
+        })
+        .catch((err) => {
+          console.log(err);
+          this.errorMsg = "An error occured when submitting. Try again.";
+        });
+    },
+    reset() {
+      this.uploadedImages = false;
+      this.selectedModel = "";
+      this.files = {};
+      this.datasetName = "";
+      this.datasetNotes = "";
+      this.datasetGeoloc = "";
+      this.visibility = "";
+      this.successfulSubmit = false;
+      this.errorMsg = "";
     },
   },
 };

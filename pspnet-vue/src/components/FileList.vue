@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-full border-2 border-gray-300 min-h-[100px] flex flex-col items-center"
+    class="w-full border-2 border-gray-300 min-h-[100px] max-h-[50%] flex flex-col items-center"
   >
     <div class="relative w-full">
       <label
@@ -32,7 +32,7 @@
         type="search"
         id="search"
         class="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        placeholder="Search"
+        :placeholder="!Object.keys(files).length ? 'Search (disabled)' : 'Search'"
         :disabled="!Object.keys(files).length"
       />
     </div>
@@ -56,7 +56,7 @@
         </button>
       </li>
     </ul>
-    <div v-else class="h-full flex flex-col justify-center">No images uploaded</div>
+    <div v-else class="p-5 flex flex-col justify-center">No images uploaded</div>
   </div>
 </template>
 

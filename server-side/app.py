@@ -62,6 +62,15 @@ class Image(db.Model):
     self.verifier_id = verifier_id
     self.upload_id = upload_id
     self.dataset_name = dataset_name
+
+
+class Dataset(db.Model):
+  dataset_name = db.Column(db.String[30], primary_key=True)
+  project_name = db.Column(db.String[40], nullable=True)
+  
+  def __init__(self, dataset_name, project_name=None):
+    self.dataset_name = dataset_name
+    self.project_name = project_name
   # insert into image values ("test-image-id", "/src/assets/user_images/sage.jpg",0,NULL,0,NULL, NULL, 0, "test")
   # test_image = Image('test-image-id4', '/src/assets/user_images/sage.jpg', upload_id=0, uploader_id=0,
   #     dataset_name="test", verifier_id=None, label=None,location=None,access=0)
@@ -139,13 +148,24 @@ def userdata(user):
   return {
     'name' : user.firstname + " " + user.lastname,
     'email' : user.email,
+    'id' : user.id,
   }, 201
 
-@app.route('/profile/', methods = ['GET'])
-@token_required
+@app.route('/profile/', methods = ['GET', 'POST'])
 def profile():
-  all_img = Image.query.get("image_id")
-  return jsonify(all_img), 201
+  response_data = {}
+  user_id = request.get_json()['id']
+  all_img = db.session.query(Image.upload_id).filter_by(uploader_id=user_id)
+  unique_upload = all_img.distinct().all()
+  img_data = {}
+  for unique_upload_id in unique_upload:
+    result = (db.session.query(Image.path).filter_by(upload_id=unique_upload_id[0]).all())  
+    for path in result:
+      adjusted_path = str(path[0].replace('/src/assets/',''))
+    img_data[str(unique_upload_id[0])] = adjusted_path
+  response_data['img_count'] = all_img.count()
+  response_data['img_data'] = img_data
+  return jsonify(response_data), 201
 
 @app.route('/explore/', methods=['GET'])
 def explore_data():
@@ -170,8 +190,6 @@ def dataset_prev_data():
   img_paths = db.session.query(Image.path).filter_by(dataset_name = ds_name['ds_name'])
   for img_path in img_paths:
     paths.append(img_path[0].replace('/src/assets/',''))
-  print(paths)
-  # return jsonify("hello world"), 201
   return jsonify(paths), 201
 
 if __name__ == "__main__":

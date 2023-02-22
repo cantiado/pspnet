@@ -18,8 +18,8 @@ export function updateUserData(userData, jwt){
   return axios.put(url + 'settings/', userData, {headers : {token : jwt}})
 }
 
-export function getProfileData(userData, jwt){
-  return axios.put(url + 'profile/', userData, {headers: {token: jwt}})
+export function getProfileData(id){
+  return axios.put(url + 'profile/')
 }
 
 export function getExplore(){
@@ -27,5 +27,5 @@ export function getExplore(){
 }
 
 export function getDatasets(ds_name) {
-  return axios.put(url + 'datasets/')
+  return axios.post(url + 'datasets/')
 }

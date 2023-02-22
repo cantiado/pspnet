@@ -43,7 +43,7 @@ export default {
   setup(){
     const routeNames = [
       'Settings',
-      'Gallary'
+      'Profile'
     ]
 
     const router = useRouter()

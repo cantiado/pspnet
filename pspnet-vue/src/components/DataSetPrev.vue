@@ -28,7 +28,6 @@ export default {
     data() {
         return {
             img_paths: null,
-            images: [{path: "user_images/sage.jpg"}, {path: "user_images/rabbit.jpg"}]
         }
     },
     mounted() {

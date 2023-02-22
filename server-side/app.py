@@ -54,7 +54,7 @@ def token_required(f):
     }
     try:
       data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-      user = User.query.filter_by(email=data['sub']).first()
+      user = User.query.filter_by(id=data['sub']).first()
       if not user:
         raise RuntimeError('User not found')
       return f(user, *args, **kwargs)
@@ -81,7 +81,7 @@ def login():
         return jsonify(invalid_msg), 401
       else:
         token = jwt.encode({
-          'sub' : testUser.email,
+          'sub' : testUser.id,
           'iat' : datetime.datetime.utcnow(),
           'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
           app.config['SECRET_KEY'])
@@ -110,6 +110,17 @@ def userdata(user):
     'email' : user.email,
     'role' : user.role
   }, 201
+
+#route to update information from account settings page
+@app.route('/settings/', methods = ['PUT'])
+@token_required
+def updateUser(user):
+  user_data = request.get_json()
+  user.email = user_data.get('email')
+  user.firstname = user_data.get('firstname')
+  user.lastname = user_data.get('lastname')
+  db.session.commit()
+  return { 'status' : 'good' } , 201
 
 if __name__ == "__main__":
   app.run(debug=True)

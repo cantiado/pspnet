@@ -13,3 +13,7 @@ export function register(userData){
 export function getUserData(jwt){
   return axios.get(url + 'userdata/', { headers: { token : jwt}})
 }
+
+export function updateUserData(userData, jwt){
+  return axios.put(url + 'settings/', userData, {headers : {token : jwt}})
+}

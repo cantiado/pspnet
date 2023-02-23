@@ -14,7 +14,7 @@ def hello_world():
 @app.route("/identify", methods=["POST"])
 def identify():
   print("here!")
-  files = request.files.to_dict(flat=False)["dropzone-file"]
+  files = request.files.to_dict(flat=False)["image-input"]
   for i, file in enumerate(files):
     file.save(os.path.join(image_folder, file.filename))
 

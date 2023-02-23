@@ -47,7 +47,7 @@ export default {
 <style>
     .rectangle {
         border-radius: 10px;
-        border-width: 1px;
+        border-width: 3px;
         border-color: #b9e0a5;
         width:100%;
         display: flex;

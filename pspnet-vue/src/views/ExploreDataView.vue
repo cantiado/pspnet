@@ -31,6 +31,7 @@
                         id="searchBar"
                         placeholder="Dataset name"
                         />
+                        <div>{{ searchFilter() }}</div>
                     </div>
                 </div>
                 <!-- following div component from tailwind elements -->
@@ -91,27 +92,25 @@ import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 export default {
     name : 'ExploreDataView',
     setup() {
-        const ds_names = ref('')
-        const ds_counts = ref('')
         const error = ref('')
         const active = ref(true)
         const searchInput = ref('')
-        const filteredNames = ref('')
-        const filteredCounts = ref('')
         const filteredData = ref('')
         const ds_info = ref('')
         const links = [
             { filter: 'img l 5', label: 'Fewer than 5 images'},
             { filter: 'class eq 1', label: 'Single-Class Datasets'}
         ]
-        
+
+        const searchFilter = () => {
+            filteredData.value = Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => k.includes(searchInput.value)))
+        }
+
         const applyFilter = (filter) => {
-            console.log("Apply " + filter)
             if (filter == "img l 5") {
                 console.log("Filter datasets with fewer than 5 images")
                 // Adapted from: https://9to5answer.com/how-to-filter-a-dictionary-by-value-in-javascript
                 filteredData.value = Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => v<5));
-                console.log(filteredData)
             }
             if (filter == "class eq 1") {
                 console.log("Filter datasets with one class")
@@ -129,7 +128,7 @@ export default {
             .catch(error.value = "Failed to retreive data")
     
         })
-        return { ds_info, filteredData, error, active, links, searchInput, applyFilter}
+        return { ds_info, filteredData, error, active, links, searchInput, applyFilter, searchFilter}
     },
     components: {DataSetPrev, Menu, MenuButton, MenuItems, MenuItems}
 }

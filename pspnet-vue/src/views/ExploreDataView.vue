@@ -71,8 +71,8 @@
                 </Menu>
             </div>
             <div class="container">
-                <li v-for="(value, index) in filteredNames" datasets>
-                    <DataSetPrev :ds_name="value" :ds_count="filteredCounts[index]"/>
+                <li v-for="(value, index) in filteredData" datasets>
+                    <DataSetPrev :ds_name="index" :ds_count="value"/>
                 </li>
             </div>
             
@@ -98,17 +98,23 @@ export default {
         const searchInput = ref('')
         const filteredNames = ref('')
         const filteredCounts = ref('')
+        const filteredData = ref('')
+        const ds_info = ref('')
         const links = [
             { filter: 'img l 5', label: 'Fewer than 5 images'},
-            { filter: 'class 1', label: 'Single-Class Datasets'}
+            { filter: 'class eq 1', label: 'Single-Class Datasets'}
         ]
+        
         const applyFilter = (filter) => {
             console.log("Apply " + filter)
             if (filter == "img l 5") {
-                var res = filteredCounts.value.filter(count => count < 5)
-                var res2 = filteredNames.value.filter(name => filteredCounts.value.includes(res))
-                console.log(res)
-                console.log(res2)
+                console.log("Filter datasets with fewer than 5 images")
+                // Adapted from: https://9to5answer.com/how-to-filter-a-dictionary-by-value-in-javascript
+                filteredData.value = Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => v<5));
+                console.log(filteredData)
+            }
+            if (filter == "class eq 1") {
+                console.log("Filter datasets with one class")
             }
         }
 
@@ -116,16 +122,14 @@ export default {
             axios
             .get('http://127.0.0.1:5000/explore/')
             .then(response => (
-                ds_names.value = response.data['ds_names'],
-                ds_counts.value = response.data['ds_counts'],
-                filteredNames.value = ds_names.value,
-                filteredCounts.value = ds_counts.value,
-                console.log(ds_names.value)
+                ds_info.value = response.data['ds_info'],
+                filteredData.value = response.data['ds_info'],
+                console.log(response.data)
                 ))
             .catch(error.value = "Failed to retreive data")
     
         })
-        return { filteredNames, filteredCounts, error, active, links, searchInput, applyFilter}
+        return { ds_info, filteredData, error, active, links, searchInput, applyFilter}
     },
     components: {DataSetPrev, Menu, MenuButton, MenuItems, MenuItems}
 }

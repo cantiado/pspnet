@@ -179,8 +179,8 @@ def explore_data():
     img_count = db.session.query(Image.path).filter_by(dataset_name = dataset[0]).count()
     ds_names.append(dataset[0])
     ds_img_counts.append(img_count)
-  response_data['ds_names'] = ds_names
-  response_data['ds_counts'] = ds_img_counts
+  response_data['ds_info'] = dict(zip(ds_names, ds_img_counts))
+  # response_data['ds_counts'] = ds_img_counts
   return jsonify(response_data), 201
 
 @app.route('/datasets/', methods = ['GET', 'POST'])

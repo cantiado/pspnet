@@ -31,7 +31,7 @@
                         id="searchBar"
                         placeholder="Dataset name"
                         />
-                        <div>{{ searchFilter() }}</div>
+                        {{ searchFilter() }}
                     </div>
                 </div>
                 <!-- following div component from tailwind elements -->

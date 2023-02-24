@@ -30,8 +30,8 @@
                         "
                         id="searchBar"
                         placeholder="Dataset name"
+                        @change="searchFilter"
                         />
-                        {{ searchFilter() }}
                     </div>
                 </div>
                 <!-- following div component from tailwind elements -->
@@ -104,6 +104,7 @@ export default {
 
         const searchFilter = () => {
             filteredData.value = Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => k.includes(searchInput.value)))
+            console.log(filteredData.value)
         }
 
         const applyFilter = (filter) => {
@@ -130,7 +131,7 @@ export default {
         })
         return { ds_info, filteredData, error, active, links, searchInput, applyFilter, searchFilter}
     },
-    components: {DataSetPrev, Menu, MenuButton, MenuItems, MenuItems}
+    components: {DataSetPrev, Menu, MenuButton, MenuItem, MenuItems}
 }
 </script>
 

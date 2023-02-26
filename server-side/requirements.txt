@@ -46,3 +46,9 @@ wincertstore==0.2
 Flask-Migrate==4.0.4
 Mako==1.2.4
 alembic==1.9.4
+Flask-Migrate==4.0.4
+Mako==1.2.4
+alembic==1.9.4
+async-timeout==4.0.2
+redis==4.5.1
+rq==1.12.0

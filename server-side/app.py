@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
+from flask_migrate import Migrate
 from functools import wraps
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 import jwt
@@ -16,9 +17,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
 app.config['SECRET_KEY'] = '95fd1e474cbc4b49a3286dc09cba7510'
 CORS(app, resources={r"/*":{'origins':"*"}})
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 db.init_app(app)
-db.create_all()
 
 class User(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -26,19 +27,14 @@ class User(db.Model):
   lastname = db.Column(db.String(20), nullable=False)
   email = db.Column(db.String(20), unique=True, nullable=False)
   password = db.Column(db.String(255), nullable=False)
+  role = db.Column(db.String(20), default = "researcher")
+  #NOTE user role is set by an administrator. 
 
   def __init__(self, firstname, lastname, email, password):
     self.firstname = firstname
     self.lastname = lastname
     self.email = email
     self.password = bcrypt.generate_password_hash(password, 10)
-
-#The following code was used to add a single test element to the user DB
-#testUser = User(userID=2, firstname="Andrew", lastname="Ramirez", email="andrewramirez@unr.edu", password="1041131")
-#with app.app_context():
-#  db.session.add(testUser)
-#  db.session.commit()
-
 
 class Image(db.Model):
   image_id = db.Column(db.String[20], primary_key=True)
@@ -71,11 +67,7 @@ class Dataset(db.Model):
   def __init__(self, dataset_name, project_name=None):
     self.dataset_name = dataset_name
     self.project_name = project_name
-  # insert into image values ("test-image-id", "/src/assets/user_images/sage.jpg",0,NULL,0,NULL, NULL, 0, "test")
-  # test_image = Image('test-image-id4', '/src/assets/user_images/sage.jpg', upload_id=0, uploader_id=0,
-  #     dataset_name="test", verifier_id=None, label=None,location=None,access=0)
-  # db.session.add(test_image)
-  # db.session.commit()
+
 
 #creates wrapper function for routes that require authorized tokens. 
 #code adapted from blog post https://stackabuse.com/single-page-apps-with-vue-js-and-flask-jwt-authentication/
@@ -94,7 +86,7 @@ def token_required(f):
     }
     try:
       data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-      user = User.query.filter_by(email=data['sub']).first()
+      user = User.query.filter_by(id=data['sub']).first()
       if not user:
         raise RuntimeError('User not found')
       return f(user, *args, **kwargs)
@@ -121,7 +113,7 @@ def login():
         return jsonify(invalid_msg), 401
       else:
         token = jwt.encode({
-          'sub' : testUser.email,
+          'sub' : testUser.id,
           'iat' : datetime.datetime.utcnow(),
           'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
           app.config['SECRET_KEY'])
@@ -148,8 +140,20 @@ def userdata(user):
   return {
     'name' : user.firstname + " " + user.lastname,
     'email' : user.email,
+    'role' : user.role,
     'id' : user.id,
   }, 201
+
+#route to update information from account settings page
+@app.route('/settings/', methods = ['PUT'])
+@token_required
+def updateUser(user):
+  user_data = request.get_json()
+  user.email = user_data.get('email')
+  user.firstname = user_data.get('firstname')
+  user.lastname = user_data.get('lastname')
+  db.session.commit()
+  return { 'status' : 'good' } , 201
 
 @app.route('/profile/', methods = ['GET', 'POST'])
 def profile():

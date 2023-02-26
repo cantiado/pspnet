@@ -423,6 +423,7 @@ export default {
       this.uploadedImages = false;
       this.selectedModel = "";
       this.files = {};
+      this.modifyFileList()
       this.datasetName = "";
       this.datasetNotes = "";
       this.datasetGeoloc = "";

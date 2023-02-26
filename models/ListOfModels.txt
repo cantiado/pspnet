@@ -1,15 +1,1 @@
-yolov5 - PyTorch: https://colab.research.google.com/drive/1eOGAgyF90GoDjBt88xRCjhxRAGA3N2Pr?usp=sharing
-Link to mock report - 
-https://wandb.ai/nathanielrivas/YOLOv5/reports/PSPNet-yolov5--VmlldzozMDc5NzI5?accessToken=mfjg3jw5fncovcv7xmp729nn9co8vzpg1pxyr95y8ds6fs374jzx5vp57tmx9unw
-
-Detectron2 - PyTorch: https://colab.research.google.com/drive/15bh9pyf9DER8rcCneYNvlbG3Ddimkzf5?usp=sharing
-Link to mock report - ##Notes: The report is less detailed than YOLOv5, still retains notable data over the duration of training however does not include images comparisons.
-https://wandb.ai/nathanielrivas/PSPNet-Detectron2/reports/PSPNet-Detectron2--VmlldzozMTExMjkz?accessToken=mae77624tjc3357lzwcpk11tth4efqx19sc2cwz4x3scmli3qiy29l13ss3uzbp8
-
-
-EfficientDet - PyTorch
-
-
-
-EfficientDet-D0-D7 - Tensorflow 2
- 
+YOLOv5 Only...

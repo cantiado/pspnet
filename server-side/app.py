@@ -10,6 +10,7 @@ import datetime
 
 
 app = Flask(__name__)
+app.app_context().push()
 bcrypt = Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
 app.config['SECRET_KEY'] = '95fd1e474cbc4b49a3286dc09cba7510'
@@ -17,6 +18,7 @@ CORS(app, resources={r"/*":{'origins':"*"}})
 db = SQLAlchemy(app)
 
 db.init_app(app)
+db.create_all()
 
 class User(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -36,6 +38,44 @@ class User(db.Model):
 #with app.app_context():
 #  db.session.add(testUser)
 #  db.session.commit()
+
+
+class Image(db.Model):
+  image_id = db.Column(db.String[20], primary_key=True)
+  path = db.Column(db.String[40], nullable=False)
+  uploader_id = db.Column(db.Integer, nullable=False)
+  label = db.Column(db.String[30], nullable=True)
+  access = db.Column(db.Integer, nullable=False)
+  location = db.Column(db.String[30], nullable=True)
+  verifier_id = db.Column(db.Integer, nullable=True)
+  upload_id = db.Column(db.Integer, nullable=False)
+  dataset_name = db.Column(db.String[20], nullable=True)
+
+  def __init__(self, image_id, path, uploader_id, upload_id, dataset_name,
+               verifier_id=None, label=None, location=None, access=0):
+    self.image_id = image_id
+    self.path = path
+    self.uploader_id = uploader_id
+    self.label = label
+    self.access = access
+    self.location = location
+    self.verifier_id = verifier_id
+    self.upload_id = upload_id
+    self.dataset_name = dataset_name
+
+
+class Dataset(db.Model):
+  dataset_name = db.Column(db.String[30], primary_key=True)
+  project_name = db.Column(db.String[40], nullable=True)
+  
+  def __init__(self, dataset_name, project_name=None):
+    self.dataset_name = dataset_name
+    self.project_name = project_name
+  # insert into image values ("test-image-id", "/src/assets/user_images/sage.jpg",0,NULL,0,NULL, NULL, 0, "test")
+  # test_image = Image('test-image-id4', '/src/assets/user_images/sage.jpg', upload_id=0, uploader_id=0,
+  #     dataset_name="test", verifier_id=None, label=None,location=None,access=0)
+  # db.session.add(test_image)
+  # db.session.commit()
 
 #creates wrapper function for routes that require authorized tokens. 
 #code adapted from blog post https://stackabuse.com/single-page-apps-with-vue-js-and-flask-jwt-authentication/
@@ -108,8 +148,49 @@ def userdata(user):
   return {
     'name' : user.firstname + " " + user.lastname,
     'email' : user.email,
+    'id' : user.id,
   }, 201
+
+@app.route('/profile/', methods = ['GET', 'POST'])
+def profile():
+  response_data = {}
+  user_id = request.get_json()['id']
+  all_img = db.session.query(Image.upload_id).filter_by(uploader_id=user_id)
+  unique_upload = all_img.distinct().all()
+  img_data = {}
+  for unique_upload_id in unique_upload:
+    result = (db.session.query(Image.path).filter_by(upload_id=unique_upload_id[0]).all())  
+    for path in result:
+      adjusted_path = str(path[0].replace('/src/assets/',''))
+    img_data[str(unique_upload_id[0])] = adjusted_path
+  response_data['img_count'] = all_img.count()
+  response_data['img_data'] = img_data
+  return jsonify(response_data), 201
+
+@app.route('/explore/', methods=['GET'])
+def explore_data():
+  # SELECT COUNT(*) FROM image WHERE dataset_name = 
+  #   (SELECT DISTINCT dataset_name FROM image);
+  unique_ds = db.session.query(Image.dataset_name).distinct()
+  response_data = {}
+  ds_names = []
+  ds_img_counts = []
+  for dataset in unique_ds:
+    img_count = db.session.query(Image.path).filter_by(dataset_name = dataset[0]).count()
+    ds_names.append(dataset[0])
+    ds_img_counts.append(img_count)
+  response_data['ds_info'] = dict(zip(ds_names, ds_img_counts))
+  # response_data['ds_counts'] = ds_img_counts
+  return jsonify(response_data), 201
+
+@app.route('/datasets/', methods = ['GET', 'POST'])
+def dataset_prev_data():
+  ds_name = request.get_json()
+  paths = []
+  img_paths = db.session.query(Image.path).filter_by(dataset_name = ds_name['ds_name'])
+  for img_path in img_paths:
+    paths.append(img_path[0].replace('/src/assets/',''))
+  return jsonify(paths), 201
 
 if __name__ == "__main__":
   app.run(debug=True)
-    

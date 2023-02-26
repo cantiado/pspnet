@@ -7,6 +7,7 @@ import UserProfile from '../views/UserProfile.vue'
 import AccountSettingsView from '../views/AccountSettingsView.vue'
 import GallaryView from '../views/GallaryView.vue'
 import JobsView from '../views/JobsView.vue'
+import Explore from '../views/ExploreDataView.vue'
 
 const routes = [
   {
@@ -56,6 +57,11 @@ const routes = [
     path : '/jobs',
     name : 'jobs',
     component : JobsView
+  },
+  {
+    path : '/explore',
+    name : 'explore',
+    component : Explore
   }
 ]
 

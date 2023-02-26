@@ -36,7 +36,4 @@ export default {
         margin-bottom: 20px;
         color: black;
     }
-    .nav-rail-ul {
-        position: sticky;
-    }
 </style>

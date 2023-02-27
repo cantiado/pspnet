@@ -4,8 +4,9 @@ app = Flask(__name__)
 
 image_folder = "images"
 import os
-import json
 import csv
+import sys
+from pathlib import Path
 
 @app.route("/")
 def hello_world():
@@ -18,35 +19,30 @@ def identify():
   for i, file in enumerate(files):
     file.save(os.path.join(image_folder, file.filename))
 
-  cmd = r'python \yolov5\classify\predict.py --weights \yolov5\best.onnx --save-txt --source \images --img 640'
+  #commands here give global environment path to project for deployment on any machine
+  FILE = Path(__file__).resolve()
+  path = FILE.parents[0]
+  os.chdir(path)
+  cmd = r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/ --img 640'
   os.system(cmd)
-  
-  #opens and saves json file data format to variable
-  with open(r"plantnet300K_species_id_2_name.json") as json_file:
-    data = json.load(json_file)
-  json_file.close()
 
   #Declare string variables, append with new information from inference txt, print out
   confidenceInterval = []
   object_id = []
   species_id = []
-  
-  #After predicting images, need list of txt outputs... uses single hard coded output for testing
-  with open(r'\yolov5\runs\predict-cls\exp\labels\65e9dc873ad002330d91abbae2d5dd2d7b41d8be.txt','r') as f:
-    for line in f:
-        for word in line.split():
-            temp = word
-            temp = float(temp)
-            if temp <= 1:
-                confidenceInterval.append(word)
-            for key, value in data.items():
-                if word == key:
-                    object_id.append(word)
-                    species_id.append(value)
-  f.close()
 
-#prediction saved to \prediction\predict.csv
-#need to append txt file outputs to one save file and interate through it
+  #this command is used to concatenate all txt files in the labels directory after prediciton is made
+  os.chdir("labels")
+  cmd2 = r"cat *.txt > predictions.txt"
+  os.system(cmd2)
+  os.chdir(path)
+  
+  os.remove(r'labels/*txt')
+
+  return "success"
+#2/27/2023 - Convert text files in predict class to csv...
+
+"""
   with open(r'\predict\predict.csv', 'w', newline='') as file:
      writer = csv.writer(file)
      
@@ -56,5 +52,4 @@ def identify():
      writer.writerow([confidenceInterval[2], object_id[2], species_id[2]])
      writer.writerow([confidenceInterval[3], object_id[3], species_id[3]])
      writer.writerow([confidenceInterval[4], object_id[4], species_id[4]])
-
-  return "success"
+"""

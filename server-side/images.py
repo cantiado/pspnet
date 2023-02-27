@@ -6,6 +6,7 @@ image_folder = "images"
 import os
 import csv
 import sys
+import pandas as pd
 from pathlib import Path
 
 @app.route("/")
@@ -14,7 +15,6 @@ def hello_world():
 
 @app.route("/identify", methods=["POST"])
 def identify():
-  print("here!")
   files = request.files.to_dict(flat=False)["image-input"]
   for i, file in enumerate(files):
     file.save(os.path.join(image_folder, file.filename))
@@ -23,6 +23,7 @@ def identify():
   FILE = Path(__file__).resolve()
   path = FILE.parents[0]
   os.chdir(path)
+  print("Predicting...")
   cmd = r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/ --img 640'
   os.system(cmd)
 
@@ -35,21 +36,11 @@ def identify():
   os.chdir("labels")
   cmd2 = r"cat *.txt > predictions.txt"
   os.system(cmd2)
+
+  #changes back to pspnet/server-side folder to append predictions.txt to csv file.
   os.chdir(path)
+  read_file = pd.read_csv (r'labels/predictions.txt')
+  read_file.to_csv (r'labels/predictions.csv', index=None)
   
-  os.remove(r'labels/*txt')
-
-  return "success"
+  return open(r"labels/predictions.csv", mode='r')
 #2/27/2023 - Convert text files in predict class to csv...
-
-"""
-  with open(r'\predict\predict.csv', 'w', newline='') as file:
-     writer = csv.writer(file)
-     
-     writer.writerow(["Confidence Interval", "Object ID", "Species"])
-     writer.writerow([confidenceInterval[0], object_id[0], species_id[0]])
-     writer.writerow([confidenceInterval[1], object_id[1], species_id[1]])
-     writer.writerow([confidenceInterval[2], object_id[2], species_id[2]])
-     writer.writerow([confidenceInterval[3], object_id[3], species_id[3]])
-     writer.writerow([confidenceInterval[4], object_id[4], species_id[4]])
-"""

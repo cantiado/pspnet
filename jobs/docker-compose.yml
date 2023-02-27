@@ -1,0 +1,31 @@
+#Docker compose based from https://github.com/RandyDeng/rq-docker-supervisor/blob/master/docker-compose.yml
+version: "3.7"
+services:
+  redis:
+    image: redis:latest
+    expose:
+      - '6379'
+  workers:
+    image: workers
+    build:
+      context: . 
+      dockerfile: workers/Dockerfile
+    volumes:
+      - ./workers:/workers
+    links:
+      - redis
+    depends_on:
+      - redis
+  dashboard:
+    image: dashboard
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+    ports:
+      - '9181:9181'
+    expose:
+      - '9181'
+    links:
+      - redis
+    depends_on:
+      - redis

@@ -1,10 +1,13 @@
 <template>
     <div class="background" @click="closeView">
         <div class="window">
-            <div v-if="img_paths" v-for="path in img_paths" :key="index" class="imgContainer">
-                <!-- <div class="imgHolder"> -->
-                    <img class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm" :src="require(`../assets/${path}`)">
-                <!-- </div> -->
+            <div class="dsName text-2xl font-bold">{{ ds_name }}</div>
+            <div class="imgContainer inline-grid grid-cols-3 gap-3">
+                <div v-if="img_paths" v-for="path in img_paths" :key="index" class="individualImg">
+                    <!-- <div class="imgHolder"> -->
+                        <img class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm" :src="require(`../assets/${path}`)">
+                    <!-- </div> -->
+            </div>
         </div>
         </div>
     </div>
@@ -66,10 +69,16 @@ export default {
     width: 60%;
     height: 60%;
     overflow-y: auto;
-    padding: 15px
+    padding: 15px;
 }
 .imgContainer {
-    display:grid;
-    grid-gap: 10px;
+    display: grid;
+}
+.individualImg {
+    width: auto;
+    position:relative;
+}
+.dsName {
+    margin-bottom: 15px;
 }
 </style>

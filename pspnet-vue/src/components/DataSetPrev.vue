@@ -7,7 +7,7 @@
                 <img class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm" :src="require(`../assets/${img_paths[index-1]}`)">
             </div>
         </div>
-        <div>
+        <div class="details w-48">
             <div> Name: {{ ds_name }}</div>
             <div> # Images: {{ ds_count }}</div>
         </div>
@@ -71,5 +71,9 @@ export default {
     .rectangle .imgHolder {
         width: 150px;
         height: 150px;
+    }
+    .details {
+       align-items: center;
+       margin-top: 15px;
     }
 </style>

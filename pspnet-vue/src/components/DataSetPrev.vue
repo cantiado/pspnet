@@ -16,8 +16,8 @@
 
 <script>
 import UserImg from './UserImg.vue'
-import axios from 'axios';
-import { onMounted } from 'vue';
+// import axios from 'axios';
+// import { onMounted } from 'vue';
 import { ref } from 'vue';
 
 export default {
@@ -25,25 +25,26 @@ export default {
     props: {
             ds_name: String,
             ds_count: Number,
+            img_paths: Array,
             required: true
     },
     setup(props) {
-        const img_paths = ref('')
+        const img_paths = ref(props.img_paths)
         const ds_name = ref(props.ds_name)
         const ds_count = ref(props.ds_count)
         const error = ref('')
         
-        onMounted(async () => {
-            await ds_name.value
-            if (ds_name) {
-                await axios.post('http://127.0.0.1:5000/datasets/',
-                {ds_name: ds_name.value}
-                )
-                .then(response => (
-                    img_paths.value = response.data))
-                .catch(error.value = "Failed to retreive data")
-            }
-        })
+        // onMounted(async () => {
+        //     await ds_name.value
+        //     if (ds_name) {
+        //         await axios.post('http://127.0.0.1:5000/datasets/',
+        //         {ds_name: ds_name.value}
+        //         )
+        //         .then(response => (
+        //             img_paths.value = response.data))
+        //         .catch(error.value = "Failed to retreive data")
+        //     }
+        // })
 
         return { ds_name, ds_count, img_paths }
     },

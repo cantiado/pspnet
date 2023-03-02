@@ -177,13 +177,19 @@ def explore_data():
   #   (SELECT DISTINCT dataset_name FROM image);
   unique_ds = db.session.query(Image.dataset_name).distinct()
   response_data = {}
-  ds_names = []
-  ds_img_counts = []
+  ds_img_paths = []
+  response_data['ds_info'] = {}
   for dataset in unique_ds:
-    img_count = db.session.query(Image.path).filter_by(dataset_name = dataset[0]).count()
-    ds_names.append(dataset[0])
-    ds_img_counts.append(img_count)
-  response_data['ds_info'] = dict(zip(ds_names, ds_img_counts))
+    cleaned_paths = []
+    images = db.session.query(Image.path).filter_by(dataset_name = dataset[0])
+    paths = images[0:4]
+    for img_path in paths:
+      cleaned_paths.append(img_path[0].replace('/src/assets/',''))
+    ds_img_paths.append(cleaned_paths)
+    img_count = images.count()
+    response_data['ds_info'][str(dataset[0])] = {'count': img_count,
+                                              'paths': cleaned_paths,
+                                              'show' : True}
   return jsonify(response_data), 201
 
 @app.route('/datasets/', methods = ['GET', 'POST'])

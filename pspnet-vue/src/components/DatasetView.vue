@@ -3,10 +3,9 @@
         <div class="window">
             <div class="dsName text-2xl font-bold">{{ ds_name }}</div>
             <div class="imgContainer inline-grid grid-cols-3 gap-3">
-                <div v-if="img_paths" v-for="path in img_paths" :key="index" class="individualImg">
-                    <!-- <div class="imgHolder"> -->
-                        <img class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm" :src="require(`../assets/${path}`)">
-                    <!-- </div> -->
+                <div v-if="img_paths" v-for="path in img_paths" class="individualImg">
+                        <img class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm" 
+                        :src="require(`../assets/${path}`)">
             </div>
         </div>
         </div>
@@ -28,20 +27,20 @@ export default {
     },
     setup(props, {emit}) {
         const img_paths = ref([])
-        // const emit = defineEmits(['close'])
         const ds_name = ref(props.ds_name)
+        const error = ref('')
         onMounted(async () => {
-            await axios.post('http://127.0.0.1:5000/datasetview/',
-            {ds_name: ds_name.value}
-            )
-            .then(response => (
-                img_paths.value = response.data,
-                console.log(img_paths.value)))
-            .catch(error.value = "Failed to retreive data")
+            if (ds_name.value) {
+                await axios.post('http://127.0.0.1:5000/datasetview/',
+                {ds_name: ds_name.value}
+                )
+                .then(response => (
+                    img_paths.value = response.data))
+                .catch(error.value = "Failed to retreive data")
+            }
         })
 
         const closeView = () => {
-            console.log("Return to regular explore")
             emit("closeModal", true)
         }
 

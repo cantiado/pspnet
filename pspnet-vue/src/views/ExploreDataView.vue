@@ -60,24 +60,28 @@
                         items-center
                         whitespace-nowrap
                         ">Filters</MenuButton>
-                    <MenuItems class="dropdown">
-                        <!-- Use the `active` state to conditionally style the active item. -->
-                        <MenuItem
-                            v-for="link in links"
-                            :key="link.href"
-                            as="div"
-                            v-slot="active"
-                            class="group flex w-full items-center justify-center rounded-md px-2 py-2 text-sm hover:bg-gray-100"
-                            @click="applyFilter(link.filter)">
-                            {{ link.label }}
-                        </MenuItem>
-                    </MenuItems>
+                    <transition name="fade">
+                        <MenuItems class="dropdown">
+                            <!-- Use the `active` state to conditionally style the active item. -->
+                            <MenuItem
+                                v-for="link in links"
+                                :key="link.href"
+                                as="div"
+                                v-slot="active"
+                                class="group flex w-full items-center justify-center rounded-md px-2 py-2 text-sm hover:bg-gray-100"
+                                @click="applyFilter(link.filter)">
+                                {{ link.label }}
+                            </MenuItem>
+                        </MenuItems>
+                    </transition>
                 </Menu>
             </div>
             <div class="container">
                 <li v-for="(value, index) in filteredData" datasets>
                     <div class="prevBox" @click="openDataset(index)">
-                        <DataSetPrev :ds_name="index" :ds_count="value"/>
+                        <div v-if="value['show']">
+                            <DataSetPrev :ds_name="index" :ds_count="value['count']" :img_paths="value['paths']"/>
+                        </div>
                     </div>
                 </li>
             </div>
@@ -105,14 +109,19 @@ export default {
         const ds_info = ref('')
         const ds_modal = ref('')
         const show_modal = ref(false)
+        const datasets = ref([])
         const links = [
             { filter: 'img l 5', label: 'Fewer than 5 images'},
             { filter: 'img g 5', label: 'Greater than 5 images'},
-            { filter: 'class eq 1', label: 'Single-Class Datasets'}
+            // { filter: 'class eq 1', label: 'Single-Class Datasets'}
         ]
 
         const searchFilter = () => {
-            filteredData.value = Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => k.includes(searchInput.value)))
+            Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => {
+                let condition = k.includes(searchInput.value)
+                if (condition) v['show'] = true
+                else v['show'] = false
+            }))
             console.log(filteredData.value)
         }
 
@@ -120,12 +129,23 @@ export default {
             if (filter == "img l 5") {
                 console.log("Filter datasets with fewer than 5 images")
                 // Adapted from: https://9to5answer.com/how-to-filter-a-dictionary-by-value-in-javascript
-                filteredData.value = Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => v<5));
+                // filteredData.value = Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => v['count']<5));
+                Object.entries(filteredData.value).filter(([k,v]) => {
+                    let condition = v['count']<5
+                    if (condition) v['show'] = true
+                    else v['show'] = false
+                });
+                
+                ds_info.value['Dataset 1']['show'] = false
+                console.log(ds_info.value['Dataset 1']['show'])
             }
             if (filter == "img g 5") {
                 console.log("Filter datasets with greater than 5 images")
                 // Adapted from: https://9to5answer.com/how-to-filter-a-dictionary-by-value-in-javascript
-                filteredData.value = Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => v>5));
+                Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => {
+                    let condition = v['count']>5
+                    if (condition) v['show'] = true
+                }));
             }
             if (filter == "class eq 1") {
                 console.log("Filter datasets with one class")
@@ -153,7 +173,7 @@ export default {
             .catch(error.value = "Failed to retreive data")
     
         })
-        return { ds_info, filteredData, error, active, links, searchInput, applyFilter, searchFilter, openDataset, show_modal, closeDataset, ds_modal }
+        return { ds_info, datasets, filteredData, error, active, links, searchInput, applyFilter, searchFilter, openDataset, show_modal, closeDataset, ds_modal }
     },
     components: {DataSetPrev, DatasetView, Menu, MenuButton, MenuItem, MenuItems}
 }
@@ -175,5 +195,8 @@ export default {
 }
 .dropdown {
     border-color: aquamarine;
+}
+.fade {
+    transition: all 0.5s ease;
 }
 </style>

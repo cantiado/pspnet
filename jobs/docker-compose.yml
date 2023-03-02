@@ -5,26 +5,23 @@ services:
     image: redis:latest
     expose:
       - '6379'
-  workers:
-    image: workers
+  app:
+    image: flask-app
     build:
-      context: . 
-      dockerfile: workers/Dockerfile
+      context: app/
+      dockerfile: Dockerfile
+    expose:
+      - '5000'
+    ports:
+      - '5000:5000'
+    restart: always
+  workers:
+    image: flask-app:latest
+    build:
+      context: workers/
+      dockerfile: Dockerfile
     volumes:
       - ./workers:/workers
-    links:
-      - redis
-    depends_on:
-      - redis
-  dashboard:
-    image: dashboard
-    build:
-      context: .
-      dockerfile: dashboard/Dockerfile
-    ports:
-      - '9181:9181'
-    expose:
-      - '9181'
     links:
       - redis
     depends_on:

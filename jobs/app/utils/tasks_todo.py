@@ -1,5 +1,4 @@
 # Code retrieved from https://www.twilio.com/blog/first-task-rq-redis-python
-from datetime import datetime, timedelta
 import time
 
 def print_task(seconds):
@@ -15,4 +14,5 @@ def print_numbers(seconds):
         print(num)
         time.sleep(1)
     print("Task to print_numbers completed")
+
 

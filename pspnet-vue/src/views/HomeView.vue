@@ -1,5 +1,27 @@
 <template>
-  <link
+  <div class="w-full h-full hero-img">
+    <div class="w-full h-full p-5 backdrop-blur-md flex flex-col gap-10 items-center justify-start">
+      <h1 class="w-fit py-5 text-slate-100 text-6xl font-semibold drop-shadow-lg">
+        Plant and Soil Property Network
+      </h1>
+      <div class="flex flex-row justify-center items-stretch gap-16">
+        <div @click="redirect('/about')" class="w-1/4 p-5 bg-slate-100 rounded-lg border-2 border-slate-200 drop-shadow-lg cursor-pointer hover:bg-slate-200">
+          <h2 class="text-2xl mb-3">About</h2>
+          <p>Learn more about the project</p>
+        </div>
+        <div @click="redirect('/explore')" class="w-1/4 p-5 bg-slate-100 rounded-lg border-2 border-slate-200 drop-shadow-lg cursor-pointer hover:bg-slate-200">
+          <h2 class="text-2xl mb-3">Explore</h2>
+          <p>Check out user-contributed datasets</p>
+        </div>
+        <div @click="redirect('/identify')" class="w-1/4 p-5 bg-slate-100 rounded-lg border-2 border-slate-200 drop-shadow-lg cursor-pointer hover:bg-slate-200">
+          <h2 class="text-2xl mb-3">Identify</h2>
+          <p>Upload images to identify and contibute</p>
+        </div>
+      </div>
+    </div>
+    <!-- <img class="w-full" src="../assets/plant_soil_(Shutterstock).jpg" /> -->
+  </div>
+  <!-- <link
       href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
       rel="stylesheet"
     />
@@ -49,27 +71,31 @@
         </div>
       </div>
     </div>
-  </main>
+  </main> -->
   <!-- add Vue footer -->
 </template>
 
 <script>
-// @ is an alias to /src
+import { useRouter } from 'vue-router';
 
 export default {
   name: 'HomeView',
-  components: {
-  },
+  setup() {
+    const router = useRouter();
+    const redirect = function(path) {
+      router.push(path);
+    }
+    return {redirect}
+  }
 }
 </script>
 
 <style>
-  .mdc-card-container {
-    width: 150px;
-    height: 100px;
-  }
-  .mdc-card {
-    /* height:120px; */
-    padding: 10px;
+  .hero-img {
+    background-image: url("../assets/plant_soil_(Shutterstock).jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position-y: 75%;
+    background-position-x: center;
   }
 </style>

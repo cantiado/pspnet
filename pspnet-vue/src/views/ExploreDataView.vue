@@ -3,6 +3,9 @@
 
 <template>
     <div class="p-10">
+        <div v-if="show_modal">
+            <DatasetView :ds_name="ds_modal" @closeModal="closeDataset"/>
+        </div>
         <div class="grid gap-4">
             <div class="flex-row">
                 <!-- following div component from tailwind elements -->
@@ -73,7 +76,9 @@
             </div>
             <div class="container">
                 <li v-for="(value, index) in filteredData" datasets>
-                    <DataSetPrev :ds_name="index" :ds_count="value"/>
+                    <div class="prevBox" @click="openDataset(index)">
+                        <DataSetPrev :ds_name="index" :ds_count="value"/>
+                    </div>
                 </li>
             </div>
             
@@ -84,6 +89,7 @@
 
 <script>
 import DataSetPrev from '@/components/DataSetPrev.vue';
+import DatasetView from '@/components/DatasetView.vue';
 import axios from 'axios';
 import { onMounted } from 'vue';
 import { ref } from '@vue/reactivity';
@@ -97,8 +103,11 @@ export default {
         const searchInput = ref('')
         const filteredData = ref('')
         const ds_info = ref('')
+        const ds_modal = ref('')
+        const show_modal = ref(false)
         const links = [
             { filter: 'img l 5', label: 'Fewer than 5 images'},
+            { filter: 'img g 5', label: 'Greater than 5 images'},
             { filter: 'class eq 1', label: 'Single-Class Datasets'}
         ]
 
@@ -113,13 +122,28 @@ export default {
                 // Adapted from: https://9to5answer.com/how-to-filter-a-dictionary-by-value-in-javascript
                 filteredData.value = Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => v<5));
             }
+            if (filter == "img g 5") {
+                console.log("Filter datasets with greater than 5 images")
+                // Adapted from: https://9to5answer.com/how-to-filter-a-dictionary-by-value-in-javascript
+                filteredData.value = Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => v>5));
+            }
             if (filter == "class eq 1") {
                 console.log("Filter datasets with one class")
+                console.log(filteredData.value)
             }
+        }
+        
+        const openDataset = (ds_name) => {
+            console.log("Open view for: " + ds_name)
+            show_modal.value = true
+            ds_modal.value = ds_name
+        }
+        const closeDataset = (close) => {
+            show_modal.value = false
         }
 
         onMounted(async () => {
-            axios
+            await axios
             .get('http://127.0.0.1:5000/explore/')
             .then(response => (
                 ds_info.value = response.data['ds_info'],
@@ -129,9 +153,9 @@ export default {
             .catch(error.value = "Failed to retreive data")
     
         })
-        return { ds_info, filteredData, error, active, links, searchInput, applyFilter, searchFilter}
+        return { ds_info, filteredData, error, active, links, searchInput, applyFilter, searchFilter, openDataset, show_modal, closeDataset, ds_modal }
     },
-    components: {DataSetPrev, Menu, MenuButton, MenuItem, MenuItems}
+    components: {DataSetPrev, DatasetView, Menu, MenuButton, MenuItem, MenuItems}
 }
 </script>
 

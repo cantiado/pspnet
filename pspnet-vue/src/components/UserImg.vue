@@ -4,7 +4,6 @@
     <div class="flex flex-wrap justify-center">
         <img class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm" :src="require(`../assets/${imageData}`)">
     </div>
-    <!-- try passing size as a prop -->
     <!-- <div>
         <span>"Un/verified"</span>
     </div> -->

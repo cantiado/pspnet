@@ -184,11 +184,19 @@ def explore_data():
     ds_names.append(dataset[0])
     ds_img_counts.append(img_count)
   response_data['ds_info'] = dict(zip(ds_names, ds_img_counts))
-  # response_data['ds_counts'] = ds_img_counts
   return jsonify(response_data), 201
 
 @app.route('/datasets/', methods = ['GET', 'POST'])
 def dataset_prev_data():
+  ds_name = request.get_json()
+  paths = []
+  img_paths = db.session.query(Image.path).filter_by(dataset_name = ds_name['ds_name'])
+  for img_path in img_paths:
+    paths.append(img_path[0].replace('/src/assets/',''))
+  return jsonify(paths), 201
+
+@app.route('/datasetview/', methods = ['GET', 'POST'])
+def dataset_view_data():
   ds_name = request.get_json()
   paths = []
   img_paths = db.session.query(Image.path).filter_by(dataset_name = ds_name['ds_name'])

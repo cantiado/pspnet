@@ -5,15 +5,15 @@
         Plant and Soil Property Network
       </h1>
       <div class="flex flex-row justify-center items-stretch gap-16">
-        <div @click="redirect('/about')" class="w-1/4 p-5 bg-slate-100 rounded-lg border-2 border-slate-200 drop-shadow-lg cursor-pointer hover:bg-slate-200">
+        <div id="home-about-card" @click="redirect('/about')" class="w-1/4 p-5 bg-slate-100 rounded-lg border-2 border-slate-200 drop-shadow-lg cursor-pointer hover:bg-slate-200">
           <h2 class="text-2xl mb-3">About</h2>
           <p>Learn more about the project</p>
         </div>
-        <div @click="redirect('/explore')" class="w-1/4 p-5 bg-slate-100 rounded-lg border-2 border-slate-200 drop-shadow-lg cursor-pointer hover:bg-slate-200">
+        <div id="home-explore-card" @click="redirect('/explore')" class="w-1/4 p-5 bg-slate-100 rounded-lg border-2 border-slate-200 drop-shadow-lg cursor-pointer hover:bg-slate-200">
           <h2 class="text-2xl mb-3">Explore</h2>
           <p>Check out user-contributed datasets</p>
         </div>
-        <div @click="redirect('/identify')" class="w-1/4 p-5 bg-slate-100 rounded-lg border-2 border-slate-200 drop-shadow-lg cursor-pointer hover:bg-slate-200">
+        <div id="home-identify-card" @click="redirect('/identify')" class="w-1/4 p-5 bg-slate-100 rounded-lg border-2 border-slate-200 drop-shadow-lg cursor-pointer hover:bg-slate-200">
           <h2 class="text-2xl mb-3">Identify</h2>
           <p>Upload images to identify and contibute</p>
         </div>

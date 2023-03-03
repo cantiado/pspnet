@@ -77,6 +77,7 @@
                 </Menu>
             </div>
             <div class="container">
+                <div v-if="error!=null" class="text-2xl font-bold">{{ error }}</div>
                 <li v-for="(value, index) in filteredData" datasets>
                     <div class="prevBox" @click="openDataset(index)">
                         <div v-if="value['show']">
@@ -102,7 +103,7 @@ import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 export default {
     name : 'ExploreDataView',
     setup() {
-        const error = ref('')
+        const error = ref(null)
         const active = ref(true)
         const searchInput = ref('')
         const filteredData = ref('')
@@ -168,12 +169,15 @@ export default {
             .then(response => (
                 ds_info.value = response.data['ds_info'],
                 filteredData.value = response.data['ds_info'],
-                console.log(response.data)
+                console.log(response.data),
+                error.value=null
                 ))
             .catch(error.value = "Failed to retreive data")
     
         })
-        return { ds_info, datasets, filteredData, error, active, links, searchInput, applyFilter, searchFilter, openDataset, show_modal, closeDataset, ds_modal }
+        return { ds_info, datasets, filteredData, error, active, links,
+                 searchInput, applyFilter, searchFilter, openDataset,
+                 show_modal, closeDataset, ds_modal }
     },
     components: {DataSetPrev, DatasetView, Menu, MenuButton, MenuItem, MenuItems}
 }

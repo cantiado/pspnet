@@ -6,4 +6,11 @@ module.exports = defineConfig({
       // implement node event listeners here
     },
   },
+
+  component: {
+    devServer: {
+      framework: "vue-cli",
+      bundler: "webpack",
+    },
+  },
 });

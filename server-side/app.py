@@ -37,7 +37,7 @@ class User(db.Model):
     self.password = bcrypt.generate_password_hash(password, 10)
 
 class Image(db.Model):
-  image_id = db.Column(db.String[20], primary_key=True)
+  id = db.Column(db.Integer, primary_key=True)
   path = db.Column(db.String[40], nullable=False)
   uploader_id = db.Column(db.Integer, nullable=False)
   label = db.Column(db.String[30], nullable=True)
@@ -47,9 +47,8 @@ class Image(db.Model):
   upload_id = db.Column(db.Integer, nullable=False)
   dataset_name = db.Column(db.String[20], nullable=True)
 
-  def __init__(self, image_id, path, uploader_id, upload_id, dataset_name,
+  def __init__(self, path, uploader_id, upload_id, dataset_name,
                verifier_id=None, label=None, location=None, access=0):
-    self.image_id = image_id
     self.path = path
     self.uploader_id = uploader_id
     self.label = label

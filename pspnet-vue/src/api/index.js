@@ -29,3 +29,7 @@ export async function getExplore(){
 export async function getDatasets(ds_name) {
   return await axios.post(url + 'datasets/')
 }
+
+export async function getDatasetImgs(ds_name) {
+  return await axios.post(url + 'datasetview/')
+}

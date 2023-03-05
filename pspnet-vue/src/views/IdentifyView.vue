@@ -260,7 +260,7 @@
                 </p>
               </div>
 
-              <div class="mt-4 flex flex-row gap-2">
+              <div class="mt-4 flex flex-row gap-2 justify-start">
                 <button
                   type="button"
                   class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
@@ -274,6 +274,74 @@
                   @click="reset"
                 >
                   New dataset
+                </button>
+              </div>
+            </DialogPanel>
+          </TransitionChild>
+        </div>
+      </div>
+    </Dialog>
+  </TransitionRoot>
+  <TransitionRoot appear :show="!store.isAuthenticated()" as="template">
+    <Dialog
+      as="div"
+      @close="() => {router.push({name: 'login'})}"
+      class="relative z-10"
+    >
+      <TransitionChild
+        as="template"
+        enter="duration-300 ease-out"
+        enter-from="opacity-0"
+        enter-to="opacity-100"
+        leave="duration-200 ease-in"
+        leave-from="opacity-100"
+        leave-to="opacity-0"
+      >
+        <div class="fixed inset-0 bg-black bg-opacity-25" />
+      </TransitionChild>
+
+      <div class="fixed inset-0 overflow-y-auto">
+        <div
+          class="flex min-h-full items-center justify-center p-4 text-center"
+        >
+          <TransitionChild
+            as="template"
+            enter="duration-300 ease-out"
+            enter-from="opacity-0 scale-95"
+            enter-to="opacity-100 scale-100"
+            leave="duration-200 ease-in"
+            leave-from="opacity-100 scale-100"
+            leave-to="opacity-0 scale-95"
+          >
+            <DialogPanel
+              class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+            >
+              <DialogTitle
+                as="h3"
+                class="text-lg font-medium leading-6 text-gray-900"
+              >
+                Identification for registered users only!
+              </DialogTitle>
+              <div class="mt-2">
+                <p class="text-sm text-gray-500">
+                  Before you can upload images to identify, you must first log in to your account. If you are not a registered user, you can create an account today!
+                </p>
+              </div>
+
+              <div class="mt-4 flex flex-row gap-2 justify-start">
+                <button
+                  type="button"
+                  class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  @click="() => {router.push({name: 'login'})}"
+                >
+                  Login
+                </button>
+                <button
+                  type="button"
+                  class="text-xs font-normal px-4 py-2 rounded-md hover:bg-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
+                  @click="() => {router.push({name: 'register'})}"
+                >
+                  Create account
                 </button>
               </div>
             </DialogPanel>
@@ -303,6 +371,8 @@ import {
 import { ChevronDownIcon } from "@heroicons/vue/20/solid";
 import ImageCard from "../components/ImageCard.vue";
 import FileList from "../components/FileList.vue";
+import { authStore } from "../store/authenticate";
+import { useRouter } from "vue-router";
 
 var id = 0;
 
@@ -338,7 +408,9 @@ export default {
       visibility: "",
       successfulSubmit: false,
       errorMsg: "",
-      loading: false
+      loading: false,
+      store: authStore(),
+      router: useRouter()
     };
   },
   computed: {},

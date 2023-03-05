@@ -2,9 +2,9 @@
   <div class="flex flex-col  h-screen">
     <nav class="flex justify-start bg-plant h-24 items-center">
       <router-link class = "mx-2" :to="{name: 'home'}">PSPNet</router-link> 
-      <router-link v-if="currentRoute != 'login' && currentRoute != 'register'" class = "mx-2" :to="{name: 'identify'}">Identify</router-link>
       <router-link v-if="currentRoute != 'login' && currentRoute != 'register'" class = "mx-2" :to="{name: 'about'}">About</router-link> 
       <router-link v-if="currentRoute != 'login' && currentRoute != 'register'" class = "mx-2" :to="{name: 'explore'}">Explore</router-link> 
+      <router-link v-if="currentRoute != 'login' && currentRoute != 'register'" class = "mx-2" :to="{name: 'identify'}">Identify</router-link>
       <div v-if="!((currentRoute === 'login') || (currentRoute === 'register'))" class="grow flex justify-end">
         <button v-if="!store.isAuthenticated()" @click="toLogin" type="button" class="btn bg-gray-50 rounded-md">Login</button>
         <ProfileIcon v-else/>

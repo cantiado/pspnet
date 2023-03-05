@@ -14,7 +14,7 @@
         leave-from-class="transform scale-100 opacity-100"
         leave-to-class="transform scale-95 opacity-0"
     >
-      <MenuItems class="dropdown">
+      <MenuItems class="dropdown z-10">
 
         <MenuItem v-for="routeName in routeNames" :key="routeName">
           <button class="group flex w-full items-center justify-center rounded-md px-2 py-2 text-sm hover:bg-gray-100" @click="goRoute(routeName)">{{routeName}}</button>

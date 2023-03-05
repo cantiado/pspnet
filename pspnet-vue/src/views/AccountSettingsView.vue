@@ -37,6 +37,7 @@ import { authStore } from '@/store/authenticate'
 import { onMounted } from '@vue/runtime-core'
 import { nextTick } from 'vue'
 import { update_user_settings } from '@/helpers'
+import { useRouter } from 'vue-router'
 
 export default {
   name : 'AccountSettingsView',
@@ -91,6 +92,13 @@ export default {
     }
 
     return { name, email, role, toggleNewEmail, toggleNewName, toggleName, toggleEmail, commitChange, nameInput, emailInput, error_msg}
+  },
+  beforeMount() {
+    const store = authStore();
+    if (!store.isAuthenticated()) {
+      const router = useRouter();
+      router.push({name: 'login'})
+    }
   }
 }
 </script>

@@ -37,7 +37,7 @@ import { ref } from '@vue/reactivity'
 import { authStore } from '@/store/authenticate'
 import { onMounted } from '@vue/runtime-core'
 import axios from 'axios'
-
+import { useRouter } from 'vue-router'
 
 export default {
   name : 'ProfileView',
@@ -78,7 +78,14 @@ export default {
     })
     return { name, error, info, num_images, img_data, create_date, role }
   },
-  components: {UserImg}
+  components: {UserImg},
+  beforeMount() {
+    const store = authStore()
+    if (!store.isAuthenticated()) {
+      const router = useRouter()
+      router.push({name: 'login'})
+    }
+  }
 }
 </script>
 

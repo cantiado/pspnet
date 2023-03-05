@@ -43,7 +43,7 @@ export default {
   setup(){
     const routeNames = [
       'Settings',
-      'Gallary'
+      'Profile'
     ]
 
     const router = useRouter()
@@ -52,7 +52,7 @@ export default {
     }
     const handleLogout = () => {
       localStorage.removeItem('userToken')
-      router.go()
+      router.push( { name : 'home'})
     }
 
     return { routeNames, goRoute, handleLogout}

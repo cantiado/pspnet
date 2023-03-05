@@ -1,0 +1,28 @@
+#Docker compose based from https://github.com/RandyDeng/rq-docker-supervisor/blob/master/docker-compose.yml
+version: "3.7"
+services:
+  redis:
+    image: redis:latest
+    expose:
+      - '6379'
+  app:
+    image: flask-app
+    build:
+      context: app/
+      dockerfile: Dockerfile
+    expose:
+      - '5000'
+    ports:
+      - '5000:5000'
+    restart: always
+  workers:
+    image: flask-app:latest
+    build:
+      context: workers/
+      dockerfile: Dockerfile
+    volumes:
+      - ./workers:/workers
+    links:
+      - redis
+    depends_on:
+      - redis

@@ -1,22 +1,28 @@
-from flask import Flask, request
-
-app = Flask(__name__)
-
-image_folder = "images"
 import os
 import sys
 import pandas as pd
 from pathlib import Path
+from flask import Flask, request
+from flask_sqlalchemy import SQLAlchemy
+from app import Image
 
-@app.route("/")
-def hello_world():
-  return "<h1>Hello world<h1>"
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
+db = SQLAlchemy(app)
+db.init_app(app)
+
+
+image_folder = "images"
 
 @app.route("/identify", methods=["POST"])
 def identify():
   files = request.files.to_dict(flat=False)["image-input"]
   for i, file in enumerate(files):
     file.save(os.path.join(image_folder, file.filename))
+    new_image = Image(os.path.join(image_folder, file.filename), 0, 0, "test")
+    db.session.add(new_image)
+    db.session.commit()
+    # save file paths to image database
 
   #commands here give global environment path to project for deployment on any machine
   FILE = Path(__file__).resolve()
@@ -42,3 +48,6 @@ def identify():
   
   return open(r"labels/predictions.csv", mode='r')
 #2/27/2023 - Convert text files in predict class to csv...
+
+if __name__ == "__main__":
+  app.run(port=5001, debug=True)

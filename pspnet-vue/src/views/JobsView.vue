@@ -22,22 +22,26 @@
           <span>{{ job.eta }}</span>
         </button>
         <div
+          class="flex flex-row justify-start gap-5"
           :class="{ hidden: selectedCurrentJob != job.id }"
-          class="p-3 gap-2 border-t flex flex-col items-start bg-slate-50"
         >
-          <span>Sumbitted: {{ job.start }}</span>
-          <div class="flex flex-row gap-5">
-            <span>Images: {{ job.numImages }}</span>
-            <span>Model: {{ job.model }}</span>
-            <span>Visibility: {{ job.visibility }}</span>
-            <span
-              >Geolocation:
-              {{ job.datasetGeoloc ? job.datasetGeoloc : "None" }}</span
-            >
+          <div class="p-3 gap-2 border-t flex flex-col items-start bg-slate-50">
+            <span>Sumbitted: {{ job.start }}</span>
+            <div class="flex flex-row gap-5">
+              <span>Images: {{ job.numImages }}</span>
+              <span>Model: {{ job.model }}</span>
+              <span>Visibility: {{ job.visibility }}</span>
+              <span
+                >Geolocation:
+                {{ job.datasetGeoloc ? job.datasetGeoloc : "None" }}</span
+              >
+            </div>
+            <p class="text-justify">
+              Additional Notes:
+              {{ job.datasetNotes ? job.datasetNotes : "None" }}
+            </p>
           </div>
-          <p class="text-justify">
-            Additional Notes: {{ job.datasetNotes ? job.datasetNotes : "None" }}
-          </p>
+          <button class="border bg-green-200 my-5">Download</button>
         </div>
       </div>
     </div>
@@ -177,15 +181,15 @@ export default {
   },
   mounted() {
     this.currentJobs.sort((jobA, jobB) => {
-      if (jobA.start < jobB.start) return -1
-      if (jobA.start > jobB.start) return 1
-      return 0
-    })
+      if (jobA.start < jobB.start) return -1;
+      if (jobA.start > jobB.start) return 1;
+      return 0;
+    });
     this.completedJobs.sort((jobA, jobB) => {
-      if (jobA.end < jobB.end) return 1
-      if (jobA.end > jobB.end) return -1
-      return 0
-    })
+      if (jobA.end < jobB.end) return 1;
+      if (jobA.end > jobB.end) return -1;
+      return 0;
+    });
   },
   methods: {
     setCurrentJob(id) {

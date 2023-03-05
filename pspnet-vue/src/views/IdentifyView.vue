@@ -38,6 +38,7 @@
         multiple
       />
       <FileList
+        id="file-list"
         :files="files"
         @destroy="(fileId) => deleteFile(fileId)"
         class="mt-3"
@@ -82,7 +83,7 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           />
         </div>
-        <RadioGroup v-model="visibility">
+        <RadioGroup id="radio-visibility" v-model="visibility">
           <RadioGroupLabel class="sr-only">Dataset visibility</RadioGroupLabel>
           <div class="grid grid-cols-3 border-2">
             <RadioGroupOption v-slot="{ checked }" value="public">
@@ -131,6 +132,7 @@
         <Menu as="div" class="relative inline-block">
           <div class="flex flex-row gap-4 text-right items-center">
             <MenuButton
+              id="menu-button-model"
               class="inline-flex w-full justify-end rounded-md bg-gray-200 px-4 py-2 font-medium hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-opacity-75"
             >
               <span class="flex w-full justify-center">
@@ -168,6 +170,7 @@
           </transition>
         </Menu>
         <button
+          id="button-identify"
           @click="postImages"
           class="py-1 min-w-max p-1 rounded-full"
           :class="
@@ -189,7 +192,7 @@
         </button>
       </div>
     </div>
-    <div class="basis-2/3 p-5">
+    <div id="image-gallery" class="basis-2/3 p-5">
       <div
         v-if="uploadedImages"
         class="h-full grid grid-cols-3 gap-4 p-1 overflow-auto auto-rows-max border-4"
@@ -397,7 +400,7 @@ export default {
       imageInput.files = newFileList.files;
     },
     postImages() {
-      const url = "http://127.0.0.1:5000/identify";
+      const url = "http://127.0.0.1:5001/identify";
       const imageInput = document.getElementById("image-input");
       const images = new FormData();
       for (const image of imageInput.files) {
@@ -423,6 +426,7 @@ export default {
       this.uploadedImages = false;
       this.selectedModel = "";
       this.files = {};
+      this.modifyFileList()
       this.datasetName = "";
       this.datasetNotes = "";
       this.datasetGeoloc = "";

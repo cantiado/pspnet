@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
+from flask_migrate import Migrate
 from functools import wraps
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 import jwt
@@ -10,11 +11,13 @@ import datetime
 
 
 app = Flask(__name__)
+app.app_context().push()
 bcrypt = Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
 app.config['SECRET_KEY'] = '95fd1e474cbc4b49a3286dc09cba7510'
 CORS(app, resources={r"/*":{'origins':"*"}})
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 db.init_app(app)
 
@@ -24,6 +27,8 @@ class User(db.Model):
   lastname = db.Column(db.String(20), nullable=False)
   email = db.Column(db.String(20), unique=True, nullable=False)
   password = db.Column(db.String(255), nullable=False)
+  role = db.Column(db.String(20), default = "researcher")
+  #NOTE user role is set by an administrator. 
 
   def __init__(self, firstname, lastname, email, password):
     self.firstname = firstname
@@ -31,11 +36,37 @@ class User(db.Model):
     self.email = email
     self.password = bcrypt.generate_password_hash(password, 10)
 
-#The following code was used to add a single test element to the user DB
-#testUser = User(userID=2, firstname="Andrew", lastname="Ramirez", email="andrewramirez@unr.edu", password="1041131")
-#with app.app_context():
-#  db.session.add(testUser)
-#  db.session.commit()
+class Image(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  path = db.Column(db.String[40], nullable=False)
+  uploader_id = db.Column(db.Integer, nullable=False)
+  label = db.Column(db.String[30], nullable=True)
+  access = db.Column(db.Integer, nullable=False)
+  location = db.Column(db.String[30], nullable=True)
+  verifier_id = db.Column(db.Integer, nullable=True)
+  upload_id = db.Column(db.Integer, nullable=False)
+  dataset_name = db.Column(db.String[20], nullable=True)
+
+  def __init__(self, path, uploader_id, upload_id, dataset_name,
+               verifier_id=None, label=None, location=None, access=0):
+    self.path = path
+    self.uploader_id = uploader_id
+    self.label = label
+    self.access = access
+    self.location = location
+    self.verifier_id = verifier_id
+    self.upload_id = upload_id
+    self.dataset_name = dataset_name
+
+
+class Dataset(db.Model):
+  dataset_name = db.Column(db.String[30], primary_key=True)
+  project_name = db.Column(db.String[40], nullable=True)
+  
+  def __init__(self, dataset_name, project_name=None):
+    self.dataset_name = dataset_name
+    self.project_name = project_name
+
 
 #creates wrapper function for routes that require authorized tokens. 
 #code adapted from blog post https://stackabuse.com/single-page-apps-with-vue-js-and-flask-jwt-authentication/
@@ -54,7 +85,7 @@ def token_required(f):
     }
     try:
       data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-      user = User.query.filter_by(email=data['sub']).first()
+      user = User.query.filter_by(id=data['sub']).first()
       if not user:
         raise RuntimeError('User not found')
       return f(user, *args, **kwargs)
@@ -81,7 +112,7 @@ def login():
         return jsonify(invalid_msg), 401
       else:
         token = jwt.encode({
-          'sub' : testUser.email,
+          'sub' : testUser.id,
           'iat' : datetime.datetime.utcnow(),
           'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
           app.config['SECRET_KEY'])
@@ -108,8 +139,75 @@ def userdata(user):
   return {
     'name' : user.firstname + " " + user.lastname,
     'email' : user.email,
+    'role' : user.role,
+    'id' : user.id,
   }, 201
+
+#route to update information from account settings page
+@app.route('/settings/', methods = ['PUT'])
+@token_required
+def updateUser(user):
+  user_data = request.get_json()
+  user.email = user_data.get('email')
+  user.firstname = user_data.get('firstname')
+  user.lastname = user_data.get('lastname')
+  db.session.commit()
+  return { 'status' : 'good' } , 201
+
+@app.route('/profile/', methods = ['GET', 'POST'])
+def profile():
+  response_data = {}
+  user_id = request.get_json()['id']
+  all_img = db.session.query(Image.upload_id).filter_by(uploader_id=user_id)
+  unique_upload = all_img.distinct().all()
+  img_data = {}
+  for unique_upload_id in unique_upload:
+    result = (db.session.query(Image.path).filter_by(upload_id=unique_upload_id[0]).all())  
+    for path in result:
+      adjusted_path = str(path[0].replace('/src/assets/',''))
+    img_data[str(unique_upload_id[0])] = adjusted_path
+  response_data['img_count'] = all_img.count()
+  response_data['img_data'] = img_data
+  return jsonify(response_data), 201
+
+@app.route('/explore/', methods=['GET'])
+def explore_data():
+  # SELECT COUNT(*) FROM image WHERE dataset_name = 
+  #   (SELECT DISTINCT dataset_name FROM image);
+  unique_ds = db.session.query(Image.dataset_name).distinct()
+  response_data = {}
+  ds_img_paths = []
+  response_data['ds_info'] = {}
+  for dataset in unique_ds:
+    cleaned_paths = []
+    images = db.session.query(Image.path).filter_by(dataset_name = dataset[0])
+    paths = images[0:4]
+    for img_path in paths:
+      cleaned_paths.append(img_path[0].replace('/src/assets/',''))
+    ds_img_paths.append(cleaned_paths)
+    img_count = images.count()
+    response_data['ds_info'][str(dataset[0])] = {'count': img_count,
+                                              'paths': cleaned_paths,
+                                              'show' : True}
+  return jsonify(response_data), 201
+
+@app.route('/datasets/', methods = ['GET', 'POST'])
+def dataset_prev_data():
+  ds_name = request.get_json()
+  paths = []
+  img_paths = db.session.query(Image.path).filter_by(dataset_name = ds_name['ds_name'])
+  for img_path in img_paths:
+    paths.append(img_path[0].replace('/src/assets/',''))
+  return jsonify(paths), 201
+
+@app.route('/datasetview/', methods = ['GET', 'POST'])
+def dataset_view_data():
+  ds_name = request.get_json()
+  paths = []
+  img_paths = db.session.query(Image.path).filter_by(dataset_name = ds_name['ds_name'])
+  for img_path in img_paths:
+    paths.append(img_path[0].replace('/src/assets/',''))
+  return jsonify(paths), 201
 
 if __name__ == "__main__":
   app.run(debug=True)
-    

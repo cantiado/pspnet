@@ -174,13 +174,13 @@
           @click="postImages"
           class="py-1 min-w-max p-1 rounded-full"
           :class="
-            !uploadedImages || !datasetName || !visibility || !selectedModel
+            !uploadedImages || !datasetName || !visibility || !selectedModel || loading
               ? 'bg-gray-200'
               : 'bg-green-300 hover:bg-green-200'
           "
-          :disabled="!uploadedImages || !selectedModel"
+          :disabled="!uploadedImages || !selectedModel || loading"
         >
-          <span class="m-3 text-xl font-bold">Identify</span>
+          <span class="m-3 text-xl font-bold">{{loading ? "Submitting..." : "Identify"}}</span>
         </button>
       </div>
       <div class="mt-10 flex justify-center items-center">
@@ -338,6 +338,7 @@ export default {
       visibility: "",
       successfulSubmit: false,
       errorMsg: "",
+      loading: false
     };
   },
   computed: {},
@@ -400,6 +401,7 @@ export default {
       imageInput.files = newFileList.files;
     },
     postImages() {
+      this.loading = true
       const url = "http://127.0.0.1:5001/identify";
       const imageInput = document.getElementById("image-input");
       const images = new FormData();
@@ -420,6 +422,9 @@ export default {
         .catch((err) => {
           console.log(err);
           this.errorMsg = "An error occured when submitting. Try again.";
+        })
+        .finally(() => {
+          this.loading = false
         });
     },
     reset() {

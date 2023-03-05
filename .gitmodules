@@ -1,3 +1,0 @@
-[submodule "server-side/yolov5"]
-	path = server-side/yolov5
-	url = https://github.com/ultralytics/yolov5.git

@@ -42,8 +42,9 @@ export default {
   },
   setup(){
     const routeNames = [
-      'Settings',
-      'Profile'
+      'Profile',
+      'Jobs',
+      'Settings'
     ]
 
     const router = useRouter()

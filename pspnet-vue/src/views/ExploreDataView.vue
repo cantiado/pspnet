@@ -81,9 +81,12 @@
                 <li v-for="(value, index) in filteredData" datasets>
                     <div class="prevBox" @click="openDataset(index)">
                         <div v-if="value['show']">
-                            <DataSetPrev :ds_name="index" :ds_count="value['count']" :img_paths="value['paths']"/>
+                            <!-- <DataSetPrev :ds_name="index" :ds_count="value['count']" :img_paths="value['paths']"/> -->
                         </div>
                     </div>
+                </li>
+                <li v-for="(image,index) in image_urls" :key="index">
+                    <img :src="image"/>
                 </li>
             </div>
             
@@ -111,6 +114,9 @@ export default {
         const ds_modal = ref('')
         const show_modal = ref(false)
         const datasets = ref([])
+        const images = ref([])
+        const image_urls = ref([])
+        
         const links = [
             { filter: 'img l 5', label: 'Fewer than 5 images'},
             { filter: 'img g 5', label: 'Greater than 5 images'},
@@ -163,12 +169,42 @@ export default {
             show_modal.value = false
         }
 
+        const getImgURL = (imgBytes) => {
+            for (var i = 0; i < imgBytes.length; i++) {
+                image_urls.value.push(URL.createObjectURL(b64toBlob(imgBytes[i])))
+            }
+        }
+
+        // Following function adapted from:
+        // https://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
+        const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
+            const byteCharacters = atob(b64Data);
+            const byteArrays = [];
+
+            for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+                const byteNumbers = new Array(slice.length);
+                for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+                }
+
+                const byteArray = new Uint8Array(byteNumbers);
+                byteArrays.push(byteArray);
+            }
+
+            const blob = new Blob(byteArrays, {type: contentType});
+            return blob;
+        }
+
         onMounted(async () => {
             await axios
             .get('http://127.0.0.1:5000/explore/')
             .then(response => (
                 ds_info.value = response.data['ds_info'],
                 filteredData.value = response.data['ds_info'],
+                images.value = response.data['images'],
+                getImgURL(images.value),
                 console.log(response.data),
                 error.value=null
                 ))
@@ -177,9 +213,10 @@ export default {
         })
         return { ds_info, datasets, filteredData, error, active, links,
                  searchInput, applyFilter, searchFilter, openDataset,
-                 show_modal, closeDataset, ds_modal }
+                 show_modal, closeDataset, ds_modal, image_urls }
     },
-    components: {DataSetPrev, DatasetView, Menu, MenuButton, MenuItem, MenuItems}
+    components: { DataSetPrev, DatasetView, Menu, MenuButton, MenuItem, 
+                  MenuItems}
 }
 </script>
 

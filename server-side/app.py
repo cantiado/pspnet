@@ -8,6 +8,10 @@ from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 import jwt
 import datetime
 
+import io
+from base64 import encodebytes
+import PIL.Image as pimg
+
 
 
 app = Flask(__name__)
@@ -179,23 +183,24 @@ def profile():
 
 @app.route('/explore/', methods=['GET'])
 def explore_data():
-  # SELECT COUNT(*) FROM image WHERE dataset_name = 
-  #   (SELECT DISTINCT dataset_name FROM image);
-  unique_ds = db.session.query(Image.dataset_name).distinct()
+  unique_ds = db.session.query(Dataset.dataset_name).all()
   response_data = {}
   ds_img_paths = []
+  encoded_imgs = []
   response_data['ds_info'] = {}
   for dataset in unique_ds:
     cleaned_paths = []
     images = db.session.query(Image.path).filter_by(dataset_name = dataset[0])
     paths = images[0:4]
     for img_path in paths:
+      encoded_imgs.append(img_from_path(img_path[0]))
       cleaned_paths.append(img_path[0].replace('/src/assets/',''))
     ds_img_paths.append(cleaned_paths)
     img_count = images.count()
     response_data['ds_info'][str(dataset[0])] = {'count': img_count,
                                               'paths': cleaned_paths,
                                               'show' : True}
+    response_data['images'] = encoded_imgs
   return jsonify(response_data), 201
 
 @app.route('/datasets/', methods = ['GET', 'POST'])
@@ -215,6 +220,13 @@ def dataset_view_data():
   for img_path in img_paths:
     paths.append(img_path[0].replace('/src/assets/',''))
   return jsonify(paths), 201
+
+def img_from_path(image_path):
+  pillow_img = pimg.open(image_path, mode='r')
+  byte_array = io.BytesIO()
+  pillow_img.save(byte_array, format='JPEG')
+  encoded_img = encodebytes(byte_array.getvalue()).decode('ascii')
+  return encoded_img
 
 if __name__ == "__main__":
   app.run(debug=True)

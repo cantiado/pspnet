@@ -61,11 +61,18 @@ class Image(db.Model):
 
 class Dataset(db.Model):
   dataset_name = db.Column(db.String[30], primary_key=True)
-  project_name = db.Column(db.String[40], nullable=True)
+  dataset_description = db.Column(db.String[40], nullable=True)
   
-  def __init__(self, dataset_name, project_name=None):
+  def __init__(self, dataset_name, dataset_description=None) -> None:
     self.dataset_name = dataset_name
-    self.project_name = project_name
+    self.project_name = dataset_description
+
+class Upload(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  uploader_id = db.Column(db.Integer, nullable=False)
+
+  def __init__(self, uploader_id) -> None:
+    self.uploader_id = uploader_id
 
 
 #creates wrapper function for routes that require authorized tokens. 

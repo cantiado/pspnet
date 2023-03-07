@@ -30,10 +30,15 @@ export async function getDatasets(ds_name) {
   return await axios.post(url + 'datasets/')
 }
 
+<<<<<<< HEAD
 export function sendEmail(userEmail){
   return axios.post(url + 'forgotpass/', { 'email' : userEmail})
 }
 
 export function resetPass(userData, jwt){
   return axios.post(url + 'changePass/', userData, {headers : {token : jwt}})
+=======
+export async function getDatasetImgs(ds_name) {
+  return await axios.post(url + 'datasetview/')
+>>>>>>> main
 }

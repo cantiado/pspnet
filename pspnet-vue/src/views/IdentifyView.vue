@@ -400,7 +400,7 @@ export default {
       imageInput.files = newFileList.files;
     },
     postImages() {
-      const url = "http://127.0.0.1:5000/identify";
+      const url = "http://127.0.0.1:5001/identify";
       const imageInput = document.getElementById("image-input");
       const images = new FormData();
       for (const image of imageInput.files) {

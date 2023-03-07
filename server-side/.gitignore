@@ -1,3 +1,6 @@
 __pycache__
 *.pyc
 /images
+/instance
+/instance/*.db
+/labels

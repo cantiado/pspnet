@@ -1,60 +1,69 @@
+import os
+import csv
+import sys
+import pandas as pd
+from pathlib import Path
 from flask import Flask, request
+from flask_sqlalchemy import SQLAlchemy
+from app import Image
+from app import Dataset
+from app import Upload
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
+db = SQLAlchemy(app)
+db.init_app(app)
+
 
 image_folder = "images"
-import os
-import json
-import csv
-
-@app.route("/")
-def hello_world():
-  return "<h1>Hello world<h1>"
 
 @app.route("/identify", methods=["POST"])
 def identify():
-  print("here!")
   files = request.files.to_dict(flat=False)["image-input"]
-  for i, file in enumerate(files):
-    file.save(os.path.join(image_folder, file.filename))
-
-  cmd = r'python \yolov5\classify\predict.py --weights \yolov5\best.onnx --save-txt --source \images --img 640'
-  os.system(cmd)
+  user_id = 0
+  dataset_name = "test"
+  # dataset_description = None
+  # new_dataset = Dataset(dataset_name, dataset_description)
+  # db.session.add(new_dataset)
+  new_upload = Upload(0)
+  db.session.add(new_upload)
+  db.session.commit()
+  job_id = db.session.query(Upload.id).order_by(Upload.id.desc()).first()[0]
   
-  #opens and saves json file data format to variable
-  with open(r"plantnet300K_species_id_2_name.json") as json_file:
-    data = json.load(json_file)
-  json_file.close()
+  for i, file in enumerate(files):
+    job_folder = os.path.join(image_folder, str(job_id)) 
+    os.makedirs(job_folder)
+    file.save(os.path.join(job_folder, file.filename))
+    new_image = Image(os.path.join(job_folder, file.filename), user_id, job_id, dataset_name)
+    db.session.add(new_image)
+    db.session.commit()
+    # save file paths to image database
+
+  #commands here give global environment path to project for deployment on any machine
+  FILE = Path(__file__).resolve()
+  path = FILE.parents[0]
+  os.chdir(path)
+  print("Predicting...")
+  cmd = r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + r' --img 640'
+  os.system(cmd)
 
   #Declare string variables, append with new information from inference txt, print out
   confidenceInterval = []
   object_id = []
   species_id = []
-  
-  #After predicting images, need list of txt outputs... uses single hard coded output for testing
-  with open(r'\yolov5\runs\predict-cls\exp\labels\65e9dc873ad002330d91abbae2d5dd2d7b41d8be.txt','r') as f:
-    for line in f:
-        for word in line.split():
-            temp = word
-            temp = float(temp)
-            if temp <= 1:
-                confidenceInterval.append(word)
-            for key, value in data.items():
-                if word == key:
-                    object_id.append(word)
-                    species_id.append(value)
-  f.close()
 
-#prediction saved to \prediction\predict.csv
-#need to append txt file outputs to one save file and interate through it
-  with open(r'\predict\predict.csv', 'w', newline='') as file:
-     writer = csv.writer(file)
-     
-     writer.writerow(["Confidence Interval", "Object ID", "Species"])
-     writer.writerow([confidenceInterval[0], object_id[0], species_id[0]])
-     writer.writerow([confidenceInterval[1], object_id[1], species_id[1]])
-     writer.writerow([confidenceInterval[2], object_id[2], species_id[2]])
-     writer.writerow([confidenceInterval[3], object_id[3], species_id[3]])
-     writer.writerow([confidenceInterval[4], object_id[4], species_id[4]])
+  #this command is used to concatenate all txt files in the labels directory after prediciton is made
+  os.chdir("labels")
+  cmd2 = r"cat *.txt > predictions.txt"
+  os.system(cmd2)
 
-  return "success"
+  #changes back to pspnet/server-side folder to append predictions.txt to csv file.
+  os.chdir(path)
+  read_file = pd.read_csv (r'labels/predictions.txt')
+  read_file.to_csv (r'labels/predictions.csv', index=None)
+
+  return open(r"labels/predictions.csv", mode='r')
+#2/27/2023 - Convert text files in predict class to csv...
+
+if __name__ == "__main__":
+  app.run(port=5001, debug=True)

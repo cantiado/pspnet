@@ -54,7 +54,7 @@ class User(db.Model):
     self.password = bcrypt.generate_password_hash(password, 10)
 
 class Image(db.Model):
-  image_id = db.Column(db.String[20], primary_key=True)
+  id = db.Column(db.Integer, primary_key=True)
   path = db.Column(db.String[40], nullable=False)
   uploader_id = db.Column(db.Integer, nullable=False)
   label = db.Column(db.String[30], nullable=True)
@@ -64,9 +64,8 @@ class Image(db.Model):
   upload_id = db.Column(db.Integer, nullable=False)
   dataset_name = db.Column(db.String[20], nullable=True)
 
-  def __init__(self, image_id, path, uploader_id, upload_id, dataset_name,
+  def __init__(self, path, uploader_id, upload_id, dataset_name,
                verifier_id=None, label=None, location=None, access=0):
-    self.image_id = image_id
     self.path = path
     self.uploader_id = uploader_id
     self.label = label
@@ -79,11 +78,18 @@ class Image(db.Model):
 
 class Dataset(db.Model):
   dataset_name = db.Column(db.String[30], primary_key=True)
-  project_name = db.Column(db.String[40], nullable=True)
+  dataset_description = db.Column(db.String[40], nullable=True)
   
-  def __init__(self, dataset_name, project_name=None):
+  def __init__(self, dataset_name, dataset_description=None) -> None:
     self.dataset_name = dataset_name
-    self.project_name = project_name
+    self.project_name = dataset_description
+
+class Upload(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  uploader_id = db.Column(db.Integer, nullable=False)
+
+  def __init__(self, uploader_id) -> None:
+    self.uploader_id = uploader_id
 
 
 #creates wrapper function for routes that require authorized tokens. 
@@ -232,14 +238,19 @@ def explore_data():
   #   (SELECT DISTINCT dataset_name FROM image);
   unique_ds = db.session.query(Image.dataset_name).distinct()
   response_data = {}
-  ds_names = []
-  ds_img_counts = []
+  ds_img_paths = []
+  response_data['ds_info'] = {}
   for dataset in unique_ds:
-    img_count = db.session.query(Image.path).filter_by(dataset_name = dataset[0]).count()
-    ds_names.append(dataset[0])
-    ds_img_counts.append(img_count)
-  response_data['ds_info'] = dict(zip(ds_names, ds_img_counts))
-  # response_data['ds_counts'] = ds_img_counts
+    cleaned_paths = []
+    images = db.session.query(Image.path).filter_by(dataset_name = dataset[0])
+    paths = images[0:4]
+    for img_path in paths:
+      cleaned_paths.append(img_path[0].replace('/src/assets/',''))
+    ds_img_paths.append(cleaned_paths)
+    img_count = images.count()
+    response_data['ds_info'][str(dataset[0])] = {'count': img_count,
+                                              'paths': cleaned_paths,
+                                              'show' : True}
   return jsonify(response_data), 201
 
 @app.route('/datasets/', methods = ['GET', 'POST'])
@@ -251,6 +262,7 @@ def dataset_prev_data():
     paths.append(img_path[0].replace('/src/assets/',''))
   return jsonify(paths), 201
 
+<<<<<<< HEAD
 
 #route responsible for forgot password
 @app.route('/forgotpass/', methods = ['POST'])
@@ -302,6 +314,16 @@ def changePass(user):
 
   return {'message' : 'success'}, 201
   
+=======
+@app.route('/datasetview/', methods = ['GET', 'POST'])
+def dataset_view_data():
+  ds_name = request.get_json()
+  paths = []
+  img_paths = db.session.query(Image.path).filter_by(dataset_name = ds_name['ds_name'])
+  for img_path in img_paths:
+    paths.append(img_path[0].replace('/src/assets/',''))
+  return jsonify(paths), 201
+>>>>>>> main
 
 if __name__ == "__main__":
   app.run(debug=True)

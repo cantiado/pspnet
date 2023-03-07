@@ -29,6 +29,9 @@ export default {
   setup(){
     const store = authStore()
     const router = useRouter()
+    const routeDisableNames = ['login', 'forgot', 'register', 'resetPassword']
+
+
     const toLogin = () => {
       if (store.isAuthenticated()){
       }
@@ -40,7 +43,7 @@ export default {
       return router.currentRoute.value.name
     })
 
-    return { currentRoute, toLogin, store }
+    return { currentRoute, toLogin, store, routeDisableNames}
   }
 }
 </script>

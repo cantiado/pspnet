@@ -1,10 +1,14 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
+from flask_mail import Mail, Message
 from functools import wraps
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+from email_validator import validate_email, EmailNotValidError
+from threading import Thread
+
 import jwt
 import datetime
 
@@ -16,10 +20,23 @@ import PIL.Image as pimg
 
 app = Flask(__name__)
 app.app_context().push()
-bcrypt = Bcrypt(app)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
 app.config['SECRET_KEY'] = '95fd1e474cbc4b49a3286dc09cba7510'
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USERNAME'] = "pspnetcs426@gmail.com"
+app.config['MAIL_PASSWORD'] = "waiccpkrmgjpescr"
+app.config['TESTING'] = False
+
+
 CORS(app, resources={r"/*":{'origins':"*"}})
+
+bcrypt = Bcrypt(app)
+mail = Mail(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -108,10 +125,30 @@ def token_required(f):
     except ExpiredSignatureError:
       return jsonify(expired_msg), 401
     except (InvalidTokenError, Exception) as e:
-      print(e)
+      print(str(e))
       return jsonify(invalid_msg), 401
     
   return authorize
+
+#code adapted form https://dev.to/paurakhsharma/flask-rest-api-part-5-password-reset-2f2e
+def new_thread_email(msg, app):
+  with app.app_context():
+    try:
+      mail.send(msg)
+    except ConnectionRefusedError:
+      print("Mail Servers are not working")
+
+#sends recovery email for forgot password
+def send_email(subject, sender, recipients, text, html):
+  msg = Message()
+  msg.subject = subject
+  msg.sender = sender
+  msg.recipients = recipients
+  msg.body = text
+  msg.html = html
+
+  Thread(target=new_thread_email, args=[msg, app]).start()
+
 
 @app.route('/login/', methods = ['POST'])
 def login():
@@ -120,7 +157,16 @@ def login():
     login_credentials=request.get_json()
     password = login_credentials.get('password')
     email = login_credentials.get('email')
+
+    #validate email address
+    try:
+      validation = validate_email(email, check_deliverability=False)
+      email = validation.email
+    except EmailNotValidError as err:
+      return jsonify({'message' : str(err)}), 401
+
     testUser = User.query.filter_by(email = email).first()
+
     if not testUser:
       return jsonify(invalid_msg), 401
     else:
@@ -141,6 +187,15 @@ def login():
 def register():
   if request.method == 'POST':
     user_data = request.get_json()
+
+    #validate the user email
+    try:
+      email = user_data.get('email')
+      validation = validate_email(email, check_deliverability=True)
+      user_data['email'] = validation.email
+    except EmailNotValidError as err:
+      return jsonify({'message' : str(err)}), 401
+
     newUser = User(**user_data)
     if User.query.filter_by(email = newUser.email).first() is not None:
       return jsonify({'message': 'Email Already in Use.'}), 401
@@ -256,6 +311,58 @@ def img_from_path(image_path):
   pillow_img.save(byte_array, format='JPEG')
   encoded_img = encodebytes(byte_array.getvalue()).decode('ascii')
   return encoded_img
+
+
+#route responsible for forgot password
+@app.route('/forgotpass/', methods = ['POST'])
+def forgot_pass():
+  user_data = request.get_json()
+  email = user_data['email']
+  url = 'http://localhost:8080/reset/'
+
+  #validate email and check if in database
+  try:
+    validation = validate_email(email, check_deliverability=False)
+    email = validation.email
+  except EmailNotValidError as err:
+    return jsonify({'message' : str(err)}), 401
+  user = User.query.filter_by(email = email).first()
+  if not user:
+    return jsonify({'message' : 'No user found with email'}), 401
+
+  #create token for reset password
+  token = jwt.encode({
+    'sub' : user.id,
+    'iat' : datetime.datetime.utcnow(),
+    'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
+    app.config['SECRET_KEY'])
+
+  send_email('PSPNet Password Reset',
+             sender= app.config['MAIL_USERNAME'],
+             recipients= [user.email], 
+             text=render_template('reset_password.txt', url= url + token),
+             html=render_template('reset_password.html', url= url + token))
+  return { 'message' : 'success'}, 201
+
+#user with reset token can reset the password
+@app.route('/changePass/', methods = ['POST'])
+@token_required
+def changePass(user):
+  data = request.get_json()
+  new_password = data.get('new_password')
+  new_hashed = bcrypt.generate_password_hash(new_password, 10)
+  user.password = new_hashed 
+  db.session.commit()
+
+  send_email('PSPNet Password Reset',
+             sender= app.config['MAIL_USERNAME'],
+             recipients= [user.email], 
+             text=render_template('success_password.txt'),
+             html=render_template('success_password.html'))
+  
+
+  return {'message' : 'success'}, 201
+  
 
 if __name__ == "__main__":
   app.run(debug=True)

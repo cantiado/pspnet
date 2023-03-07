@@ -23,9 +23,11 @@ export const authStore = defineStore('authenticate', () => {
   const createUser = async (userData) => {
     try{
       loading_data.value = true
-      await register(userData)
+      const res = await register(userData)
       loading_data.value = false
-      return ''
+      if (res.message == 'success'){
+        return ''
+      }
     }
     catch(err){
       loading_data.value = false

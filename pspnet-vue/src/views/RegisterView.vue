@@ -6,6 +6,7 @@
         <router-link class="underline text-blue-500" :to="{name: 'login'}">Login here</router-link>
       </h2>
       <form class="form" @submit.prevent="handleCreateAccount">
+
         <input v-model="firstname" type="text" placeholder="First Name" class="input" required> 
         <input v-model="lastname" type="text" placeholder="Last Name" class="input" required> 
         <input v-model="email" type="email" placeholder="Email Address" class="input" required> 
@@ -16,6 +17,7 @@
           <button v-else class="button bg-soil text-white hover:bg-pecan disabled:opacity-50 disabled">Creating...</button>
         </div>
       </form>
+
     </div>
   </div>
 </template>
@@ -47,6 +49,7 @@ export default {
         'firstname' : firstname.value,
         'lastname' : lastname.value
       })
+      console.log(error_msg.value)
       if(!error_msg.value){
         router.push({name : 'login'})
       }
@@ -62,6 +65,5 @@ export default {
 .input{
   @apply rounded-md my-2
 }
-
 
 </style>

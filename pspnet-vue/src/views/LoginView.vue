@@ -8,7 +8,9 @@
 
         <label class="label">Password:</label>
         <input v-model="pass" class="input" type="password" required>
-        <router-link class="underline text-blue-500" :to="{name: 'forgot'}">Forgot Password?</router-link>
+        <div class="flex justify-center">
+          <router-link class="underline text-blue-500" :to="{name: 'forgot'}">Forgot Password?</router-link>
+        </div>
 
         <div v-if="error_msg" class="error"> {{error_msg}}</div>
 

@@ -29,3 +29,11 @@ export async function getExplore(){
 export async function getDatasets(ds_name) {
   return await axios.post(url + 'datasets/')
 }
+
+export function sendEmail(userEmail){
+  return axios.post(url + 'forgotpass/', { 'email' : userEmail})
+}
+
+export function resetPass(userData, jwt){
+  return axios.post(url + 'changePass/', userData, {headers : {token : jwt}})
+}

@@ -2,9 +2,9 @@
 
 <template>
     <div class="rectangle">
-        <div v-if="img_paths" v-for="index in 4" :key="index" class="imgContainer">
+        <div v-if="img_paths" v-for="imgPath in img_paths" class="imgContainer">
             <div class="imgHolder">
-                <img class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm" :src="require(`../assets/${img_paths[index-1]}`)">
+                <img class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm" :src="imgPath">
             </div>
         </div>
         <div class="details w-48">

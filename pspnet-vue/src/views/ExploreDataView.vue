@@ -2,11 +2,10 @@
 <!-- Dropdown filter menu adapted from vue headless ui and tailwind-->
 
 <template>
-    <div class="p-10">
+    <div class="viewWindow">
         <div v-if="show_modal">
             <DatasetView :ds_name="ds_modal" @closeModal="closeDataset"/>
         </div>
-        <div class="grid gap-4">
             <div class="flex-row">
                 <!-- following div component from tailwind elements -->
                 <div class="flex justify-center">
@@ -81,17 +80,13 @@
                 <li v-for="(value, index) in filteredData" datasets>
                     <div class="prevBox" @click="openDataset(index)">
                         <div v-if="value['show']">
-                            <!-- <DataSetPrev :ds_name="index" :ds_count="value['count']" :img_paths="value['paths']"/> -->
+                            <DataSetPrev :ds_name="index" :ds_count="value['count']" :img_paths="value['paths']"/>
                         </div>
                     </div>
-                </li>
-                <li v-for="(image,index) in image_urls" :key="index">
-                    <img :src="image"/>
                 </li>
             </div>
             
         </div>
-    </div>
 
 </template>
 
@@ -170,9 +165,18 @@ export default {
         }
 
         const getImgURL = (imgBytes) => {
+            let tempArr = []
             for (var i = 0; i < imgBytes.length; i++) {
-                image_urls.value.push(URL.createObjectURL(b64toBlob(imgBytes[i])))
+                tempArr.push(URL.createObjectURL(b64toBlob(imgBytes[i])))
             }
+            return tempArr
+        }
+
+        const convertByDataset = (images) => {
+            Object.keys(ds_info.value).forEach(function(key, index) {
+                console.log(key + " " + ds_info.value[key]['count']);
+                ds_info.value[key]['paths'] = getImgURL(images[index])
+            });
         }
 
         // Following function adapted from:
@@ -204,7 +208,8 @@ export default {
                 ds_info.value = response.data['ds_info'],
                 filteredData.value = response.data['ds_info'],
                 images.value = response.data['images'],
-                getImgURL(images.value),
+                convertByDataset(images.value),
+                // getImgURL(images.value),
                 console.log(response.data),
                 error.value=null
                 ))
@@ -226,18 +231,28 @@ export default {
     border-radius: 10px;
     gap: 20px;
     display: grid;
-    height: 120%;
     overflow-y: scroll;
     margin: 17px;
     padding: 10px;
+    height:70vh;
+    width:85%;
 }
 .container li {
     list-style-type: none;
+    width: 100%;
+    height:100%;
 }
 .dropdown {
     border-color: aquamarine;
 }
 .fade {
     transition: all 0.5s ease;
+}
+.viewWindow {
+    margin: 25px;
+    margin-top: 15px;
+    height: 75vh;
+    overflow-y: scroll;
+    width:65vw;
 }
 </style>

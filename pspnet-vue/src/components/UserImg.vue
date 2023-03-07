@@ -2,7 +2,7 @@
 
 <template>
     <div class="flex flex-wrap justify-center">
-        <img class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm" :src="require(`../assets/${imageData}`)">
+        <img class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm" :src="imageData">
     </div>
     <!-- <div>
         <span>{{ label }}</span>
@@ -12,7 +12,7 @@
 <script>
 export default {
     props: {
-        src_path: String,
+        imgURL: String,
         required: true
     },
     setup() {
@@ -22,7 +22,7 @@ export default {
     data() {
         return {
             verified_image: false,
-            imageData: this.src_path
+            imageData: this.imgURL
         }
     }
 }

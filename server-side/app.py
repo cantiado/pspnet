@@ -185,22 +185,22 @@ def profile():
 def explore_data():
   unique_ds = db.session.query(Dataset.dataset_name).all()
   response_data = {}
-  ds_img_paths = []
-  encoded_imgs = []
+  combined_encoded = []
   response_data['ds_info'] = {}
   for dataset in unique_ds:
     cleaned_paths = []
+    encoded_imgs = []
     images = db.session.query(Image.path).filter_by(dataset_name = dataset[0])
     paths = images[0:4]
     for img_path in paths:
       encoded_imgs.append(img_from_path(img_path[0]))
       cleaned_paths.append(img_path[0].replace('/src/assets/',''))
-    ds_img_paths.append(cleaned_paths)
+    combined_encoded.append(encoded_imgs)
     img_count = images.count()
     response_data['ds_info'][str(dataset[0])] = {'count': img_count,
-                                              'paths': cleaned_paths,
+                                              'paths': encoded_imgs,
                                               'show' : True}
-    response_data['images'] = encoded_imgs
+    response_data['images'] = combined_encoded
   return jsonify(response_data), 201
 
 @app.route('/datasets/', methods = ['GET', 'POST'])

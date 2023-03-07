@@ -262,7 +262,15 @@ def dataset_prev_data():
     paths.append(img_path[0].replace('/src/assets/',''))
   return jsonify(paths), 201
 
-<<<<<<< HEAD
+@app.route('/datasetview/', methods = ['GET', 'POST'])
+def dataset_view_data():
+  ds_name = request.get_json()
+  paths = []
+  img_paths = db.session.query(Image.path).filter_by(dataset_name = ds_name['ds_name'])
+  for img_path in img_paths:
+    paths.append(img_path[0].replace('/src/assets/',''))
+  return jsonify(paths), 201
+
 
 #route responsible for forgot password
 @app.route('/forgotpass/', methods = ['POST'])
@@ -314,16 +322,6 @@ def changePass(user):
 
   return {'message' : 'success'}, 201
   
-=======
-@app.route('/datasetview/', methods = ['GET', 'POST'])
-def dataset_view_data():
-  ds_name = request.get_json()
-  paths = []
-  img_paths = db.session.query(Image.path).filter_by(dataset_name = ds_name['ds_name'])
-  for img_path in img_paths:
-    paths.append(img_path[0].replace('/src/assets/',''))
-  return jsonify(paths), 201
->>>>>>> main
 
 if __name__ == "__main__":
   app.run(debug=True)

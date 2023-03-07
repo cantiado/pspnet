@@ -174,16 +174,19 @@ def updateUser(user):
 def profile():
   response_data = {}
   user_id = request.get_json()['id']
-  all_img = db.session.query(Image.upload_id).filter_by(uploader_id=user_id)
-  unique_upload = all_img.distinct().all()
-  img_data = {}
-  for unique_upload_id in unique_upload:
-    result = (db.session.query(Image.path).filter_by(upload_id=unique_upload_id[0]).all())  
+
+  user_uploads = db.session.query(Upload.id).filter_by(uploader_id=user_id).all()
+
+  for unique_upload_id in user_uploads:
+    upload_img_paths = []
+    result = db.session.query(Image.path).filter_by(upload_id=unique_upload_id[0]).all()
     for path in result:
-      adjusted_path = str(path[0].replace('/src/assets/',''))
-    img_data[str(unique_upload_id[0])] = adjusted_path
-  response_data['img_count'] = all_img.count()
-  response_data['img_data'] = img_data
+      upload_img_paths.append(img_from_path(path[0]))
+
+    response_data[str(unique_upload_id[0])] = {
+      'paths': upload_img_paths,
+      'count': len(upload_img_paths)
+    }
   return jsonify(response_data), 201
 
 @app.route('/explore/', methods=['GET'])

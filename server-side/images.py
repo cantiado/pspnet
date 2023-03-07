@@ -1,5 +1,4 @@
 import os
-import csv
 import sys
 import pandas as pd
 from pathlib import Path
@@ -64,7 +63,6 @@ def identify():
 
   #Declare string variables, append with new information from inference txt, print out
   confidenceInterval = []
-  object_id = []
   species_id = []
 
   #this command is used to concatenate all txt files in the labels directory after prediciton is made

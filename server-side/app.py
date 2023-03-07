@@ -64,12 +64,17 @@ class Image(db.Model):
 
 
 class Dataset(db.Model):
-  dataset_name = db.Column(db.String[30], primary_key=True)
-  dataset_description = db.Column(db.String[40], nullable=True)
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String[30], nullable=False)
+  description = db.Column(db.String[40], nullable=True)
+  location = db.Column(db.String[50], nullable=True)
+  visibility = db.Column(db.String[10], default='public')
   
-  def __init__(self, dataset_name, dataset_description=None) -> None:
-    self.dataset_name = dataset_name
-    self.project_name = dataset_description
+  def __init__(self, dataset_name, dataset_description=None, location=None, visibility='public') -> None:
+    self.name = dataset_name
+    self.description = dataset_description
+    self.location = location
+    self.visibility = visibility
 
 class Upload(db.Model):
   id = db.Column(db.Integer, primary_key=True)

@@ -90,6 +90,8 @@
 </template>
 
 <script>
+import { authStore } from '../store/authenticate';
+import { useRouter } from 'vue-router';
 export default {
   data() {
     return {
@@ -178,6 +180,13 @@ export default {
       selectedCurrentJob: -1,
       selectedCompletedJob: -1,
     };
+  },
+  beforeMount() {
+    const store = authStore()
+    if (!store.isAuthenticated()) {
+      const router = useRouter()
+      router.push({name: 'login'})
+    }
   },
   mounted() {
     this.currentJobs.sort((jobA, jobB) => {

@@ -174,13 +174,19 @@
           @click="postImages"
           class="py-1 min-w-max p-1 rounded-full"
           :class="
-            !uploadedImages || !datasetName || !visibility || !selectedModel
+            !uploadedImages ||
+            !datasetName ||
+            !visibility ||
+            !selectedModel ||
+            loading
               ? 'bg-gray-200'
               : 'bg-green-300 hover:bg-green-200'
           "
-          :disabled="!uploadedImages || !selectedModel"
+          :disabled="!uploadedImages || !selectedModel || loading"
         >
-          <span class="m-3 text-xl font-bold">Identify</span>
+          <span class="m-3 text-xl font-bold">{{
+            loading ? "Submitting..." : "Identify"
+          }}</span>
         </button>
       </div>
       <div class="mt-10 flex justify-center items-center">
@@ -215,7 +221,7 @@
   <TransitionRoot appear :show="successfulSubmit" as="template">
     <Dialog
       as="div"
-      @close="() => (successfulSubmit = false)"
+      @close="reset"
       class="relative z-10"
     >
       <TransitionChild
@@ -260,11 +266,11 @@
                 </p>
               </div>
 
-              <div class="mt-4 flex flex-row gap-2">
+              <div class="mt-4 flex flex-row gap-2 justify-start">
                 <button
                   type="button"
                   class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                  @click="() => (successfulSubmit = false)"
+                  @click="reset"
                 >
                   Job Status
                 </button>
@@ -274,6 +280,88 @@
                   @click="reset"
                 >
                   New dataset
+                </button>
+              </div>
+            </DialogPanel>
+          </TransitionChild>
+        </div>
+      </div>
+    </Dialog>
+  </TransitionRoot>
+  <TransitionRoot appear :show="!store.isAuthenticated()" as="template">
+    <Dialog
+      as="div"
+      @close="
+        () => {
+          router.push({ name: 'login' });
+        }
+      "
+      class="relative z-10"
+    >
+      <TransitionChild
+        as="template"
+        enter="duration-300 ease-out"
+        enter-from="opacity-0"
+        enter-to="opacity-100"
+        leave="duration-200 ease-in"
+        leave-from="opacity-100"
+        leave-to="opacity-0"
+      >
+        <div class="fixed inset-0 bg-black bg-opacity-25" />
+      </TransitionChild>
+
+      <div class="fixed inset-0 overflow-y-auto">
+        <div
+          class="flex min-h-full items-center justify-center p-4 text-center"
+        >
+          <TransitionChild
+            as="template"
+            enter="duration-300 ease-out"
+            enter-from="opacity-0 scale-95"
+            enter-to="opacity-100 scale-100"
+            leave="duration-200 ease-in"
+            leave-from="opacity-100 scale-100"
+            leave-to="opacity-0 scale-95"
+          >
+            <DialogPanel
+              class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+            >
+              <DialogTitle
+                as="h3"
+                class="text-lg font-medium leading-6 text-gray-900"
+              >
+                Identification for registered users only!
+              </DialogTitle>
+              <div class="mt-2">
+                <p class="text-sm text-gray-500">
+                  Before you can upload images to identify, you must first log
+                  in to your account. If you are not a registered user, you can
+                  create an account today!
+                </p>
+              </div>
+
+              <div class="mt-4 flex flex-row gap-2 justify-start">
+                <button
+                  type="button"
+                  class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  @click="
+                    () => {
+                      router.push({ name: 'login' });
+                    }
+                  "
+                >
+                  Login
+                </button>
+                <button
+                  type="button"
+                  class="text-xs font-normal px-4 py-2 rounded-md hover:bg-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
+                  @click="
+                    () => {
+                      router.push({ name: 'register' });
+                    }
+                  "
+                >
+                  Create account
                 </button>
               </div>
             </DialogPanel>
@@ -303,6 +391,8 @@ import {
 import { ChevronDownIcon } from "@heroicons/vue/20/solid";
 import ImageCard from "../components/ImageCard.vue";
 import FileList from "../components/FileList.vue";
+import { authStore } from "../store/authenticate";
+import { useRouter } from "vue-router";
 
 var id = 0;
 
@@ -338,6 +428,9 @@ export default {
       visibility: "",
       successfulSubmit: false,
       errorMsg: "",
+      loading: false,
+      store: authStore(),
+      router: useRouter(),
     };
   },
   computed: {},
@@ -399,17 +492,25 @@ export default {
       }
       imageInput.files = newFileList.files;
     },
-    postImages() {
+    async postImages() {
+      this.loading = true;
       const url = "http://127.0.0.1:5001/identify";
       const imageInput = document.getElementById("image-input");
-      const images = new FormData();
+      const form = new FormData();
       for (const image of imageInput.files) {
-        images.append("image-input", image);
+        form.append("images", image);
       }
+      form.set("dataset-name", this.datasetName);
+      form.set("dataset-notes", this.datasetNotes);
+      form.set("dataset-geoloc", this.datasetGeoloc);
+      form.set("visibility", this.visibility);
+      const userData = await this.store.userData();
+      console.log("user data", userData)
+      form.set("user-id", userData.id);
       fetch(url, {
         method: "POST",
         mode: "no-cors",
-        body: images,
+        body: form,
       })
         .then((res) => {
           // console.log(res)
@@ -420,13 +521,16 @@ export default {
         .catch((err) => {
           console.log(err);
           this.errorMsg = "An error occured when submitting. Try again.";
+        })
+        .finally(() => {
+          this.loading = false;
         });
     },
     reset() {
       this.uploadedImages = false;
       this.selectedModel = "";
       this.files = {};
-      this.modifyFileList()
+      this.modifyFileList();
       this.datasetName = "";
       this.datasetNotes = "";
       this.datasetGeoloc = "";

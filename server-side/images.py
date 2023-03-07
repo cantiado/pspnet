@@ -3,7 +3,7 @@ import csv
 import sys
 import pandas as pd
 from pathlib import Path
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from app import Image
 from app import Dataset
@@ -19,20 +19,34 @@ image_folder = "images"
 
 @app.route("/identify", methods=["POST"])
 def identify():
-  files = request.files.to_dict(flat=False)["image-input"]
-  user_id = 0
-  dataset_name = "test"
-  # dataset_description = None
-  # new_dataset = Dataset(dataset_name, dataset_description)
-  # db.session.add(new_dataset)
-  new_upload = Upload(0)
+  # files = request.files.to_dict(flat=False)["image-input"]
+  files = request.files.to_dict(flat=False)["images"]
+  form_info = request.form.to_dict()
+  user_id = form_info['user-id']
+  dataset_name = form_info['dataset-name']
+  dataset_description = form_info['dataset-notes']
+  dataset_description = None if dataset_description == "" else dataset_description
+  dataset_location = form_info['dataset-geoloc']
+  dataset_location = None if dataset_location == "" else dataset_location
+  visibility = form_info['visibility']
+  new_dataset = Dataset(dataset_name, dataset_description, 
+                        dataset_location, visibility)
+  db.session.add(new_dataset)
+  new_upload = Upload(user_id)
   db.session.add(new_upload)
   db.session.commit()
   job_id = db.session.query(Upload.id).order_by(Upload.id.desc()).first()[0]
   
+  # form_info["dataset-name"]: dataset name
+  # form_info["dataset-notes"]: dataset notes
+  # form_info["dataset-geoloc"]: dataset geolocation
+  # form_info["visibility"]: {"public", "shared", "private"}
+  # form_info["user-id"]: user id
+  # return jsonify(message="Successfully uploaded images!")
+
+  job_folder = os.path.join(image_folder, str(job_id)) 
+  os.makedirs(job_folder)
   for i, file in enumerate(files):
-    job_folder = os.path.join(image_folder, str(job_id)) 
-    os.makedirs(job_folder)
     file.save(os.path.join(job_folder, file.filename))
     new_image = Image(os.path.join(job_folder, file.filename), user_id, job_id, dataset_name)
     db.session.add(new_image)

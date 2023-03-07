@@ -174,13 +174,19 @@
           @click="postImages"
           class="py-1 min-w-max p-1 rounded-full"
           :class="
-            !uploadedImages || !datasetName || !visibility || !selectedModel || loading
+            !uploadedImages ||
+            !datasetName ||
+            !visibility ||
+            !selectedModel ||
+            loading
               ? 'bg-gray-200'
               : 'bg-green-300 hover:bg-green-200'
           "
           :disabled="!uploadedImages || !selectedModel || loading"
         >
-          <span class="m-3 text-xl font-bold">{{loading ? "Submitting..." : "Identify"}}</span>
+          <span class="m-3 text-xl font-bold">{{
+            loading ? "Submitting..." : "Identify"
+          }}</span>
         </button>
       </div>
       <div class="mt-10 flex justify-center items-center">
@@ -215,7 +221,7 @@
   <TransitionRoot appear :show="successfulSubmit" as="template">
     <Dialog
       as="div"
-      @close="() => (successfulSubmit = false)"
+      @close="reset"
       class="relative z-10"
     >
       <TransitionChild
@@ -264,7 +270,7 @@
                 <button
                   type="button"
                   class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                  @click="() => (successfulSubmit = false)"
+                  @click="reset"
                 >
                   Job Status
                 </button>
@@ -285,7 +291,11 @@
   <TransitionRoot appear :show="!store.isAuthenticated()" as="template">
     <Dialog
       as="div"
-      @close="() => {router.push({name: 'login'})}"
+      @close="
+        () => {
+          router.push({ name: 'login' });
+        }
+      "
       class="relative z-10"
     >
       <TransitionChild
@@ -324,7 +334,9 @@
               </DialogTitle>
               <div class="mt-2">
                 <p class="text-sm text-gray-500">
-                  Before you can upload images to identify, you must first log in to your account. If you are not a registered user, you can create an account today!
+                  Before you can upload images to identify, you must first log
+                  in to your account. If you are not a registered user, you can
+                  create an account today!
                 </p>
               </div>
 
@@ -332,14 +344,22 @@
                 <button
                   type="button"
                   class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                  @click="() => {router.push({name: 'login'})}"
+                  @click="
+                    () => {
+                      router.push({ name: 'login' });
+                    }
+                  "
                 >
                   Login
                 </button>
                 <button
                   type="button"
                   class="text-xs font-normal px-4 py-2 rounded-md hover:bg-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
-                  @click="() => {router.push({name: 'register'})}"
+                  @click="
+                    () => {
+                      router.push({ name: 'register' });
+                    }
+                  "
                 >
                   Create account
                 </button>
@@ -410,7 +430,7 @@ export default {
       errorMsg: "",
       loading: false,
       store: authStore(),
-      router: useRouter()
+      router: useRouter(),
     };
   },
   computed: {},
@@ -472,18 +492,25 @@ export default {
       }
       imageInput.files = newFileList.files;
     },
-    postImages() {
-      this.loading = true
+    async postImages() {
+      this.loading = true;
       const url = "http://127.0.0.1:5001/identify";
       const imageInput = document.getElementById("image-input");
-      const images = new FormData();
+      const form = new FormData();
       for (const image of imageInput.files) {
-        images.append("image-input", image);
+        form.append("images", image);
       }
+      form.set("dataset-name", this.datasetName);
+      form.set("dataset-notes", this.datasetNotes);
+      form.set("dataset-geoloc", this.datasetGeoloc);
+      form.set("visibility", this.visibility);
+      const userData = await this.store.userData();
+      console.log("user data", userData)
+      form.set("user-id", userData.id);
       fetch(url, {
         method: "POST",
         mode: "no-cors",
-        body: images,
+        body: form,
       })
         .then((res) => {
           // console.log(res)
@@ -496,14 +523,14 @@ export default {
           this.errorMsg = "An error occured when submitting. Try again.";
         })
         .finally(() => {
-          this.loading = false
+          this.loading = false;
         });
     },
     reset() {
       this.uploadedImages = false;
       this.selectedModel = "";
       this.files = {};
-      this.modifyFileList()
+      this.modifyFileList();
       this.datasetName = "";
       this.datasetNotes = "";
       this.datasetGeoloc = "";

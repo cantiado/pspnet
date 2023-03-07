@@ -3,7 +3,7 @@ import csv
 import sys
 import pandas as pd
 from pathlib import Path
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from app import Image
 
@@ -17,7 +17,14 @@ image_folder = "images"
 
 @app.route("/identify", methods=["POST"])
 def identify():
-  files = request.files.to_dict(flat=False)["image-input"]
+  files = request.files.to_dict(flat=False)["images"]
+  form_info = request.form.to_dict()
+  # form_info["dataset-name"]: dataset name
+  # form_info["dataset-notes"]: dataset notes
+  # form_info["dataset-geoloc"]: dataset geolocation
+  # form_info["visibility"]: {"public", "shared", "private"}
+  # form_info["user-id"]: user id
+  return jsonify(message="Successfully uploaded images!")
   for i, file in enumerate(files):
     file.save(os.path.join(image_folder, file.filename))
     new_image = Image(os.path.join(image_folder, file.filename), 0, 0, "test")

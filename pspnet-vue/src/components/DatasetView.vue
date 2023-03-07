@@ -3,9 +3,9 @@
         <div class="window">
             <div class="dsName text-2xl font-bold">{{ ds_name }}</div>
             <div class="imgContainer inline-grid grid-cols-3 gap-3">
-                <div v-if="img_paths" v-for="path in img_paths" class="individualImg">
+                <div v-if="imgURLs" v-for="path in imgURLs" class="individualImg">
                         <img class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm" 
-                        :src="require(`../assets/${path}`)">
+                        :src="path">
             </div>
         </div>
         </div>
@@ -19,6 +19,7 @@ import axios from 'axios';
 import { ref } from 'vue';
 import UserImg from './UserImg.vue';
 import { onMounted } from 'vue';
+import b64toBlob from '@/composables/byteToBlob';
 
 export default {
 
@@ -26,16 +27,28 @@ export default {
         ds_name: String
     },
     setup(props, {emit}) {
-        const img_paths = ref([])
+        const responseData = ref()
+        const imgURLs = ref([])
+        const imgLabels = ref([])
         const ds_name = ref(props.ds_name)
         const error = ref('')
+
+        const getURLs = (imgBytes) => {
+            for (var i=0; i<imgBytes.length; i++) {
+                imgURLs.value.push(URL.createObjectURL(b64toBlob(imgBytes[i])))
+            }
+        }
+
         onMounted(async () => {
             if (ds_name.value) {
                 await axios.post('http://127.0.0.1:5000/datasetview/',
                 {ds_name: ds_name.value}
                 )
                 .then(response => (
-                    img_paths.value = response.data))
+                    responseData.value = response.data,
+                    getURLs(response.data['images']),
+                    imgLabels.value = responseData.value['labels'],
+                    console.log(responseData.value)))
                 .catch(error.value = "Failed to retreive data")
             }
         })
@@ -44,7 +57,7 @@ export default {
             emit("closeModal", true)
         }
 
-        return {img_paths, closeView, emit}
+        return {imgURLs, closeView, emit}
     },
     components: {UserImg}
 }

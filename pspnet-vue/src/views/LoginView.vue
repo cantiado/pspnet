@@ -4,10 +4,11 @@
       <h1 class="text-4xl text-center">Login to Your Account</h1>
       <form @submit.prevent="handleLogin" class="form">
         <label class="label">Email:</label>
-        <input v-model="email" class="input" type="email" required>
+        <input ref="emailInput" v-model="email" class="input" type="email" required>
 
         <label class="label">Password:</label>
         <input v-model="pass" class="input" type="password" required>
+        <router-link class="underline text-blue-500" :to="{name: 'forgot'}">Forgot Password?</router-link>
 
         <div v-if="error_msg" class="error"> {{error_msg}}</div>
 
@@ -30,7 +31,7 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authStore } from '@/store/authenticate'
 
@@ -41,8 +42,14 @@ export default {
     const email = ref('')
     const router = useRouter()
 
+    const emailInput = ref(null)
+
     const store = authStore()
     const error_msg = ref('')
+
+    onMounted(() => {
+      emailInput.value.focus()
+    })
 
     const handleLogin = async () => {
       error_msg.value = await store.loginUser({'email' : email.value, 'password' : pass.value})
@@ -56,7 +63,7 @@ export default {
     }
 
 
-    return {pass, email, handleLogin, handleCreate, error_msg, store}
+    return {pass, email, handleLogin, handleCreate, error_msg, store, emailInput}
   }
 }
 </script>

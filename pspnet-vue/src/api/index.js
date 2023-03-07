@@ -2,12 +2,12 @@ import axios from 'axios'
 
 const url = 'http://127.0.0.1:5000/'
 
-export async function authenticate(userData){
-  return await axios.post(url + 'login/', userData)
+export function authenticate(userData){
+  return axios.post(url + 'login/', userData)
 }
 
-export async function register(userData){
-  return await axios.post(url + 'register/', userData)
+export function register(userData){
+  return axios.post(url + 'register/', userData)
 }
 
 export async function getUserData(jwt){

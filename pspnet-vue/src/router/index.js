@@ -9,6 +9,8 @@ import GallaryView from "../views/GallaryView.vue";
 import JobsView from "../views/JobsView.vue";
 import Explore from "../views/ExploreDataView.vue";
 import AboutView from "../views/AboutView.vue";
+import ResetView from "../views/ResetView"
+import ForgotView from "../views/ForgotView"
 
 const routes = [
   {
@@ -20,6 +22,16 @@ const routes = [
     path: "/login",
     name: "login",
     component: LoginView,
+  },
+  {
+    path: "/reset/:resetToken",
+    name: "resetPassword",
+    component: ResetView,
+  },
+  {
+    path: "/forgot",
+    name: "forgot",
+    component: ForgotView,
   },
   {
     path: "/about",

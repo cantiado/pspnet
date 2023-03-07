@@ -51,7 +51,8 @@ export default {
         border-color: #b9e0a5;
         width:100%;
         display: flex;
-        margin:4;
+        margin:4px;
+        padding:4px;
     }
     .rectangle .imgContainer {
         display: flex;
@@ -67,6 +68,8 @@ export default {
     }
     .details {
        align-items: center;
-       margin-top: 15px;
+       padding: 7px;
+       height: 150px;
+       overflow-y: scroll;
     }
 </style>

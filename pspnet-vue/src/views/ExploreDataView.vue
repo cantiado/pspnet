@@ -80,7 +80,9 @@
                 <li v-for="(value, index) in filteredData" datasets>
                     <div class="prevBox" @click="openDataset(index)">
                         <div v-if="value['show']">
-                            <DataSetPrev :ds_name="index" :ds_count="value['count']" :img_paths="value['paths']"/>
+                            <DataSetPrev :ds_name="index" :ds_count="value['count']"
+                                         :img_paths="value['paths']" :location="value['location']"
+                                         :description="value['description']"/>
                         </div>
                     </div>
                 </li>

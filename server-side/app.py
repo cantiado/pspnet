@@ -188,22 +188,40 @@ def profile():
 
 @app.route('/explore/', methods=['GET'])
 def explore_data():
-  unique_ds = db.session.query(Dataset.dataset_name).all()
+  unique_ds = db.session.query(Dataset.name).filter(Dataset.visibility=='public').distinct().all()
+  # unique_ds = db.session.query(Dataset.name, Dataset.description, 
+  #                              Dataset.location).filter(Dataset.visibility=='public')
+  # test_names = unique_ds.filter
+
+  unique_visible = []
+  visibile_descr = []
+  visiblie_location = []
+
+  for dataset in unique_ds:
+    query_data = db.session.query(Dataset.description, Dataset.location, 
+                                  Dataset.visibility).filter(Dataset.name==dataset[0]
+                                                             ).order_by(Dataset.id.desc()).first()
+    if query_data[2] == 'public':
+      unique_visible.append(dataset[0])
+      visibile_descr.append(query_data[0])
+      visiblie_location.append(query_data[1])
   response_data = {}
   combined_encoded = []
   response_data['ds_info'] = {}
-  for dataset in unique_ds:
+  for index, dataset in enumerate(unique_visible):
     cleaned_paths = []
     encoded_imgs = []
-    images = db.session.query(Image.path).filter_by(dataset_name = dataset[0])
+    images = db.session.query(Image.path).filter_by(dataset_name = dataset)
     paths = images[0:4]
     for img_path in paths:
       encoded_imgs.append(img_from_path(img_path[0]))
       cleaned_paths.append(img_path[0].replace('/src/assets/',''))
     combined_encoded.append(encoded_imgs)
     img_count = images.count()
-    response_data['ds_info'][str(dataset[0])] = {'count': img_count,
+    response_data['ds_info'][str(dataset)] = {'count': img_count,
                                               'paths': encoded_imgs,
+                                              'description': visibile_descr[index],
+                                              'location': visiblie_location[index],
                                               'show' : True}
     response_data['images'] = combined_encoded
   return jsonify(response_data), 201
@@ -226,6 +244,8 @@ def dataset_view_data():
     paths.append(img_path[0].replace('/src/assets/',''))
   return jsonify(paths), 201
 
+# function adapted from:
+# https://stackoverflow.com/questions/64065587/how-to-return-multiple-images-with-flask
 def img_from_path(image_path):
   pillow_img = pimg.open(image_path, mode='r')
   byte_array = io.BytesIO()

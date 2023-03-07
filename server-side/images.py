@@ -48,7 +48,8 @@ def identify():
   os.makedirs(job_folder)
   for i, file in enumerate(files):
     file.save(os.path.join(job_folder, file.filename))
-    new_image = Image(os.path.join(job_folder, file.filename), user_id, job_id, dataset_name)
+    new_image = Image(os.path.join(job_folder, file.filename), user_id, 
+                      job_id, dataset_name, location=dataset_location)
     db.session.add(new_image)
     db.session.commit()
     # save file paths to image database

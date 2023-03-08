@@ -2,14 +2,16 @@
 <!-- Dropdown filter menu adapted from vue headless ui and tailwind-->
 
 <template>
-  <div class="viewWindow">
-    <div v-if="show_modal">
-      <DatasetView :ds_name="ds_modal" @closeModal="closeDataset" />
-    </div>
-    <div class="flex-row">
-      <!-- following div component from tailwind elements -->
-      <div class="flex justify-center">
-        <div class="mb-3 xl:w-96">
+  <div v-if="show_modal">
+    <DatasetView :ds_name="ds_modal" @closeModal="closeDataset" />
+  </div>
+  <div class="w-full p-5 max-h-[79.5vh] overflow-auto flex flex-col justify-start items-center gap-5">
+    <div
+      class="w-full flex flex-row justify-center items-center bg-slate-50 p-5 border-2"
+    >
+      <div class="w-full flex flex-col justify-start gap-2">
+        <!-- following div component from tailwind elements -->
+        <div class="">
           <input
             v-model="searchInput"
             type="search"
@@ -19,47 +21,52 @@
             @change="searchFilter"
           />
         </div>
+        <!-- following div component from tailwind elements -->
+        <Menu as="div" class="flex flex-row gap-3 justify-start">
+          <MenuButton
+            as="div"
+            class="dropdown-toggle px-6 py-2.5 bg-[#b9e0a5] text-black font-medium text-sm uppercase rounded shadow-md hover:bg-green-800 hover:shadow-lg focus:bg-green-800 focus:shadow-lg focus:outline-none focus:ring-0 text-white active:bg-[#b9e0a5] active:shadow-lg active:text-black transition duration-150 ease-in-out flex items-center whitespace-nowrap"
+            >Filters</MenuButton
+          >
+          <transition
+            enter-active-class="transition duration-100 ease-out"
+            enter-from-class="transform scale-95 opacity-0"
+            enter-to-class="transform scale-100 opacity-100"
+            leave-active-class="transition duration-75 ease-in"
+            leave-from-class="transform scale-100 opacity-100"
+            leave-to-class="transform scale-95 opacity-0"
+          >
+            <MenuItems class="w-fill flex flex-row">
+              <!-- Use the `active` state to conditionally style the active item. -->
+              <MenuItem
+                v-for="link in links"
+                :key="link.href"
+                as="div"
+                v-slot="active"
+                class="group flex w-full items-center justify-center px-2 py-2 text-sm border bg-white hover:bg-gray-200"
+                @click="applyFilter(link.filter)"
+              >
+                {{ link.label }}
+              </MenuItem>
+            </MenuItems>
+          </transition>
+        </Menu>
       </div>
-      <!-- following div component from tailwind elements -->
-      <Menu as="div" class="dropdown">
-        <MenuButton
-          as="div"
-          class="dropdown-toggle px-6 py-2.5 bg-[#b9e0a5] text-black font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-green-800 hover:shadow-lg focus:bg-green-800 focus:shadow-lg focus:outline-none focus:ring-0 text-white active:bg-[#b9e0a5] active:shadow-lg active:text-black transition duration-150 ease-in-out flex items-center whitespace-nowrap"
-          >Filters</MenuButton
-        >
-        <transition name="fade">
-          <MenuItems class="dropdown">
-            <!-- Use the `active` state to conditionally style the active item. -->
-            <MenuItem
-              v-for="link in links"
-              :key="link.href"
-              as="div"
-              v-slot="active"
-              class="group flex w-full items-center justify-center rounded-md px-2 py-2 text-sm hover:bg-gray-100"
-              @click="applyFilter(link.filter)"
-            >
-              {{ link.label }}
-            </MenuItem>
-          </MenuItems>
-        </transition>
-      </Menu>
     </div>
-    <div class="datasetPrevContainer">
-      <div class="container">
-        <div v-if="error != null" class="text-2xl font-bold">{{ error }}</div>
-        <li v-for="(value, index) in filteredData" datasets>
-          <div class="prevBox" @click="openDataset(index)">
-            <div v-if="value['show']">
-              <DataSetPrev
-                :ds_name="index"
-                :ds_count="value['count']"
-                :img_paths="value['paths']"
-                :location="value['location']"
-                :description="value['description']"
-              />
-            </div>
+    <div class="w-full flex flex-col gap-3">
+      <div v-if="error != null" class="text-2xl font-bold">{{ error }}</div>
+      <div v-for="(value, index) in filteredData" :key="index" @click="openDataset(index)">
+        <div class="prevBox" >
+          <div v-if="value['show']">
+            <DataSetPrev
+              :ds_name="index"
+              :ds_count="value['count']"
+              :img_paths="value['paths']"
+              :location="value['location']"
+              :description="value['description']"
+            />
           </div>
-        </li>
+        </div>
       </div>
     </div>
   </div>
@@ -89,8 +96,8 @@ export default {
     const image_urls = ref([]);
 
     const links = [
-      { filter: "img l 5", label: "Fewer than 5 images" },
-      { filter: "img g 5", label: "Greater than 5 images" },
+      { filter: "img l 5", label: "< 5 images" },
+      { filter: "img g 5", label: "> 5 images" },
       // { filter: 'class eq 1', label: 'Single-Class Datasets'}
     ];
 
@@ -200,7 +207,7 @@ export default {
 </script>
 
 <style>
-.datasetPrevContainer {
+/* .datasetPrevContainer {
   border-width: 3px;
   border-radius: 10px;
   overflow-y: scroll;
@@ -231,5 +238,5 @@ export default {
   width: 65vw;
   display: grid;
   grid-gap: 10px;
-}
+} */
 </style>

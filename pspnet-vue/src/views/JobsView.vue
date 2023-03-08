@@ -1,5 +1,8 @@
 <template>
   <div class="w-full flex flex-col justify-start items-center gap-3 p-5">
+    <!-- delete this once jobs are implemented -->
+    <a href="http://127.0.0.1:5000/download" class="p-5 bg-green-100 border-2 border-black"> Download csv</a>
+    <!--  -->
     <h1 class="text-2xl font-bold">Current Jobs</h1>
     <div class="max-w-750 w-3/4 border" id="currentJobsTable">
       <div class="grid grid-cols-3 border-2 p-2">
@@ -90,8 +93,8 @@
 </template>
 
 <script>
-import { authStore } from '../store/authenticate';
-import { useRouter } from 'vue-router';
+import { authStore } from "../store/authenticate";
+import { useRouter } from "vue-router";
 export default {
   data() {
     return {
@@ -182,10 +185,10 @@ export default {
     };
   },
   beforeMount() {
-    const store = authStore()
+    const store = authStore();
     if (!store.isAuthenticated()) {
-      const router = useRouter()
-      router.push({name: 'login'})
+      const router = useRouter();
+      router.push({ name: "login" });
     }
   },
   mounted() {

@@ -38,6 +38,10 @@ export function resetPass(userData, jwt){
   return axios.post(url + 'changePass/', userData, {headers : {token : jwt}})
 }
 
+export function getJobData(jwt){
+  return axios.get(url + 'getJobData/', {headers : {token : jwt}})
+}
+
 export async function getDatasetImgs(ds_name) {
   return await axios.post(url + 'datasetview/')
 }

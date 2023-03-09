@@ -86,12 +86,17 @@ class Dataset(db.Model):
   description = db.Column(db.String[40], nullable=True)
   location = db.Column(db.String[50], nullable=True)
   visibility = db.Column(db.String[10], default='public')
+  uploadtime = db.Column(db.String(20), nullable=False)
+  finishtime = db.Column(db.String(20), nullable=False)
+  numimages = db.Column(db.Integer, nullable=False)
   
-  def __init__(self, dataset_name, dataset_description=None, location=None, visibility='public') -> None:
+  
+  def __init__(self, dataset_name, dataset_description=None, location=None, visibility='public', uploadTime='0') -> None:
     self.name = dataset_name
     self.description = dataset_description
     self.location = location
     self.visibility = visibility
+    self.uploadtime = uploadTime
 
 class Upload(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -365,8 +370,21 @@ def changePass(user):
 
 @app.route('/getJobData/', methods = ['GET'])
 @token_required
-def getJobData():
-  pass
+def getJobData(user):
+  datasets = Dataset.query.all()
+  
+  return jsonify([
+    {'id' : dataset.id,
+     'datasetName' : dataset.name,
+     'datasetNotes' : dataset.description,
+     'datasetGeoloc' : '',
+     'visibility' : dataset.visibility,
+     'model' : '',
+     'numImages' : dataset.numimages,
+     'start' : dataset.uploadtime,
+     'end' : dataset.finishtime}
+     for dataset in datasets
+  ]), 201
   
 
 if __name__ == "__main__":

@@ -4,6 +4,11 @@ import pandas as pd
 from pathlib import Path
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import datetime
+
+from redis import Redis
+from rq import Queue
+
 from app import Image
 from app import Dataset
 from app import Upload
@@ -13,11 +18,18 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
 db = SQLAlchemy(app)
 db.init_app(app)
 
+r = Redis()
+queue = Queue(connection=r)
+
 
 image_folder = "images"
+  
 
 @app.route("/identify", methods=["POST"])
 def identify():
+
+  uploadTime = datetime.datetime.utcnow() 
+
   # files = request.files.to_dict(flat=False)["image-input"]
   files = request.files.to_dict(flat=False)["images"]
   form_info = request.form.to_dict()
@@ -29,11 +41,10 @@ def identify():
   dataset_location = None if dataset_location == "" else dataset_location
   visibility = form_info['visibility']
   new_dataset = Dataset(dataset_name, dataset_description, 
-                        dataset_location, visibility)
-  db.session.add(new_dataset)
+                        dataset_location, visibility, uploadTime)
   new_upload = Upload(user_id)
   db.session.add(new_upload)
-  db.session.commit()
+
   job_id = db.session.query(Upload.id).order_by(Upload.id.desc()).first()[0]
   
   # form_info["dataset-name"]: dataset name
@@ -42,24 +53,32 @@ def identify():
   # form_info["visibility"]: {"public", "shared", "private"}
   # form_info["user-id"]: user id
   # return jsonify(message="Successfully uploaded images!")
+  
 
   job_folder = os.path.join(image_folder, str(job_id)) 
   os.makedirs(job_folder)
+  numImages = 0
   for i, file in enumerate(files):
     file.save(os.path.join(job_folder, file.filename))
     new_image = Image(os.path.join(job_folder, file.filename), user_id, 
                       job_id, dataset_name, location=dataset_location)
     db.session.add(new_image)
     db.session.commit()
+    
+    numImages = numImages + 1
     # save file paths to image database
 
   #commands here give global environment path to project for deployment on any machine
   FILE = Path(__file__).resolve()
   path = FILE.parents[0]
   os.chdir(path)
+
   print("Predicting...")
-  cmd = r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + r' --img 640'
-  os.system(cmd)
+  #image_tasks = queue.enqueue_many( [Queue.prepare_data(os.system, [r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + '/' +  file.filename + r' --img 640']) for file in files])
+  os.system(r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + r' --img 640')
+  
+  #cmd = r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + r' --img 640'
+  #os.system(cmd)
 
   #Declare string variables, append with new information from inference txt, print out
   confidenceInterval = []
@@ -74,6 +93,13 @@ def identify():
   os.chdir(path)
   read_file = pd.read_csv (r'labels/predictions.txt')
   read_file.to_csv (r'labels/predictions.csv', index=None)
+
+  finishTime = datetime.datetime.utcnow()
+
+  new_dataset.finishtime = finishTime
+  new_dataset.numimages = numImages
+  db.session.add(new_dataset)
+  db.session.commit()
 
   return open(r"labels/predictions.csv", mode='r')
 #2/27/2023 - Convert text files in predict class to csv...

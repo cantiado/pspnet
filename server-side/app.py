@@ -1,21 +1,42 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
+from flask_mail import Mail, Message
 from functools import wraps
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+from email_validator import validate_email, EmailNotValidError
+from threading import Thread
+
 import jwt
 import datetime
+
+import io
+from base64 import encodebytes
+import PIL.Image as pimg
 
 
 
 app = Flask(__name__)
 app.app_context().push()
-bcrypt = Bcrypt(app)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
 app.config['SECRET_KEY'] = '95fd1e474cbc4b49a3286dc09cba7510'
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USERNAME'] = "pspnetcs426@gmail.com"
+app.config['MAIL_PASSWORD'] = "waiccpkrmgjpescr"
+app.config['TESTING'] = False
+
+
 CORS(app, resources={r"/*":{'origins':"*"}})
+
+bcrypt = Bcrypt(app)
+mail = Mail(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -60,12 +81,24 @@ class Image(db.Model):
 
 
 class Dataset(db.Model):
-  dataset_name = db.Column(db.String[30], primary_key=True)
-  project_name = db.Column(db.String[40], nullable=True)
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String[30], nullable=False)
+  description = db.Column(db.String[40], nullable=True)
+  location = db.Column(db.String[50], nullable=True)
+  visibility = db.Column(db.String[10], default='public')
   
-  def __init__(self, dataset_name, project_name=None):
-    self.dataset_name = dataset_name
-    self.project_name = project_name
+  def __init__(self, dataset_name, dataset_description=None, location=None, visibility='public') -> None:
+    self.name = dataset_name
+    self.description = dataset_description
+    self.location = location
+    self.visibility = visibility
+
+class Upload(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  uploader_id = db.Column(db.Integer, nullable=False)
+
+  def __init__(self, uploader_id) -> None:
+    self.uploader_id = uploader_id
 
 
 #creates wrapper function for routes that require authorized tokens. 
@@ -92,10 +125,30 @@ def token_required(f):
     except ExpiredSignatureError:
       return jsonify(expired_msg), 401
     except (InvalidTokenError, Exception) as e:
-      print(e)
+      print(str(e))
       return jsonify(invalid_msg), 401
     
   return authorize
+
+#code adapted form https://dev.to/paurakhsharma/flask-rest-api-part-5-password-reset-2f2e
+def new_thread_email(msg, app):
+  with app.app_context():
+    try:
+      mail.send(msg)
+    except ConnectionRefusedError:
+      print("Mail Servers are not working")
+
+#sends recovery email for forgot password
+def send_email(subject, sender, recipients, text, html):
+  msg = Message()
+  msg.subject = subject
+  msg.sender = sender
+  msg.recipients = recipients
+  msg.body = text
+  msg.html = html
+
+  Thread(target=new_thread_email, args=[msg, app]).start()
+
 
 @app.route('/login/', methods = ['POST'])
 def login():
@@ -104,7 +157,16 @@ def login():
     login_credentials=request.get_json()
     password = login_credentials.get('password')
     email = login_credentials.get('email')
+
+    #validate email address
+    try:
+      validation = validate_email(email, check_deliverability=False)
+      email = validation.email
+    except EmailNotValidError as err:
+      return jsonify({'message' : str(err)}), 401
+
     testUser = User.query.filter_by(email = email).first()
+
     if not testUser:
       return jsonify(invalid_msg), 401
     else:
@@ -125,6 +187,15 @@ def login():
 def register():
   if request.method == 'POST':
     user_data = request.get_json()
+
+    #validate the user email
+    try:
+      email = user_data.get('email')
+      validation = validate_email(email, check_deliverability=True)
+      user_data['email'] = validation.email
+    except EmailNotValidError as err:
+      return jsonify({'message' : str(err)}), 401
+
     newUser = User(**user_data)
     if User.query.filter_by(email = newUser.email).first() is not None:
       return jsonify({'message': 'Email Already in Use.'}), 401
@@ -158,37 +229,55 @@ def updateUser(user):
 def profile():
   response_data = {}
   user_id = request.get_json()['id']
-  all_img = db.session.query(Image.upload_id).filter_by(uploader_id=user_id)
-  unique_upload = all_img.distinct().all()
-  img_data = {}
-  for unique_upload_id in unique_upload:
-    result = (db.session.query(Image.path).filter_by(upload_id=unique_upload_id[0]).all())  
+
+  user_uploads = db.session.query(Upload.id).filter_by(uploader_id=user_id).all()
+
+  for unique_upload_id in user_uploads:
+    upload_img_paths = []
+    result = db.session.query(Image.path).filter_by(upload_id=unique_upload_id[0]).all()
     for path in result:
-      adjusted_path = str(path[0].replace('/src/assets/',''))
-    img_data[str(unique_upload_id[0])] = adjusted_path
-  response_data['img_count'] = all_img.count()
-  response_data['img_data'] = img_data
+      upload_img_paths.append(img_from_path(path[0]))
+
+    response_data[str(unique_upload_id[0])] = {
+      'paths': upload_img_paths,
+      'count': len(upload_img_paths)
+    }
   return jsonify(response_data), 201
 
 @app.route('/explore/', methods=['GET'])
 def explore_data():
-  # SELECT COUNT(*) FROM image WHERE dataset_name = 
-  #   (SELECT DISTINCT dataset_name FROM image);
-  unique_ds = db.session.query(Image.dataset_name).distinct()
-  response_data = {}
-  ds_img_paths = []
-  response_data['ds_info'] = {}
+  unique_ds = db.session.query(Dataset.name).filter(Dataset.visibility==
+                                                    'public').distinct().all()
+  unique_visible = []
+  visibile_descr = []
+  visiblie_location = []
+
+  # retrieve data where the last contribution to the dataset was public
   for dataset in unique_ds:
-    cleaned_paths = []
-    images = db.session.query(Image.path).filter_by(dataset_name = dataset[0])
+    query_data = db.session.query(Dataset.description, Dataset.location, 
+                                  Dataset.visibility).filter(Dataset.name==dataset[0]
+                                                             ).order_by(Dataset.id.desc()).first()
+    if query_data[2] == 'public':
+      unique_visible.append(dataset[0])
+      visibile_descr.append(query_data[0])
+      visiblie_location.append(query_data[1])
+  response_data = {}
+  combined_encoded = []
+  response_data['ds_info'] = {}
+  for index, dataset in enumerate(unique_visible):
+    encoded_imgs = []
+    images = db.session.query(Image.path).filter_by(dataset_name = dataset)
     paths = images[0:4]
     for img_path in paths:
-      cleaned_paths.append(img_path[0].replace('/src/assets/',''))
-    ds_img_paths.append(cleaned_paths)
+      encoded_imgs.append(img_from_path(img_path[0]))
+    combined_encoded.append(encoded_imgs)
     img_count = images.count()
-    response_data['ds_info'][str(dataset[0])] = {'count': img_count,
-                                              'paths': cleaned_paths,
+    response_data['ds_info'][str(dataset)] = {'count': img_count,
+                                              'paths': encoded_imgs,
+                                              'description': visibile_descr[index],
+                                              'location': visiblie_location[index],
                                               'show' : True}
+    response_data['images'] = combined_encoded
   return jsonify(response_data), 201
 
 @app.route('/datasets/', methods = ['GET', 'POST'])
@@ -203,11 +292,77 @@ def dataset_prev_data():
 @app.route('/datasetview/', methods = ['GET', 'POST'])
 def dataset_view_data():
   ds_name = request.get_json()
+  response_data = {}
   paths = []
-  img_paths = db.session.query(Image.path).filter_by(dataset_name = ds_name['ds_name'])
+  labels = []
+  img_paths = db.session.query(Image.path, Image.label).filter_by(dataset_name = ds_name['ds_name'])
   for img_path in img_paths:
-    paths.append(img_path[0].replace('/src/assets/',''))
-  return jsonify(paths), 201
+    paths.append(img_from_path(img_path[0]))
+    labels.append(img_path[1])
+  response_data['images'] = paths
+  response_data['labels'] = labels
+  return jsonify(response_data), 201
+
+# function adapted from:
+# https://stackoverflow.com/questions/64065587/how-to-return-multiple-images-with-flask
+def img_from_path(image_path):
+  pillow_img = pimg.open(image_path, mode='r')
+  byte_array = io.BytesIO()
+  pillow_img.save(byte_array, format='JPEG')
+  encoded_img = encodebytes(byte_array.getvalue()).decode('ascii')
+  return encoded_img
+
+
+#route responsible for forgot password
+@app.route('/forgotpass/', methods = ['POST'])
+def forgot_pass():
+  user_data = request.get_json()
+  email = user_data['email']
+  url = 'http://localhost:8080/reset/'
+
+  #validate email and check if in database
+  try:
+    validation = validate_email(email, check_deliverability=False)
+    email = validation.email
+  except EmailNotValidError as err:
+    return jsonify({'message' : str(err)}), 401
+  user = User.query.filter_by(email = email).first()
+  if not user:
+    return jsonify({'message' : 'No user found with email'}), 401
+
+  #create token for reset password
+  token = jwt.encode({
+    'sub' : user.id,
+    'iat' : datetime.datetime.utcnow(),
+    'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
+    app.config['SECRET_KEY'])
+
+  send_email('PSPNet Password Reset',
+             sender= app.config['MAIL_USERNAME'],
+             recipients= [user.email], 
+             text=render_template('reset_password.txt', url= url + token),
+             html=render_template('reset_password.html', url= url + token))
+  return { 'message' : 'success'}, 201
+
+#user with reset token can reset the password
+@app.route('/changePass/', methods = ['POST'])
+@token_required
+def changePass(user):
+  data = request.get_json()
+  new_password = data.get('new_password')
+  new_hashed = bcrypt.generate_password_hash(new_password, 10)
+  user.password = new_hashed 
+  db.session.commit()
+
+  send_email('PSPNet Password Reset',
+             sender= app.config['MAIL_USERNAME'],
+             recipients= [user.email], 
+             text=render_template('success_password.txt'),
+             html=render_template('success_password.html'))
+  
+
+  return {'message' : 'success'}, 201
+  
 
 if __name__ == "__main__":
   app.run(debug=True)

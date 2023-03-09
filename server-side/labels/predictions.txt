@@ -1,0 +1,40 @@
+0.21 Acacia dealbata Link
+0.02 Acacia angustissima (Mill.) Kuntze
+0.01 Acacia mearnsii De Wild
+0.01 Acacia tortuosa (L.) Willd
+0.01 Angelica sylvestris L
+0.06 Sedum rupestre L
+0.05 Thapsia villosa L
+0.03 Hypericum perforatum L
+0.01 Stanleya pinnata (Pursh) Britton
+0.01 Sedum montanum Perrier & Songeon
+0.10 Cirsium vulgare (Savi) Ten
+0.04 Cirsium palustre (L.) Scop
+0.04 Daucus carota L
+0.02 Cirsium arvense (L.) Scop
+0.02 Cirsium heterophyllum (L.) Hill
+0.10 Cirsium vulgare (Savi) Ten
+0.04 Cirsium palustre (L.) Scop
+0.04 Daucus carota L
+0.02 Cirsium arvense (L.) Scop
+0.02 Cirsium heterophyllum (L.) Hill
+0.10 Cirsium vulgare (Savi) Ten
+0.04 Cirsium palustre (L.) Scop
+0.04 Daucus carota L
+0.02 Cirsium arvense (L.) Scop
+0.02 Cirsium heterophyllum (L.) Hill
+0.10 Cirsium vulgare (Savi) Ten
+0.04 Cirsium palustre (L.) Scop
+0.04 Daucus carota L
+0.02 Cirsium arvense (L.) Scop
+0.02 Cirsium heterophyllum (L.) Hill
+0.10 Cirsium vulgare (Savi) Ten
+0.04 Cirsium palustre (L.) Scop
+0.04 Daucus carota L
+0.02 Cirsium arvense (L.) Scop
+0.02 Cirsium heterophyllum (L.) Hill
+0.10 Cirsium vulgare (Savi) Ten
+0.04 Cirsium palustre (L.) Scop
+0.04 Daucus carota L
+0.02 Cirsium arvense (L.) Scop
+0.02 Cirsium heterophyllum (L.) Hill

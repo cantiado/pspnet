@@ -1,18 +1,23 @@
 <!-- Author: Antonio Lang -->
 
 <template>
-    <div class="flex flex-wrap justify-center">
-        <img class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm" :src="require(`../assets/${imageData}`)">
+    <div class="rectangle grid">
+        <div v-for="imgURL in imgURLs">
+            <img class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm" :src="imgURL">
+        </div>
+        <div class="details w-48">
+            <div>Upload ID: {{ uploadID }}</div>
+            <div># Images: {{ numUploaded }}</div>
+        </div>
     </div>
-    <!-- <div>
-        <span>{{ label }}</span>
-    </div> -->
 </template>
 
 <script>
 export default {
     props: {
-        src_path: String,
+        imgURLs: Array,
+        numUploaded: Number,
+        uploadID: Number,
         required: true
     },
     setup() {
@@ -22,7 +27,7 @@ export default {
     data() {
         return {
             verified_image: false,
-            imageData: this.src_path
+            imageData: this.imgURL
         }
     }
 }

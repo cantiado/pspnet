@@ -83,7 +83,7 @@ def identify():
   shutil.rmtree(r"labels")
 
   return "Success!"
-#2/27/2023 - Convert text files in predict class to csv.....
+#2/27/2023 - Convert text files in predict class to csv...
 
 if __name__ == "__main__":
   app.run(port=5001, debug=True)

@@ -2,93 +2,95 @@
 <!-- Dropdown filter menu adapted from vue headless ui and tailwind-->
 
 <template>
-    <div class="p-10">
+    <div class="viewWindow">
         <div v-if="show_modal">
             <DatasetView :ds_name="ds_modal" @closeModal="closeDataset"/>
         </div>
-        <div class="grid gap-4">
-            <div class="flex-row">
-                <!-- following div component from tailwind elements -->
-                <div class="flex justify-center">
-                    <div class="mb-3 xl:w-96">
-                        <input
-                        v-model="searchInput"
-                        type="search"
-                        class="
-                            form-control
-                            block
-                            w-full
-                            px-3
-                            py-1.5
-                            text-base
-                            font-normal
-                            text-gray-700
-                            bg-white bg-clip-padding
-                            border border-solid border-gray-300
-                            rounded
-                            transition
-                            ease-in-out
-                            m-0
-                            focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none
-                        "
-                        id="searchBar"
-                        placeholder="Dataset name"
-                        @change="searchFilter"
-                        />
-                    </div>
-                </div>
-                <!-- following div component from tailwind elements -->
-                <Menu as="div" class="dropdown">
-                    <MenuButton as="div" class="dropdown-toggle
-                        px-6
-                        py-2.5
-                        bg-[#b9e0a5]
-                        text-black
-                        font-medium
-                        text-xs
-                        leading-tight
-                        uppercase
+        <div class="flex-row">
+            <!-- following div component from tailwind elements -->
+            <div class="flex justify-center">
+                <div class="mb-3 xl:w-96">
+                    <input
+                    v-model="searchInput"
+                    type="search"
+                    class="
+                        form-control
+                        block
+                        w-full
+                        px-3
+                        py-1.5
+                        text-base
+                        font-normal
+                        text-gray-700
+                        bg-white bg-clip-padding
+                        border border-solid border-gray-300
                         rounded
-                        shadow-md
-                        hover:bg-green-800 hover:shadow-lg
-                        focus:bg-green-800 focus:shadow-lg focus:outline-none focus:ring-0 text-white
-                        active:bg-[#b9e0a5] active:shadow-lg active:text-black
                         transition
-                        duration-150
                         ease-in-out
-                        flex
-                        items-center
-                        whitespace-nowrap
-                        ">Filters</MenuButton>
-                    <transition name="fade">
-                        <MenuItems class="dropdown">
-                            <!-- Use the `active` state to conditionally style the active item. -->
-                            <MenuItem
-                                v-for="link in links"
-                                :key="link.href"
-                                as="div"
-                                v-slot="active"
-                                class="group flex w-full items-center justify-center rounded-md px-2 py-2 text-sm hover:bg-gray-100"
-                                @click="applyFilter(link.filter)">
-                                {{ link.label }}
-                            </MenuItem>
-                        </MenuItems>
-                    </transition>
-                </Menu>
+                        m-0
+                        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none
+                    "
+                    id="searchBar"
+                    placeholder="Dataset name"
+                    @change="searchFilter"
+                    />
+                </div>
             </div>
+            <!-- following div component from tailwind elements -->
+            <Menu as="div" class="dropdown">
+                <MenuButton as="div" class="dropdown-toggle
+                    px-6
+                    py-2.5
+                    bg-[#b9e0a5]
+                    text-black
+                    font-medium
+                    text-xs
+                    leading-tight
+                    uppercase
+                    rounded
+                    shadow-md
+                    hover:bg-green-800 hover:shadow-lg
+                    focus:bg-green-800 focus:shadow-lg focus:outline-none focus:ring-0 text-white
+                    active:bg-[#b9e0a5] active:shadow-lg active:text-black
+                    transition
+                    duration-150
+                    ease-in-out
+                    flex
+                    items-center
+                    whitespace-nowrap
+                    ">Filters</MenuButton>
+                <transition name="fade">
+                    <MenuItems class="dropdown">
+                        <!-- Use the `active` state to conditionally style the active item. -->
+                        <MenuItem
+                            v-for="link in links"
+                            :key="link.href"
+                            as="div"
+                            v-slot="active"
+                            class="group flex w-full items-center justify-center rounded-md px-2 py-2 text-sm hover:bg-gray-100"
+                            @click="applyFilter(link.filter)">
+                            {{ link.label }}
+                        </MenuItem>
+                    </MenuItems>
+                </transition>
+            </Menu>
+        </div>
+        <div class="datasetPrevContainer">
             <div class="container">
                 <div v-if="error!=null" class="text-2xl font-bold">{{ error }}</div>
                 <li v-for="(value, index) in filteredData" datasets>
                     <div class="prevBox" @click="openDataset(index)">
                         <div v-if="value['show']">
-                            <DataSetPrev :ds_name="index" :ds_count="value['count']" :img_paths="value['paths']"/>
+                            <DataSetPrev :ds_name="index" :ds_count="value['count']"
+                                         :img_paths="value['paths']" :location="value['location']"
+                                         :description="value['description']"/>
                         </div>
                     </div>
                 </li>
             </div>
+        </div>
             
         </div>
-    </div>
 
 </template>
 
@@ -99,11 +101,12 @@ import axios from 'axios';
 import { onMounted } from 'vue';
 import { ref } from '@vue/reactivity';
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import b64toBlob from '@/composables/byteToBlob';
 
 export default {
     name : 'ExploreDataView',
     setup() {
-        const error = ref(null)
+        const error = ref('Retrieving data...')
         const active = ref(true)
         const searchInput = ref('')
         const filteredData = ref('')
@@ -111,6 +114,9 @@ export default {
         const ds_modal = ref('')
         const show_modal = ref(false)
         const datasets = ref([])
+        const images = ref([])
+        const image_urls = ref([])
+        
         const links = [
             { filter: 'img l 5', label: 'Fewer than 5 images'},
             { filter: 'img g 5', label: 'Greater than 5 images'},
@@ -136,9 +142,6 @@ export default {
                     if (condition) v['show'] = true
                     else v['show'] = false
                 });
-                
-                ds_info.value['Dataset 1']['show'] = false
-                console.log(ds_info.value['Dataset 1']['show'])
             }
             if (filter == "img g 5") {
                 console.log("Filter datasets with greater than 5 images")
@@ -146,6 +149,7 @@ export default {
                 Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => {
                     let condition = v['count']>5
                     if (condition) v['show'] = true
+                    else v['show'] = false
                 }));
             }
             if (filter == "class eq 1") {
@@ -163,44 +167,74 @@ export default {
             show_modal.value = false
         }
 
+        const getImgURL = (imgBytes) => {
+            let tempArr = []
+            for (var i = 0; i < imgBytes.length; i++) {
+                tempArr.push(URL.createObjectURL(b64toBlob(imgBytes[i])))
+            }
+            return tempArr
+        }
+
+        const convertByDataset = (images) => {
+            Object.keys(ds_info.value).forEach(function(key, index) {
+                ds_info.value[key]['paths'] = getImgURL(images[index])
+            });
+        }
+
         onMounted(async () => {
             await axios
             .get('http://127.0.0.1:5000/explore/')
             .then(response => (
                 ds_info.value = response.data['ds_info'],
                 filteredData.value = response.data['ds_info'],
+                images.value = response.data['images'],
+                convertByDataset(images.value),
                 console.log(response.data),
                 error.value=null
                 ))
-            .catch(error.value = "Failed to retreive data")
+            .catch(error.value = "Retrieving data...")
     
         })
         return { ds_info, datasets, filteredData, error, active, links,
                  searchInput, applyFilter, searchFilter, openDataset,
-                 show_modal, closeDataset, ds_modal }
+                 show_modal, closeDataset, ds_modal, image_urls }
     },
-    components: {DataSetPrev, DatasetView, Menu, MenuButton, MenuItem, MenuItems}
+    components: { DataSetPrev, DatasetView, Menu, MenuButton, MenuItem, 
+                  MenuItems}
 }
 </script>
 
 <style>
-.container {
+.datasetPrevContainer {
     border-width: 3px;
     border-radius: 10px;
+    overflow-y: scroll;
+}
+.container {
     gap: 20px;
     display: grid;
-    height: 120%;
     overflow-y: scroll;
-    margin: 17px;
     padding: 10px;
+    height:70vh;
+    width:85%;
 }
 .container li {
     list-style-type: none;
+    width: 90%;
+    height:100%;
 }
 .dropdown {
     border-color: aquamarine;
 }
 .fade {
     transition: all 0.5s ease;
+}
+.viewWindow {
+    margin: 25px;
+    margin-top: 15px;
+    height: 75vh;
+    width:65vw;
+    display: grid;
+    grid-gap: 10px;
 }
 </style>

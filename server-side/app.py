@@ -362,6 +362,11 @@ def changePass(user):
   
 
   return {'message' : 'success'}, 201
+
+@app.route('/getJobData/', methods = ['GET'])
+@token_required
+def getJobData():
+  pass
   
 
 if __name__ == "__main__":

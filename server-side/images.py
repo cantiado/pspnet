@@ -4,6 +4,10 @@ import pandas as pd
 from pathlib import Path
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+
+from redis import Redis
+from rq import Queue
+
 from app import Image
 from app import Dataset
 from app import Upload
@@ -13,8 +17,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
 db = SQLAlchemy(app)
 db.init_app(app)
 
+r = Redis()
+queue = Queue(connection=r)
+
 
 image_folder = "images"
+  
 
 @app.route("/identify", methods=["POST"])
 def identify():
@@ -57,9 +65,13 @@ def identify():
   FILE = Path(__file__).resolve()
   path = FILE.parents[0]
   os.chdir(path)
+
   print("Predicting...")
-  cmd = r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + r' --img 640'
-  os.system(cmd)
+  #image_tasks = queue.enqueue_many( [Queue.prepare_data(os.system, [r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + '/' +  file.filename + r' --img 640']) for file in files])
+  os.system(r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + r' --img 640')
+  
+  #cmd = r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + r' --img 640'
+  #os.system(cmd)
 
   #Declare string variables, append with new information from inference txt, print out
   confidenceInterval = []

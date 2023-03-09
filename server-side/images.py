@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import pandas as pd
 from pathlib import Path
 from flask import Flask, request, jsonify
@@ -72,10 +73,16 @@ def identify():
 
   #changes back to pspnet/server-side folder to append predictions.txt to csv file.
   os.chdir(path)
+  
+  #saves csv prediction labels folder...
   read_file = pd.read_csv (r'labels/predictions.txt')
-  read_file.to_csv (r'labels/predictions.csv', index=None)
+  read_file.to_csv(r"labels/predictions.csv", index = None)
 
-  return open(r"labels/predictions.csv", mode='r')
+  #move csv prediction to newly created jobs folder... and deletes labels folder to remove previous job
+  shutil.move("labels/predictions.csv", job_folder)
+  shutil.rmtree(r"labels")
+
+  return "Success!"
 #2/27/2023 - Convert text files in predict class to csv...
 
 if __name__ == "__main__":

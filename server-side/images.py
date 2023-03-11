@@ -62,25 +62,24 @@ def identify():
   cmd = r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + r' --img 640'
   os.system(cmd)
 
-  #Declare string variables, append with new information from inference txt, print out
-  confidenceInterval = []
-  species_id = []
-
   #this command is used to concatenate all txt files in the labels directory after prediciton is made
   os.chdir("labels")
-  cmd2 = r"cat *.txt > predictions.txt"
-  os.system(cmd2)
+  newText_ID = "cat *.txt > predictions" + str(job_id) + ".txt"
+  os.system(newText_ID)
 
   #changes back to pspnet/server-side folder to append predictions.txt to csv file.
   os.chdir(path)
   
   #saves csv prediction labels folder...
-  read_file = pd.read_csv (r'labels/predictions.txt')
-  read_file.to_csv(r"labels/predictions.csv", index = None)
+  newPredictionsCSV = "labels/predictions" + str(job_id) + ".csv" #creates unique csv file with jobID
+  predictionsTXT = "labels/predictions" + str(job_id) + ".txt" #creates predictions text with unique id
+
+  read_file = pd.read_fwf(predictionsTXT)
+  read_file.to_csv(newPredictionsCSV, index=None)
 
   #move csv prediction to newly created jobs folder... and deletes labels folder to remove previous job
-  shutil.move("labels/predictions.csv", job_folder)
-  shutil.rmtree(r"labels")
+  shutil.move(newPredictionsCSV, job_folder)
+  shutil.rmtree(r"labels/")
 
   return "Success!"
 #2/27/2023 - Convert text files in predict class to csv...

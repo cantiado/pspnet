@@ -33,7 +33,7 @@ app.config['MAIL_USERNAME'] = "pspnetcs426@gmail.com"
 app.config['MAIL_PASSWORD'] = "waiccpkrmgjpescr"
 app.config['TESTING'] = False
 
-app.config['DOWNLOAD'] = 'labels'
+app.config['DOWNLOAD'] = 'images'
 
 
 CORS(app, resources={r"/*":{'origins':"*"}})
@@ -392,7 +392,7 @@ def getJobData(user):
 # @token_required
 @app.route('/download', methods = ['GET'])
 def download():
-  path = os.path.join(app.root_path, app.config['DOWNLOAD'], 'predictions.csv')
+  path = os.path.join(app.root_path, app.config['DOWNLOAD'], '1','predictions.csv')
   return send_file(path, as_attachment=True)
 
 if __name__ == "__main__":

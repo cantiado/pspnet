@@ -297,13 +297,12 @@ def dataset_prev_data():
     paths.append(img_path[0].replace('/src/assets/',''))
   return jsonify(paths), 201
 
-@app.route('/datasetview/', methods = ['GET', 'POST'])
-def dataset_view_data():
-  ds_name = request.get_json()
+@app.route('/datasetview/<dsName>/', methods = ['GET'])
+def dataset_view_data(dsName):
   response_data = {}
   paths = []
   labels = []
-  img_paths = db.session.query(Image.path, Image.label).filter_by(dataset_name = ds_name['ds_name'])
+  img_paths = db.session.query(Image.path, Image.label).filter_by(dataset_name = dsName)
   for img_path in img_paths:
     paths.append(img_from_path(img_path[0]))
     labels.append(img_path[1])

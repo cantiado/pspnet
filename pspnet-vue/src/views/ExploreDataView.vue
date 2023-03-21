@@ -2,9 +2,6 @@
 <!-- Dropdown filter menu adapted from vue headless ui and tailwind-->
 
 <template>
-  <div v-if="show_modal">
-    <DatasetView :ds_name="ds_modal" @closeModal="closeDataset" />
-  </div>
   <div class="w-full p-5 max-h-[79.5vh] overflow-auto flex flex-col justify-start items-center gap-5">
     <div
       class="w-full flex flex-row justify-center items-center bg-slate-50 p-5 border-2"
@@ -55,7 +52,8 @@
     </div>
     <div class="w-full flex flex-col gap-3">
       <div v-if="error != null" class="text-2xl font-bold">{{ error }}</div>
-      <div v-for="(value, index) in filteredData" :key="index" @click="openDataset(index)">
+      <router-link :to="{ name: 'singleDataset', params: {dsName: index}, props: true }" v-for="(value, index) in filteredData" :key="index">
+      <!-- <div v-for="(value, index) in filteredData" :key="index" @click="openDataset(index)"> -->
         <div class="prevBox" >
           <div v-if="value['show']">
             <DataSetPrev
@@ -67,7 +65,7 @@
             />
           </div>
         </div>
-      </div>
+      </router-link>
     </div>
   </div>
 </template>

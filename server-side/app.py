@@ -298,11 +298,13 @@ def dataset_prev_data():
   return jsonify(paths), 201
 
 @app.route('/datasetview/<dsName>/', methods = ['GET'])
+# possibly allows private/shared datasets to be directly access by URL
 def dataset_view_data(dsName):
   response_data = {}
   paths = []
   labels = []
-  img_paths = db.session.query(Image.path, Image.label).filter_by(dataset_name = dsName)
+  # img_data = {} # new structure w/ upload(+er)_id
+  img_paths = db.session.query(Image.path, Image.label, Image.upload_id, Image.uploader_id).filter_by(dataset_name = dsName)
   for img_path in img_paths:
     paths.append(img_from_path(img_path[0]))
     labels.append(img_path[1])

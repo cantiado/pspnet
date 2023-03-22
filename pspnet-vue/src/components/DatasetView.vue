@@ -11,19 +11,20 @@
                     <li><text class="font-bold">{{ dsName }}</text></li>
                     <li># Images: </li>
                     <li># Uploads: </li>
-                    <li>Contributors: </li>
-                    <li>Changes:</li>
+                    <li># Contributors: </li>
+                    <li># Modifications: </li>
 
                 </ul>
             </div>
         </div>
         <div class="basis-2/3 p-5">
             <div class="imgContainer inline-grid grid-cols-3 gap-3">
-                <div v-if="imgURLs" v-for="path in imgURLs" class="individualImg">
-                <img
-                    class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm"
-                    :src="path"
-                />
+                <div v-if="imgURLs" v-for="(path, index) in imgURLs" class="individualImg">
+                    <img
+                        class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm"
+                        :src="path"
+                    />
+                    <span v-if="imgLabels[index]">{{ imgLabels[index] }}</span>
                 </div>
             </div>
         </div>
@@ -72,7 +73,7 @@ export default {
       }
     });
 
-    return { imgURLs };
+    return { imgURLs, imgLabels };
   },
   components: { UserImg },
 };

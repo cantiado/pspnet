@@ -17,10 +17,24 @@ db.init_app(app)
 image_folder = "images"
 
 def YOLOv5(path, job_id):
+  #executes yolo prediction model on images/jobs folder...
   os.chdir(path)
+  directory = 'images/' +str(job_id)
+
+  #type checks each file in directory to verify if user uploaded images, if not error is returned and function terminates
+  for filename in os.listdir(directory):
+    f = os.path.join(directory, filename)
+    # checking if it is a file
+    if f.lower().endswith(('bmp', 'dng', 'jpeg', 'jpg', 'mpo', 'png', 'tif', 'tiff', 'webp', 'pfm')):
+        print("")
+    else:
+      print("Error, Prediction Failed.\nUser Uploaded Incorrect File Type.")
+      return 0
+
   print("Predicting...")
   cmd = r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + r' --img 640'
   os.system(cmd)
+  return 1
 
 def shutilFunction(job_id, job_folder, path):
   #changes back to pspnet/server-side folder to append predictions.txt to csv file.
@@ -31,7 +45,7 @@ def shutilFunction(job_id, job_folder, path):
 
 def csvCreation(job_id):
   os.chdir("labels")
-  #list here are used when parsing through text files in the label directory after prediciton
+  #lists here are used when parsing through text files in the label directory after prediciton
   listOne = []
   listTwo = []
   split = []
@@ -94,7 +108,10 @@ def identify():
   path = FILE.parents[0]
   
   #calls to yolov5 function to prediction images in jobs folder
-  YOLOv5(path, job_id)
+  failCheck = YOLOv5(path, job_id)
+  #if yolov5 function call fails due to user error, the fail check bellow will execute and prevent further execution.
+  if failCheck == 0:
+      return "Failed!"
   
   #calls to function which creates detailed csv for images...
   csvCreation(job_id)

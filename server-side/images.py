@@ -14,16 +14,20 @@ from app import Image
 from app import Dataset
 from app import Upload
 
+from api import bookKeeping
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
 db = SQLAlchemy(app)
 db.init_app(app)
 
-r = Redis()
+r = Redis(host='redis', port=6379)
 queue = Queue(connection=r)
 
 
 image_folder = "images"
+
+
   
 
 @app.route("/identify", methods=["POST"])
@@ -69,13 +73,17 @@ def identify():
     numImages = numImages + 1
     # save file paths to image database
 
+  new_dataset.numimages = numImages
+
   #commands here give global environment path to project for deployment on any machine
   FILE = Path(__file__).resolve()
   path = FILE.parents[0]
   os.chdir(path)
 
   print("Predicting...")
-  #image_tasks = queue.enqueue_many( [Queue.prepare_data(os.system, [r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + '/' +  file.filename + r' --img 640']) for file in files])
+  new_job = queue.enqueue(bookKeeping, args=(job_id, path, job_folder))
+
+  '''
   os.system(r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + r' --img 640')
   
   #cmd = r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + r' --img 640'
@@ -86,6 +94,7 @@ def identify():
   species_id = []
 
   #this command is used to concatenate all txt files in the labels directory after prediciton is made
+  
   os.chdir("labels")
   cmd2 = r"cat *.txt > predictions.txt"
   os.system(cmd2)
@@ -97,6 +106,11 @@ def identify():
   read_file = pd.read_csv (r'labels/predictions.txt')
   read_file.to_csv(r"labels/predictions.csv", index = None)
 
+
+  #move csv prediction to newly created jobs folder... and deletes labels folder to remove previous job
+  shutil.move("labels/predictions.csv", job_folder)
+  shutil.rmtree(r"labels")'''
+
   finishTime = datetime.datetime.utcnow()
 
   new_dataset.finishtime = finishTime
@@ -104,12 +118,8 @@ def identify():
   db.session.add(new_dataset)
   db.session.commit()
 
-  #move csv prediction to newly created jobs folder... and deletes labels folder to remove previous job
-  shutil.move("labels/predictions.csv", job_folder)
-  shutil.rmtree(r"labels")
-
   return "Success!"
 #2/27/2023 - Convert text files in predict class to csv...
 
 if __name__ == "__main__":
-  app.run(port=5001, debug=True)
+  app.run(port=5001, debug=True, host='0.0.0.0')

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
@@ -16,6 +16,7 @@ import io
 from base64 import encodebytes
 import PIL.Image as pimg
 
+import os
 
 
 app = Flask(__name__)
@@ -31,6 +32,8 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USERNAME'] = "pspnetcs426@gmail.com"
 app.config['MAIL_PASSWORD'] = "waiccpkrmgjpescr"
 app.config['TESTING'] = False
+
+app.config['DOWNLOAD'] = 'images'
 
 
 CORS(app, resources={r"/*":{'origins':"*"}})
@@ -386,6 +389,11 @@ def getJobData(user):
      for dataset in datasets
   ]), 201
   
+# @token_required
+@app.route('/download', methods = ['GET'])
+def download():
+  path = os.path.join(app.root_path, app.config['DOWNLOAD'], '1','predictions.csv')
+  return send_file(path, as_attachment=True)
 
 if __name__ == "__main__":
   app.run(debug=True)

@@ -421,7 +421,7 @@ export default {
       selectedModel: "",
       models: [{ name: "Model 1" }, { name: "Model 2" }, { name: "Model3" }],
       files: {}, // { id: { name, path, object } }
-      FILETYPES: "image/png, image/jpeg",
+      FILETYPES: "image/jpeg",//"image/png, image/jpeg",
       datasetName: "",
       datasetNotes: "",
       datasetGeoloc: "",

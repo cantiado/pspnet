@@ -3,7 +3,7 @@ from rq import Queue
 import utils.tasks_todo as tasks
 
 
-r = Redis(host='redis', port=6379)
+r = Redis()
 queue = Queue(connection=r)
 
 

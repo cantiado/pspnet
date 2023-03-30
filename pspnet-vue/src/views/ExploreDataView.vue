@@ -5,7 +5,9 @@
   <div v-if="show_modal">
     <DatasetView :ds_name="ds_modal" @closeModal="closeDataset" />
   </div>
-  <div class="w-full p-5 max-h-[79.5vh] overflow-auto flex flex-col justify-start items-center gap-5">
+  <div
+    class="w-full p-5 max-h-[79.5vh] overflow-auto flex flex-col justify-start items-center gap-5"
+  >
     <div
       class="w-full flex flex-row justify-center items-center bg-slate-50 p-5 border-2"
     >
@@ -55,8 +57,12 @@
     </div>
     <div class="w-full flex flex-col gap-3">
       <div v-if="error != null" class="text-2xl font-bold">{{ error }}</div>
-      <div v-for="(value, index) in filteredData" :key="index" @click="openDataset(index)">
-        <div class="prevBox" >
+      <div
+        v-for="(value, index) in filteredData"
+        :key="index"
+        @click="openDataset(index)"
+      >
+        <div class="prevBox">
           <div v-if="value['show']">
             <DataSetPrev
               :ds_name="index"
@@ -72,7 +78,112 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import DataSetPrev from "@/components/DataSetPrev.vue";
+import DatasetView from "@/components/DatasetView.vue";
+import axios from "axios";
+import { ref, onMounted } from "vue";
+import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
+import b64toBlob from "@/composables/byteToBlob";
+
+const error = ref("Retrieving data...");
+const active = ref(true);
+const searchInput = ref("");
+const filteredData = ref("");
+const ds_info = ref("");
+const ds_modal = ref("");
+const show_modal = ref(false);
+const datasets = ref([]);
+const images = ref([]);
+const image_urls = ref([]);
+
+const links = [
+  { filter: "img l 5", label: "< 5 images" },
+  { filter: "img g 5", label: "> 5 images" },
+  // { filter: 'class eq 1', label: 'Single-Class Datasets'}
+];
+
+function searchFilter() {
+  Object.fromEntries(
+    Object.entries(ds_info.value).filter(([k, v]) => {
+      let condition = k.includes(searchInput.value);
+      if (condition) v["show"] = true;
+      else v["show"] = false;
+    })
+  );
+  console.log(filteredData.value);
+};
+
+function applyFilter(filter) {
+  if (filter == "img l 5") {
+    console.log("Filter datasets with fewer than 5 images");
+    // Adapted from: https://9to5answer.com/how-to-filter-a-dictionary-by-value-in-javascript
+    // filteredData.value = Object.fromEntries(Object.entries(ds_info.value).filter(([k,v]) => v['count']<5));
+    Object.entries(filteredData.value).filter(([k, v]) => {
+      let condition = v["count"] < 5;
+      if (condition) v["show"] = true;
+      else v["show"] = false;
+    });
+  }
+  if (filter == "img g 5") {
+    console.log("Filter datasets with greater than 5 images");
+    // Adapted from: https://9to5answer.com/how-to-filter-a-dictionary-by-value-in-javascript
+    Object.fromEntries(
+      Object.entries(ds_info.value).filter(([k, v]) => {
+        let condition = v["count"] > 5;
+        if (condition) v["show"] = true;
+        else v["show"] = false;
+      })
+    );
+  }
+  if (filter == "class eq 1") {
+    console.log("Filter datasets with one class");
+    console.log(filteredData.value);
+  }
+};
+
+function openDataset(ds_name) {
+  console.log("Open view for: " + ds_name);
+  show_modal.value = true;
+  ds_modal.value = ds_name;
+};
+
+function closeDataset(close) {
+  show_modal.value = false;
+};
+
+function getImgURL(imgBytes) {
+  let tempArr = [];
+  for (var i = 0; i < imgBytes.length; i++) {
+    tempArr.push(URL.createObjectURL(b64toBlob(imgBytes[i])));
+  }
+  return tempArr;
+};
+
+function convertByDataset(images) {
+  Object.keys(ds_info.value).forEach(function (key, index) {
+    ds_info.value[key]["paths"] = getImgURL(images[index]);
+  });
+};
+
+onMounted(async () => {
+  await axios
+    .get("http://127.0.0.1:5000/explore/")
+    .then(
+      (response) => (
+        (ds_info.value = response.data["ds_info"]),
+        (filteredData.value = response.data["ds_info"]),
+        (images.value = response.data["images"]),
+        convertByDataset(images.value),
+        console.log(response.data),
+        (error.value = null)
+      )
+    )
+    .catch((error.value = "Retrieving data..."));
+});
+</script>
+
+<!-- <script>
 import DataSetPrev from "@/components/DataSetPrev.vue";
 import DatasetView from "@/components/DatasetView.vue";
 import axios from "axios";
@@ -204,7 +315,7 @@ export default {
     MenuItems,
   },
 };
-</script>
+</script> -->
 
 <style>
 /* .datasetPrevContainer {

@@ -1,7 +1,4 @@
 import os
-import sys
-import shutil
-import pandas as pd
 from pathlib import Path
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -78,38 +75,12 @@ def identify():
   #commands here give global environment path to project for deployment on any machine
   FILE = Path(__file__).resolve()
   path = FILE.parents[0]
-  os.chdir(path)
 
   print("Predicting...")
-  new_job = queue.enqueue(bookKeeping, args=(job_id, path, job_folder))
+  new_job = queue.enqueue(bookKeeping, args=(job_id, path, job_folder), job_id=str(job_id))
 
-  '''
-  os.system(r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + r' --img 640')
-  
-  #cmd = r'python yolov5/classify/predict.py --weights yolov5/best.onnx --save-txt --source images/' + str(job_id) + r' --img 640'
-  #os.system(cmd)
-
-  #Declare string variables, append with new information from inference txt, print out
-  confidenceInterval = []
-  species_id = []
-
-  #this command is used to concatenate all txt files in the labels directory after prediciton is made
-  
-  os.chdir("labels")
-  cmd2 = r"cat *.txt > predictions.txt"
-  os.system(cmd2)
-
-  #changes back to pspnet/server-side folder to append predictions.txt to csv file.
-  os.chdir(path)
-  
-  #saves csv prediction labels folder...
-  read_file = pd.read_csv (r'labels/predictions.txt')
-  read_file.to_csv(r"labels/predictions.csv", index = None)
-
-
-  #move csv prediction to newly created jobs folder... and deletes labels folder to remove previous job
-  shutil.move("labels/predictions.csv", job_folder)
-  shutil.rmtree(r"labels")'''
+  #fill in upload table using new_job attributes
+  #the finishtime should be set to null
 
   finishTime = datetime.datetime.utcnow()
 

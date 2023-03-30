@@ -17,7 +17,7 @@ services:
       dockerfile: Dockerfile
     restart : always
     ports:
-      - '5001:5001'
+      - '127.0.0.1:5001:5001'
     volumes:
       - ./server-side:/server-side
 
@@ -28,3 +28,6 @@ services:
     command: rq worker --url redis://redis:6379
     links:
       - redis
+    volumes:
+      - ./server-side:/server-side
+    

@@ -242,12 +242,15 @@ def profile():
 
   for unique_upload_id in user_uploads:
     upload_img_paths = []
-    result = db.session.query(Image.path).filter_by(upload_id=unique_upload_id[0]).all()
+    img_labels = []
+    result = db.session.query(Image.path, Image.label).filter_by(upload_id=unique_upload_id[0]).all()
     for path in result:
       upload_img_paths.append(img_from_path(path[0]))
+      img_labels.append(path[1])
 
     response_data[str(unique_upload_id[0])] = {
       'paths': upload_img_paths,
+      'labels': img_labels,
       'count': len(upload_img_paths)
     }
   return jsonify(response_data), 201

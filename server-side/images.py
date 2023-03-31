@@ -67,12 +67,21 @@ def csvCreation(job_id):
         predictionNumber = filename + " prediction: " + str(x) #creates new string to indicate classification order
         listOne = [split[0], split[1], predictionNumber] #adds each id to a list
         listTwo.append(listOne) #appends the list into one larger list
+        if x == 1:
+          updateLabel(filename, job_id, split[1])
   
   #creates a new csv data frame containing top 5 classifications for each image
   prediction = pd.DataFrame(listTwo, columns=['CONFIDENCE_INTERVAL', 'SPECIES', 'PICTURE_ID'])  
   prediction.insert(3, "MODEL: YOLOv5", " ")
   prediction_ID = "predictions" + str(job_id) + ".csv" 
   prediction.to_csv(prediction_ID) #converts the dataframe to a csv
+
+def updateLabel(filename, job_id, label):
+  '''Updates the label for a given file'''
+  # creates the Image.path, .txt is replaced with % for the LIKE query
+  img_path = os.path.join('images',str(job_id), filename.replace('.txt','%'))
+  db.session.query(Image).filter(Image.path.like(img_path)).update({Image.label: label}, synchronize_session = False)
+  db.session.commit()
 
 @app.route("/identify", methods=["POST"])
 def identify():
@@ -93,6 +102,8 @@ def identify():
                         dataset_location, visibility, uploadTime)
   new_upload = Upload(user_id)
   db.session.add(new_upload)
+  # db.session.add(new_dataset)
+  db.session.commit()
 
   job_id = db.session.query(Upload.id).order_by(Upload.id.desc()).first()[0]
   
@@ -112,10 +123,10 @@ def identify():
     new_image = Image(os.path.join(job_folder, file.filename), user_id, 
                       job_id, dataset_name, location=dataset_location)
     db.session.add(new_image)
-    db.session.commit()
     
     numImages = numImages + 1
     # save file paths to image database
+  db.session.commit()
 
   #commands here give global environment path to project for deployment on any machine
   FILE = Path(__file__).resolve()

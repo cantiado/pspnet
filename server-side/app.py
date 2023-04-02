@@ -104,9 +104,13 @@ class Dataset(db.Model):
 class Upload(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   uploader_id = db.Column(db.Integer, nullable=False)
+  dataset_name = db.Column(db.String[40], nullable=False)
+  upload_notes = db.Column(db.Text, nullable=True)
 
-  def __init__(self, uploader_id) -> None:
+  def __init__(self, uploader_id, dataset_name, notes) -> None:
     self.uploader_id = uploader_id
+    self.dataset_name = dataset_name
+    self.upload_notes = notes
 
 
 #creates wrapper function for routes that require authorized tokens. 
@@ -288,7 +292,7 @@ def explore_data():
                                               'description': visibile_descr[index],
                                               'location': visiblie_location[index],
                                               'show' : True}
-    response_data['images'] = combined_encoded
+  response_data['images'] = combined_encoded
   return jsonify(response_data), 201
 
 @app.route('/datasets/', methods = ['GET', 'POST'])
@@ -307,13 +311,24 @@ def dataset_view_data(dsName):
   paths = []
   labels = []
   # img_data = {} # new structure w/ upload(+er)_id
-  img_paths = db.session.query(Image.path, Image.label, Image.upload_id, Image.uploader_id).filter_by(dataset_name = dsName)
-  for img_path in img_paths:
-    paths.append(img_from_path(img_path[0]))
-    labels.append(img_path[1])
-  response_data['images'] = paths
-  response_data['labels'] = labels
-  return jsonify(response_data), 201
+  combined_data = []
+  ds_upload_list = db.session.query(Upload.id, Upload.uploader_id, Upload.upload_notes).filter_by(dataset_name = dsName)
+  for upload in ds_upload_list:
+    upload_data = {}
+    uploader_name = db.session.query(User.firstname, User.lastname).filter_by(id = upload[1]).all()
+    parsed_name = uploader_name[0][0] + ' ' + uploader_name[0][1][0:1] + '.'
+    upload_data['user'] = parsed_name
+    u_paths = []
+    u_labels = []
+    img_data = db.session.query(Image.path, Image.label).filter_by(upload_id = upload[0])
+    upload_data['count'] = img_data.count()
+    for img_datum in img_data:
+      u_paths.append(img_from_path(img_datum[0]))
+      u_labels.append(img_datum[1])
+      upload_data['images'] = u_paths
+      upload_data['labels'] = u_labels
+    combined_data.append(upload_data)
+  return jsonify(combined_data), 201
 
 # function adapted from:
 # https://stackoverflow.com/questions/64065587/how-to-return-multiple-images-with-flask

@@ -94,13 +94,14 @@ def identify():
   user_id = form_info['user-id']
   dataset_name = form_info['dataset-name']
   dataset_description = form_info['dataset-notes']
-  dataset_description = None if dataset_description == "" else dataset_description
+  upload_notes = None if dataset_description == "" else dataset_description
+  dataset_description = upload_notes # placeholder for dataset info
   dataset_location = form_info['dataset-geoloc']
   dataset_location = None if dataset_location == "" else dataset_location
   visibility = form_info['visibility']
   new_dataset = Dataset(dataset_name, dataset_description, 
                         dataset_location, visibility, uploadTime)
-  new_upload = Upload(user_id)
+  new_upload = Upload(user_id, dataset_name, upload_notes)
   db.session.add(new_upload)
   # db.session.add(new_dataset)
   db.session.commit()

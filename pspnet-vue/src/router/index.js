@@ -11,6 +11,7 @@ import Explore from "../views/ExploreDataView.vue";
 import AboutView from "../views/AboutView.vue";
 import ResetView from "../views/ResetView"
 import ForgotView from "../views/ForgotView"
+import CollectionsView from "../views/CollectionsView.vue"
 
 const routes = [
   {
@@ -113,6 +114,11 @@ const routes = [
     name: "explore",
     component: Explore,
   },
+  {
+    path: "/collections",
+    name: "collections",
+    component: CollectionsView
+  }
 ];
 
 const router = createRouter({

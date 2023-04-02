@@ -105,10 +105,10 @@ def identify():
   dataset_location = None if dataset_location == "" else dataset_location
   visibility = form_info['visibility']
   new_dataset = Dataset(dataset_name, dataset_description, 
-                        dataset_location, visibility, uploadTime)
+                        dataset_location, visibility)
   new_upload = Upload(user_id, dataset_name, upload_notes)
   db.session.add(new_upload)
-  # db.session.add(new_dataset)
+  db.session.add(new_dataset)
   db.session.commit()
 
   job_id = db.session.query(Upload.id).order_by(Upload.id.desc()).first()[0]
@@ -116,9 +116,8 @@ def identify():
   # form_info["dataset-name"]: dataset name
   # form_info["dataset-notes"]: dataset notes
   # form_info["dataset-geoloc"]: dataset geolocation
-  # form_info["visibility"]: {"public", "shared", "private"}
+  # form_info["visibility"]: {"public", "private"}
   # form_info["user-id"]: user id
-  # return jsonify(message="Successfully uploaded images!")
   
 
   job_folder = os.path.join(image_folder, str(job_id)) 

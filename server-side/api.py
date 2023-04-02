@@ -2,6 +2,13 @@ import os, glob
 import shutil
 import pandas as pd
 
+from flask import render_template
+
+from app import app, db
+from app import JobRegistry
+from app import User
+from app import new_thread_email, send_email
+
 #YOLOv5 predictions folder
 def YOLOv5(path, job_id):
   #executes yolo prediction model on images/jobs folder...
@@ -64,3 +71,21 @@ def bookKeeping(job_id, path, job_folder):
 
   #calls to shutil function to move prediction file job_folder then removes the labels directory
   shutilFunction(job_id, job_folder, path)
+
+def job_callback(job, connection, result, *args, **kwargs):
+  #first thing is to get the associated job registry object
+  with app.app_context():
+    finished_job = JobRegistry.query.filter_by(job_id = job.id).first()
+    finished_job.finishtime = job.ended_at
+
+    #next get user associated with job and send an email
+    user = User.query.filter_by(id=finished_job.uploader_id).first()
+    send_email('PSPNet Job Completed',
+              sender= app.config['MAIL_USERNAME'],
+              recipients= [user.email], 
+              text=render_template('job_completed.txt', description=finished_job.uploadNote, name=user.firstname),
+              html=render_template('job_completed.html', description=finished_job.uploadNote, name=user.firstname ))
+    db.session.commit()
+
+
+

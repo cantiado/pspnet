@@ -89,17 +89,13 @@ class Dataset(db.Model):
   description = db.Column(db.String[40], nullable=True)
   location = db.Column(db.String[50], nullable=True)
   visibility = db.Column(db.String[10], default='public')
-  uploadtime = db.Column(db.String(20), nullable=False)
-  finishtime = db.Column(db.String(20), nullable=False)
-  numimages = db.Column(db.Integer, nullable=False)
   
   
-  def __init__(self, dataset_name, dataset_description=None, location=None, visibility='public', uploadTime='0') -> None:
+  def __init__(self, dataset_name, dataset_description=None, location=None, visibility='public') -> None:
     self.name = dataset_name
     self.description = dataset_description
     self.location = location
     self.visibility = visibility
-    self.uploadtime = uploadTime
 
 class Upload(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -107,6 +103,28 @@ class Upload(db.Model):
 
   def __init__(self, uploader_id) -> None:
     self.uploader_id = uploader_id
+
+class JobRegistry(db.Model):
+  job_id = db.Column(db.Integer, primary_key=True)
+  uploader_id = db.Column(db.Integer, nullable=False)
+  dataset = db.Column(db.String(20), nullable=False)
+  uploadNote = db.Column(db.String(80), nullable=True)
+  geolocation = db.Column(db.String(20), nullable=True)
+  model = db.Column(db.String(20), nullable=False)
+  numimages = db.Column(db.Integer, nullable=False)
+  starttime = db.Column(db.String(20), nullable=False)
+  finishtime = db.Column(db.String(20), nullable=True)
+  
+  def __init__(self, job_id, uploader_id, dataset, uploadNote, geolocation, model, numimages, startime):
+    self.job_id = job_id
+    self.uploader_id = uploader_id
+    self.dataset = dataset
+    self.uploadNote = uploadNote
+    self.geolocation = geolocation
+    self.model = model
+    self.numimages = numimages
+    self.starttime = startime
+
 
 
 #creates wrapper function for routes that require authorized tokens. 
@@ -371,23 +389,44 @@ def changePass(user):
 
   return {'message' : 'success'}, 201
 
-@app.route('/getJobData/', methods = ['GET'])
+@app.route('/getCurrentJobs/', methods = ['GET'])
 @token_required
-def getJobData(user):
-  datasets = Dataset.query.all()
+def getCurrentJobs(user):
+  current_jobs = JobRegistry.query.filter_by(finishtime = None).filter_by(uploader_id=user.id).all()
+  jobs_data = [{
+    'id' : job.job_id,
+    'datasetName' : job.dataset,
+    'datasetNotes' : job.uploadNote,
+    'datasetGeoloc' : job.geolocation,
+    'visibility' : 'yes',
+    'model' : job.model,
+    'numImages' : job.numimages,
+    'start' : job.starttime,
+    'eta' : job.finishtime
+  } for job in current_jobs]
+  return jsonify(jobs_data), 201
   
-  return jsonify([
-    {'id' : dataset.id,
-     'datasetName' : dataset.name,
-     'datasetNotes' : dataset.description,
-     'datasetGeoloc' : '',
-     'visibility' : dataset.visibility,
-     'model' : '',
-     'numImages' : dataset.numimages,
-     'start' : dataset.uploadtime,
-     'end' : dataset.finishtime}
-     for dataset in datasets
-  ]), 201
+@app.route('/getFinishedJobs/', methods = ['GET'])
+@token_required
+def getFinishedJobs(user):
+  all_user_jobs = JobRegistry.query.filter_by(uploader_id=user.id).all()
+  finished_jobs = []
+  for job in all_user_jobs:
+    if job.finishtime != None:
+      finished_jobs.append(job)
+
+  jobs_data = [{
+    'id' : job.job_id,
+    'datasetName' : job.dataset,
+    'datasetNotes' : job.uploadNote,
+    'datasetGeoloc' : job.geolocation,
+    'visibility' : 'yes',
+    'model' : job.model,
+    'numImages' : job.numimages,
+    'start' : job.starttime,
+    'end' : job.finishtime
+  } for job in finished_jobs]
+  return jsonify(jobs_data), 201
   
 # @token_required
 @app.route('/download', methods = ['GET'])

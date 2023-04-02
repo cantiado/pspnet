@@ -10,8 +10,10 @@ from rq import Queue
 from app import Image
 from app import Dataset
 from app import Upload
+from app import JobRegistry
 
 from api import bookKeeping
+from api import job_callback
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
@@ -24,13 +26,11 @@ queue = Queue(connection=r)
 
 image_folder = "images"
 
-
   
 
 @app.route("/identify", methods=["POST"])
 def identify():
 
-  uploadTime = datetime.datetime.utcnow() 
 
   # files = request.files.to_dict(flat=False)["image-input"]
   files = request.files.to_dict(flat=False)["images"]
@@ -43,7 +43,7 @@ def identify():
   dataset_location = None if dataset_location == "" else dataset_location
   visibility = form_info['visibility']
   new_dataset = Dataset(dataset_name, dataset_description, 
-                        dataset_location, visibility, uploadTime)
+                        dataset_location, visibility)
   new_upload = Upload(user_id)
   db.session.add(new_upload)
 
@@ -77,15 +77,21 @@ def identify():
   path = FILE.parents[0]
 
   print("Predicting...")
-  new_job = queue.enqueue(bookKeeping, args=(job_id, path, job_folder), job_id=str(job_id))
+  new_job = queue.enqueue(bookKeeping, args=(job_id, path, job_folder), job_id=str(job_id), on_success=job_callback)
+  added_job = JobRegistry(new_job.id,
+                          user_id,
+                          dataset_name,
+                          dataset_description,
+                          dataset_location,
+                          'Yolov5',
+                          numImages,
+                          new_job.enqueued_at)
+  db.session.add(added_job)
 
   #fill in upload table using new_job attributes
   #the finishtime should be set to null
 
-  finishTime = datetime.datetime.utcnow()
 
-  new_dataset.finishtime = finishTime
-  new_dataset.numimages = numImages
   db.session.add(new_dataset)
   db.session.commit()
 

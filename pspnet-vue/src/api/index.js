@@ -42,6 +42,14 @@ export function getJobData(jwt){
   return axios.get(url + 'getJobData/', {headers : {token : jwt}})
 }
 
+export function getFinishedJobs(jwt){
+  return axios.get(url + 'getFinishedJobs/', {headers : {token : jwt}})
+}
+
+export function getCurrentJobs(jwt){
+  return axios.get(url + 'getCurrentJobs/', {headers : {token : jwt}})
+}
+
 export async function getDatasetImgs(ds_name) {
   return await axios.post(url + 'datasetview/')
 }

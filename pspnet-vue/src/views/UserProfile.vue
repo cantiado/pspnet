@@ -28,6 +28,7 @@
           :imgURLs="value['paths']"
           :numUploaded="value['count']"
           :uploadID="index"
+          :labels="value['labels']"
         />
       </div>
     </div>

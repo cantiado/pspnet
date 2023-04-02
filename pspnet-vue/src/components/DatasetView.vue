@@ -1,17 +1,46 @@
 <template>
-  <div class="background" @click="closeView">
-    <div class="window">
-      <div class="dsName text-2xl font-bold">{{ ds_name }}</div>
-      <div class="imgContainer inline-grid grid-cols-3 gap-3">
-        <div v-if="imgURLs" v-for="path in imgURLs" class="individualImg">
-          <img
-            class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm"
-            :src="path"
-          />
+    <div class="w-full h-[79vh] flex flex-row">
+        <div class="basis-1/3 p-5">
+            <router-link to="/explore">
+                <div class="rounded p-4 bg-[#b9e0a5] text-white">
+                    Back to Explore
+                </div>
+            </router-link>
+            <div>
+                <ul>
+                    <li><text class="font-bold">{{ dsName }}</text></li>
+                    <li># Images: </li>
+                    <li># Uploads: {{ numUploads }}</li>
+                    <li># Contributors: </li>
+                    <!-- <li># Modifications: </li> -->
+                    <li>Size of Dataset: </li>
+
+                </ul>
+            </div>
         </div>
-      </div>
+        <div class="basis-2/3 p-6 max-h-[79.5vh] overflow-auto">
+            <div class="imgContainer inline-grid grid-cols-1 gap-3">
+              <div v-for="(value, index) in responseData">
+                <div>
+
+                  <div class="text-xl font-bold">Upload: {{ index+1 }}</div>
+                  <div>Number of Images: {{ value['count'] }}</div>
+                  <div>Submitted By: {{ value['user'] }}</div>
+                  <div class="inline-grid grid-cols-3 gap-3" v-for="(img_value, img_index) in value['images']">
+                    <div>
+                      <img
+                            class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm"
+                            :src="img_value"
+                        />
+                        <span>{{ value['labels'][img_index] }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
     </div>
-  </div>
+
 </template>
 
 <script>
@@ -23,77 +52,51 @@ import b64toBlob from "@/composables/byteToBlob";
 
 export default {
   props: {
-    ds_name: String,
+    dsName: String,
   },
-  setup(props, { emit }) {
+
+  setup(props) {
     const responseData = ref();
     const imgURLs = ref([]);
     const imgLabels = ref([]);
-    const ds_name = ref(props.ds_name);
+    const dsName = ref(props.dsName);
     const error = ref("");
+    const numUploads = ref();
 
     const getURLs = (imgBytes) => {
+      var returnURLs = []
       for (var i = 0; i < imgBytes.length; i++) {
-        imgURLs.value.push(URL.createObjectURL(b64toBlob(imgBytes[i])));
+        returnURLs.push(URL.createObjectURL(b64toBlob(imgBytes[i])));
       }
+      return returnURLs
     };
 
+    const convertByUpload = (imageData) => {
+        for (var i = 0; i < imageData.length; i++) {
+          responseData.value[i]["images"] = getURLs(imageData[i]["images"]);
+        };
+      };
+
     onMounted(async () => {
-      if (ds_name.value) {
+      if (dsName.value) {
         await axios
-          .post("http://127.0.0.1:5000/datasetview/", {
-            ds_name: ds_name.value,
-          })
+          .get("http://127.0.0.1:5000/datasetview/" + dsName.value + "/")
           .then(
             (response) => (
-              (responseData.value = response.data),
-              getURLs(response.data["images"]),
-              (imgLabels.value = responseData.value["labels"]),
-              console.log(responseData.value)
+                (responseData.value = response.data),
+                convertByUpload(response.data),
+                numUploads.value = response.data.length,
+                // getURLs(response.data["images"]),
+                // (imgLabels.value = responseData.value["labels"]),
+                console.log(responseData.value)
             )
           )
           .catch((error.value = "Failed to retreive data"));
       }
     });
 
-    const closeView = () => {
-      emit("closeModal", true);
-    };
-
-    return { imgURLs, closeView, emit };
+    return { responseData, numUploads };
   },
   components: { UserImg },
 };
 </script>
-
-<style>
-.background {
-  background: rgba(0, 0, 0, 0.25);
-  top: 0;
-  left: 0;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-}
-.window {
-  background: white;
-  position: relative;
-  margin: 125px auto;
-  border-width: 5px;
-  border-radius: 5px;
-  width: 60%;
-  height: 60%;
-  overflow-y: auto;
-  padding: 15px;
-}
-.imgContainer {
-  display: grid;
-}
-.individualImg {
-  width: auto;
-  position: relative;
-}
-.dsName {
-  margin-bottom: 15px;
-}
-</style>

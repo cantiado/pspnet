@@ -43,5 +43,5 @@ export function getJobData(jwt){
 }
 
 export async function getDatasetImgs(ds_name) {
-  return await axios.post(url + 'datasetview/')
+  return await axios.post(url + 'datasetview/' + ds_name + '/')
 }

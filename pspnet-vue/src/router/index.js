@@ -113,6 +113,24 @@ const routes = [
     path: "/explore",
     name: "explore",
     component: Explore,
+    // children: [
+    //   {
+    //     path: "",
+    //     name: "explore",
+    //     component: Explore
+    //   },
+    //   {
+    //     path: "/:id",
+    //     name: "singleDataset",
+    //     component: () => import("../components/DatasetView.vue"),
+    //   }
+    // ]
+  },
+  {
+    path: "/explore/:dsName",
+    name: "singleDataset",
+    component: () => import("../components/DatasetView.vue"),
+    props: true,
   },
   {
     path: "/collections",

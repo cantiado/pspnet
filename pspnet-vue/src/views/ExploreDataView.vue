@@ -52,7 +52,9 @@
     </div>
     <div class="w-full flex flex-col gap-3">
       <div v-if="error != null" class="text-2xl font-bold">{{ error }}</div>
-      <router-link :to="{ name: 'singleDataset', params: {dsName: index}, props: true }" v-for="(value, index) in filteredData" :key="index">
+      <router-link
+        :to="{ name: 'singleDataset', params: {dsName: index}, props: true }"
+        v-for="(value, index) in filteredData" :key="index">
       <!-- <div v-for="(value, index) in filteredData" :key="index" @click="openDataset(index)"> -->
         <div class="prevBox" >
           <div v-if="value['show']">

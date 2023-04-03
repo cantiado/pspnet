@@ -9,20 +9,19 @@
             <div>
                 <ul>
                     <li><text class="font-bold">{{ dsName }}</text></li>
-                    <li># Images: </li>
-                    <li># Uploads: {{ numUploads }}</li>
-                    <li># Contributors: </li>
+                    <li>No. of Images: {{ numImages }}</li>
+                    <li>No. of Uploads: {{ numUploads }}</li>
+                    <!-- <li># Contributors: {{ numContributers }}</li> -->
                     <!-- <li># Modifications: </li> -->
-                    <li>Size of Dataset: </li>
+                    <li>Size of Dataset: {{ dsSize }} MB</li>
 
                 </ul>
             </div>
         </div>
         <div class="basis-2/3 p-6 max-h-[79.5vh] overflow-auto">
             <div class="imgContainer inline-grid grid-cols-1 gap-3">
-              <div v-for="(value, index) in responseData">
+              <div v-for="(value, index) in imgData">
                 <div>
-
                   <div class="text-xl font-bold">Upload: {{ index+1 }}</div>
                   <div>Number of Images: {{ value['count'] }}</div>
                   <div>Submitted By: {{ value['user'] }}</div>
@@ -53,15 +52,18 @@ import b64toBlob from "@/composables/byteToBlob";
 export default {
   props: {
     dsName: String,
+    numImages: Number
   },
 
   setup(props) {
     const responseData = ref();
-    const imgURLs = ref([]);
-    const imgLabels = ref([]);
+    const imgData = ref([]);
     const dsName = ref(props.dsName);
     const error = ref("");
-    const numUploads = ref();
+    const numImages = ref(0);
+    const numUploads = ref(0);
+    const numContributers = ref(0);
+    const dsSize = ref(0);
 
     const getURLs = (imgBytes) => {
       var returnURLs = []
@@ -73,7 +75,7 @@ export default {
 
     const convertByUpload = (imageData) => {
         for (var i = 0; i < imageData.length; i++) {
-          responseData.value[i]["images"] = getURLs(imageData[i]["images"]);
+          imgData.value[i]["images"] = getURLs(imageData[i]["images"]);
         };
       };
 
@@ -84,18 +86,20 @@ export default {
           .then(
             (response) => (
                 (responseData.value = response.data),
-                convertByUpload(response.data),
-                numUploads.value = response.data.length,
-                // getURLs(response.data["images"]),
-                // (imgLabels.value = responseData.value["labels"]),
-                console.log(responseData.value)
+                imgData.value = response.data["upload_data"],
+                convertByUpload(response.data["upload_data"]),
+                numUploads.value = response.data["upload_data"].length,
+                numImages.value = response.data["num_images"],
+                dsSize.value = response.data["ds_size"],
+                console.log(responseData.value),
+                console.log(imgData.value)
             )
           )
           .catch((error.value = "Failed to retreive data"));
       }
     });
 
-    return { responseData, numUploads };
+    return { imgData, numImages, numUploads, numContributers, dsSize };
   },
   components: { UserImg },
 };

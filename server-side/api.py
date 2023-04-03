@@ -2,11 +2,11 @@ import os, glob
 import shutil
 import pandas as pd
 
-from flask import render_template
+from flask import Flask, render_template
 
 from app import app, db
 from app import JobRegistry
-from app import User
+from app import User, Image
 from app import new_thread_email, send_email
 
 #YOLOv5 predictions folder
@@ -53,12 +53,22 @@ def csvCreation(job_id):
         predictionNumber = filename + " prediction: " + str(x) #creates new string to indicate classification order
         listOne = [split[0], split[1], predictionNumber] #adds each id to a list
         listTwo.append(listOne) #appends the list into one larger list
+        if x == 1:
+          print("running update label")
+          updateLabel(filename, job_id, split[1])
   
   #creates a new csv data frame containing top 5 classifications for each image
   prediction = pd.DataFrame(listTwo, columns=['CONFIDENCE_INTERVAL', 'SPECIES', 'PICTURE_ID'])  
   prediction.insert(3, "MODEL: YOLOv5", " ")
   prediction_ID = "predictions" + str(job_id) + ".csv" 
   prediction.to_csv(prediction_ID) #converts the dataframe to a csv
+
+def updateLabel(filename, job_id, label):
+  '''Updates the label for a given file'''
+  # creates the Image.path, .txt is replaced with % for the LIKE query
+  img_path = os.path.join('images',str(job_id), filename.replace('.txt','%'))
+  db.session.query(Image).filter(Image.path.like(img_path)).update({Image.label: label}, synchronize_session = False)
+  db.session.commit()
 
 def bookKeeping(job_id, path, job_folder):
   #calls to yolov5 function to prediction images in jobs folder
@@ -87,5 +97,5 @@ def job_callback(job, connection, result, *args, **kwargs):
               html=render_template('job_completed.html', description=finished_job.uploadNote, name=user.firstname ))
     db.session.commit()
 
-
-
+if __name__ == "__main__":
+  app.run(port=5002, debug=True)

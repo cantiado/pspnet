@@ -335,7 +335,9 @@ def dataset_prev_data():
 def dataset_view_data(dsName):
   combined_data = {}
   combined_upload_data = []
-  ds_upload_list = db.session.query(Upload.id, Upload.uploader_id, Upload.upload_notes).filter_by(dataset_name = dsName)
+  ds_upload_list = db.session.query \
+    (Upload.id,Upload.uploader_id, Upload.upload_notes)\
+      .filter_by(dataset_name = dsName)
   ds_data = db.session.query(Dataset.num_images, Dataset.ds_size). \
     filter_by(name = dsName).order_by(Dataset.id.desc()).first()
   for upload in ds_upload_list:
@@ -350,8 +352,9 @@ def dataset_view_data(dsName):
     for img_datum in img_data:
       paths.append(img_from_path(img_datum[0]))
       labels.append(img_datum[1])
-      upload_data['images'] = paths
-      upload_data['labels'] = labels
+    upload_data['images'] = paths
+    upload_data['labels'] = labels
+    upload_data['notes'] = upload[2]
     combined_upload_data.append(upload_data)
   combined_data['upload_data'] = combined_upload_data
   combined_data['num_images'] = ds_data[0]

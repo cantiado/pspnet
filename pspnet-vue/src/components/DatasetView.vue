@@ -27,6 +27,7 @@
             <h2 class="text-xl font-bold">Upload: {{ index + 1 }}</h2>
             <span>Number of Images: {{ value["count"] }}</span>
             <span>Submitted By: {{ value["user"] }}</span>
+            <span v-if="value['notes']">Notes: {{ value["notes"] }}</span>
           </div>
           <div class="flex flex-row flex-wrap gap-5">
             <div v-for="(img_value, img_index) in value['images']">

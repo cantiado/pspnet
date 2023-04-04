@@ -352,7 +352,7 @@ def dataset_view_data(dsName):
       labels.append(img_datum[1])
       upload_data['images'] = paths
       upload_data['labels'] = labels
-      combined_upload_data.append(upload_data)
+    combined_upload_data.append(upload_data)
   combined_data['upload_data'] = combined_upload_data
   combined_data['num_images'] = ds_data[0]
   combined_data['ds_size'] = ds_data[1]

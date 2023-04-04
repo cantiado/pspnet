@@ -52,7 +52,9 @@
     </div>
     <div class="w-full flex flex-col gap-3">
       <div v-if="error != null" class="text-2xl font-bold">{{ error }}</div>
-      <router-link :to="{ name: 'singleDataset', params: {dsName: index}, props: true }" v-for="(value, index) in filteredData" :key="index">
+      <router-link
+        :to="{ name: 'singleDataset', params: {dsName: index}, props: true }"
+        v-for="(value, index) in filteredData" :key="index">
       <!-- <div v-for="(value, index) in filteredData" :key="index" @click="openDataset(index)"> -->
         <div class="prevBox" >
           <div v-if="value['show']">
@@ -92,6 +94,7 @@ const image_urls = ref([]);
 const links = [
   { filter: "img l 5", label: "< 5 images" },
   { filter: "img g 5", label: "> 5 images" },
+  { filter: "reset", label: "Reset"},
   // { filter: 'class eq 1', label: 'Single-Class Datasets'}
 ];
 
@@ -121,7 +124,7 @@ function applyFilter(filter) {
     console.log("Filter datasets with greater than 5 images");
     // Adapted from: https://9to5answer.com/how-to-filter-a-dictionary-by-value-in-javascript
     Object.fromEntries(
-      Object.entries(ds_info.value).filter(([k, v]) => {
+      Object.entries(filteredData.value).filter(([k, v]) => {
         let condition = v["count"] > 5;
         if (condition) v["show"] = true;
         else v["show"] = false;
@@ -131,6 +134,14 @@ function applyFilter(filter) {
   if (filter == "class eq 1") {
     console.log("Filter datasets with one class");
     console.log(filteredData.value);
+  }
+  if (filter == "reset") {
+    console.log("Reset")
+    Object.fromEntries(
+      Object.entries(filteredData.value).filter(([k, v]) => {
+        v["show"] = true;
+      })
+    );
   }
 };
 

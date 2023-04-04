@@ -89,13 +89,20 @@ class Dataset(db.Model):
   description = db.Column(db.String[40], nullable=True)
   location = db.Column(db.String[50], nullable=True)
   visibility = db.Column(db.String[10], default='public')
+  num_images = db.Column(db.Integer, default=0)
+  num_uploads = db.Column(db.Integer, default=0)
+  ds_size = db.Column(db.Float, default=0.0)
   
   
-  def __init__(self, dataset_name, dataset_description=None, location=None, visibility='public') -> None:
+  def __init__(self, dataset_name, dataset_description=None, location=None, visibility='public',
+               num_images=0, num_uploads=0, ds_size=0.0) -> None:
     self.name = dataset_name
     self.description = dataset_description
     self.location = location
     self.visibility = visibility
+    self.num_images = num_images
+    self.num_uploads = num_uploads
+    self.ds_size = ds_size
 
 class Upload(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -288,8 +295,9 @@ def explore_data():
   # retrieve data where the last contribution to the dataset was public
   for dataset in unique_ds:
     query_data = db.session.query(Dataset.description, Dataset.location, 
-                                  Dataset.visibility).filter(Dataset.name==dataset[0]
-                                                             ).order_by(Dataset.id.desc()).first()
+                                  Dataset.visibility, Dataset.num_images). \
+                                  filter(Dataset.name==dataset[0]
+                                        ).order_by(Dataset.id.desc()).first()
     if query_data[2] == 'public':
       unique_visible.append(dataset[0])
       visibile_descr.append(query_data[0])
@@ -304,7 +312,7 @@ def explore_data():
     for img_path in paths:
       encoded_imgs.append(img_from_path(img_path[0]))
     combined_encoded.append(encoded_imgs)
-    img_count = images.count()
+    img_count = query_data[3]
     response_data['ds_info'][str(dataset)] = {'count': img_count,
                                               'paths': encoded_imgs,
                                               'description': visibile_descr[index],
@@ -325,27 +333,29 @@ def dataset_prev_data():
 @app.route('/datasetview/<dsName>/', methods = ['GET'])
 # possibly allows private/shared datasets to be directly access by URL
 def dataset_view_data(dsName):
-  response_data = {}
-  paths = []
-  labels = []
-  # img_data = {} # new structure w/ upload(+er)_id
-  combined_data = []
+  combined_data = {}
+  combined_upload_data = []
   ds_upload_list = db.session.query(Upload.id, Upload.uploader_id, Upload.upload_notes).filter_by(dataset_name = dsName)
+  ds_data = db.session.query(Dataset.num_images, Dataset.ds_size). \
+    filter_by(name = dsName).order_by(Dataset.id.desc()).first()
   for upload in ds_upload_list:
     upload_data = {}
     uploader_name = db.session.query(User.firstname, User.lastname).filter_by(id = upload[1]).all()
     parsed_name = uploader_name[0][0] + ' ' + uploader_name[0][1][0:1] + '.'
     upload_data['user'] = parsed_name
-    u_paths = []
-    u_labels = []
+    paths = []
+    labels = []
     img_data = db.session.query(Image.path, Image.label).filter_by(upload_id = upload[0])
     upload_data['count'] = img_data.count()
     for img_datum in img_data:
-      u_paths.append(img_from_path(img_datum[0]))
-      u_labels.append(img_datum[1])
-      upload_data['images'] = u_paths
-      upload_data['labels'] = u_labels
-    combined_data.append(upload_data)
+      paths.append(img_from_path(img_datum[0]))
+      labels.append(img_datum[1])
+      upload_data['images'] = paths
+      upload_data['labels'] = labels
+      combined_upload_data.append(upload_data)
+  combined_data['upload_data'] = combined_upload_data
+  combined_data['num_images'] = ds_data[0]
+  combined_data['ds_size'] = ds_data[1]
   return jsonify(combined_data), 201
 
 # function adapted from:

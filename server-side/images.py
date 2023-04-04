@@ -93,11 +93,8 @@ def identify():
   dataset_location = form_info['dataset-geoloc']
   dataset_location = None if dataset_location == "" else dataset_location
   visibility = form_info['visibility']
-  new_dataset = Dataset(dataset_name, dataset_description, 
-                        dataset_location, visibility)
   new_upload = Upload(user_id, dataset_name, upload_notes)
   db.session.add(new_upload)
-  db.session.add(new_dataset)
   db.session.commit()
 
   job_id = db.session.query(Upload.id).order_by(Upload.id.desc()).first()[0]
@@ -120,6 +117,21 @@ def identify():
     
     numImages = numImages + 1
     # save file paths to image database
+  upload_img_size = os.path.getsize(job_folder) / 100
+  # query to get data from previous entries of the dataset
+  ds_data = db.session.query(Dataset.num_images, Dataset.num_uploads,
+                             Dataset.ds_size).filter_by(name = dataset_name).all()
+  total_images = numImages
+  total_size = upload_img_size
+  total_uploads = 1
+  for entry in ds_data:
+    total_images += entry[0]
+    total_uploads += entry[1]
+    total_size += entry[2]
+  new_dataset = Dataset(dataset_name, dataset_description, 
+                        dataset_location, visibility, total_images,
+                        total_uploads, total_size)
+  db.session.add(new_dataset)
   db.session.commit()
   new_dataset.numimages = numImages
   #commands here give global environment path to project for deployment on any machine

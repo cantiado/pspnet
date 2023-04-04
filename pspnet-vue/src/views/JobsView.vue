@@ -49,7 +49,6 @@
               {{ job.datasetNotes ? job.datasetNotes : "None" }}
             </p>
           </div>
-          <button class="border bg-green-200 my-5">Download</button>
         </div>
       </div>
     </div>
@@ -91,6 +90,7 @@
           <p class="text-justify">
             Additional Notes: {{ job.datasetNotes ? job.datasetNotes : "None" }}
           </p>
+          <button class="border bg-green-200 my-5">Download</button>
         </div>
       </div>
     </div>

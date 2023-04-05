@@ -98,7 +98,7 @@ onMounted(async () => {
         (error.value = null)
       )
     )
-    .catch((error.value = "Failed to Retrieve Data"));
+    .catch((error.value = "Retrieving Data..."));
 });
 </script>
 

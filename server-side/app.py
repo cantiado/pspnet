@@ -333,15 +333,16 @@ def dataset_prev_data():
   return jsonify(paths), 201
 
 @app.route('/datasetview/<dsName>/', methods = ['GET'])
-# possibly allows private/shared datasets to be directly access by URL
 def dataset_view_data(dsName):
+  ds_data = db.session.query(Dataset.num_images, Dataset.ds_size, Dataset.visibility). \
+    filter_by(name = dsName).order_by(Dataset.id.desc()).first()
+  if ds_data[2] != 'public':
+    return jsonify(dict({'status': "Private dataset"})), 401
   combined_data = {}
   combined_upload_data = []
   ds_upload_list = db.session.query \
     (Upload.id,Upload.uploader_id, Upload.upload_notes)\
       .filter_by(dataset_name = dsName)
-  ds_data = db.session.query(Dataset.num_images, Dataset.ds_size). \
-    filter_by(name = dsName).order_by(Dataset.id.desc()).first()
   for upload in ds_upload_list:
     upload_data = {}
     uploader_name = db.session.query(User.firstname, User.lastname).filter_by(id = upload[1]).all()
@@ -361,6 +362,7 @@ def dataset_view_data(dsName):
   combined_data['upload_data'] = combined_upload_data
   combined_data['num_images'] = ds_data[0]
   combined_data['ds_size'] = ds_data[1]
+  combined_data['status'] = "Success"
   return jsonify(combined_data), 201
 
 # function adapted from:

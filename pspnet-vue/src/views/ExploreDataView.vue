@@ -163,9 +163,9 @@ function getImgURL(imgBytes) {
   return tempArr;
 };
 
-function convertByDataset(images) {
+function convertByDataset() {
   Object.keys(ds_info.value).forEach(function (key, index) {
-    ds_info.value[key]["paths"] = getImgURL(images[index]);
+    ds_info.value[key]["paths"] = getImgURL(ds_info.value[key]["paths"]);
   });
 };
 
@@ -176,8 +176,8 @@ onMounted(async () => {
       (response) => (
         (ds_info.value = response.data["ds_info"]),
         (filteredData.value = response.data["ds_info"]),
-        (images.value = response.data["images"]),
-        convertByDataset(images.value),
+        console.log(filteredData.value),
+        convertByDataset(),
         console.log(response.data),
         (error.value = null)
       )

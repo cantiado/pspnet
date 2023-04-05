@@ -291,6 +291,7 @@ def explore_data():
   unique_visible = []
   visibile_descr = []
   visiblie_location = []
+  visible_count = []
 
   # retrieve data where the last contribution to the dataset was public
   for dataset in unique_ds:
@@ -298,10 +299,12 @@ def explore_data():
                                   Dataset.visibility, Dataset.num_images). \
                                   filter(Dataset.name==dataset[0]
                                         ).order_by(Dataset.id.desc()).first()
+    print(query_data)
     if query_data[2] == 'public':
       unique_visible.append(dataset[0])
       visibile_descr.append(query_data[0])
       visiblie_location.append(query_data[1])
+      visible_count.append(query_data[3])
   response_data = {}
   combined_encoded = []
   response_data['ds_info'] = {}
@@ -312,13 +315,12 @@ def explore_data():
     for img_path in paths:
       encoded_imgs.append(img_from_path(img_path[0]))
     combined_encoded.append(encoded_imgs)
-    img_count = query_data[3]
+    img_count = visible_count[index]
     response_data['ds_info'][str(dataset)] = {'count': img_count,
                                               'paths': encoded_imgs,
                                               'description': visibile_descr[index],
                                               'location': visiblie_location[index],
                                               'show' : True}
-  response_data['images'] = combined_encoded
   return jsonify(response_data), 201
 
 @app.route('/datasets/', methods = ['GET', 'POST'])

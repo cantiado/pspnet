@@ -120,14 +120,14 @@ def identify():
   upload_img_size = os.path.getsize(job_folder) / 100
   # query to get data from previous entries of the dataset
   ds_data = db.session.query(Dataset.num_images, Dataset.num_uploads,
-                             Dataset.ds_size).filter_by(name = dataset_name).all()
+                             Dataset.ds_size).filter_by(name = dataset_name). \
+                              order_by(Dataset.id.desc()).first()
   total_images = numImages
   total_size = upload_img_size
   total_uploads = 1
-  for entry in ds_data:
-    total_images += entry[0]
-    total_uploads += entry[1]
-    total_size += entry[2]
+  total_images += ds_data[0]
+  total_uploads += ds_data[1]
+  total_size += ds_data[2]
   new_dataset = Dataset(dataset_name, dataset_description, 
                         dataset_location, visibility, total_images,
                         total_uploads, total_size)

@@ -125,9 +125,10 @@ def identify():
   total_images = numImages
   total_size = upload_img_size
   total_uploads = 1
-  total_images += ds_data[0]
-  total_uploads += ds_data[1]
-  total_size += ds_data[2]
+  if ds_data is not None:
+    total_images += ds_data[0]
+    total_uploads += ds_data[1]
+    total_size += ds_data[2]
   new_dataset = Dataset(dataset_name, dataset_description, 
                         dataset_location, visibility, total_images,
                         total_uploads, total_size)

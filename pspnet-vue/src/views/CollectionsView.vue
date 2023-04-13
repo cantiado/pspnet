@@ -10,6 +10,9 @@
       <button class="px-3 py-1 rounded-full hover:bg-slate-300 focus:outline-none focus:bg-slate-300">
         <span>Shared with me</span>
       </button>
+      <button class="px-3 py-1 rounded-full hover:bg-slate-300 focus:outline-none focus:bg-slate-300">
+        <span>Affiliated Researchers</span>
+      </button>
     </div>
     <div class="basis-5/6 p-5 overflow-auto flex flex-col gap-3">
       <span class="text-left font-bold text-sm">Projects</span>

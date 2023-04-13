@@ -32,6 +32,7 @@ const sections = ref([
   "background",
   "goals",
   "dataset",
+  "model",
   "research",
   "resources",
 ]);

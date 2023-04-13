@@ -64,6 +64,11 @@ const routes = [
         component: () => import("../components/DatasetSection.vue"),
       },
       {
+        path: "model",
+        name: "model",
+        component: () => import("../components/ModelSection.vue")
+      },
+      {
         path: "research",
         name: "research",
         component: () => import("../components/ResearchSection.vue"),

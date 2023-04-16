@@ -1,3 +1,5 @@
+<!-- Author: Antonio Lang, styled by Carl Antiado -->
+
 <template>
   <div class="w-full h-[79vh] flex flex-row">
     <div class="basis-1/4 p-5 bg-slate-50">
@@ -28,7 +30,17 @@
             <span>Number of Images: {{ value["count"] }}</span>
             <span>Submitted By: {{ value["user"] }}</span>
             <span v-if="value['notes']">Notes: {{ value["notes"] }}</span>
-            <div v-if="value['verified']" class="italic">Labels Verified</div>
+            <div 
+              v-if="value['verified']" 
+              class="italic border rounded p-1 border-[#b9e0a5]">
+              Labels Verified</div>
+              <button 
+              v-else="!value['verified']" 
+              @click="updateLabels(dsName,value['id'])"
+              class="border rounded p-1 border-black">
+              Verify Labels
+            </button>
+            <!-- check user role to display verified button -->
           </div>
           <div class="flex flex-row flex-wrap gap-5">
             <div v-for="(img_value, img_index) in value['images']">
@@ -76,6 +88,11 @@ export default {
       return returnURLs;
     };
 
+    const updateLabels = (dsName, uploadID) => {
+      var URL = "http://127.0.0.1:5000/datasetview/".concat(dsName).concat("/").concat(uploadID)
+      axios.get(URL)
+    };
+
     const convertByUpload = (imageData) => {
       for (var i = 0; i < imageData.length; i++) {
         imgData.value[i]["images"] = getURLs(imageData[i]["images"]);
@@ -102,7 +119,7 @@ export default {
       }
     });
 
-    return { imgData, numImages, numUploads, numContributers, dsSize };
+    return { imgData, numImages, numUploads, numContributers, dsSize, updateLabels };
   },
   components: { UserImg },
 };

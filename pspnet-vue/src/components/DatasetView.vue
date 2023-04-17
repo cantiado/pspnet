@@ -36,7 +36,7 @@
               Labels Verified</div>
               <button 
               v-else="!value['verified']" 
-              @click="updateLabels(dsName,value['id'])"
+              @click="value['verified'] = updateLabels(imgData, dsName,value['id'])"
               class="border rounded p-1 border-black">
               Verify Labels
             </button>
@@ -88,9 +88,10 @@ export default {
       return returnURLs;
     };
 
-    const updateLabels = (dsName, uploadID) => {
+    const updateLabels = (imgData, dsName, uploadID) => {
       var URL = "http://127.0.0.1:5000/datasetview/".concat(dsName).concat("/").concat(uploadID)
       axios.get(URL)
+      return true
     };
 
     const convertByUpload = (imageData) => {

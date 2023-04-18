@@ -9,9 +9,9 @@ import GallaryView from "../views/GallaryView.vue";
 import JobsView from "../views/JobsView.vue";
 import Explore from "../views/ExploreDataView.vue";
 import AboutView from "../views/AboutView.vue";
-import ResetView from "../views/ResetView"
-import ForgotView from "../views/ForgotView"
-import CollectionsView from "../views/CollectionsView.vue"
+import ResetView from "../views/ResetView";
+import ForgotView from "../views/ForgotView";
+import CollectionsView from "../views/CollectionsView.vue";
 
 const routes = [
   {
@@ -66,7 +66,7 @@ const routes = [
       {
         path: "model",
         name: "model",
-        component: () => import("../components/ModelSection.vue")
+        component: () => import("../components/ModelSection.vue"),
       },
       {
         path: "research",
@@ -139,9 +139,25 @@ const routes = [
   },
   {
     path: "/collections",
-    name: "collections",
-    component: CollectionsView
-  }
+    component: CollectionsView,
+    children: [
+      {
+        path: "",
+        name: "collections",
+        component: () => import("../components/MyCollections.vue"),
+      },
+      {
+        path: "shared",
+        name: "shared",
+        component: () => import("../components/SharedCollections.vue"),
+      },
+      {
+        path: "affiliates",
+        name: "affiliates",
+        component: () => import("../components/Affiliates.vue"),
+      },
+    ],
+  },
 ];
 
 const router = createRouter({

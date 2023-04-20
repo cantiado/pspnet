@@ -1,0 +1,33 @@
+#Docker compose based from https://github.com/RandyDeng/rq-docker-supervisor/blob/master/docker-compose.yml
+# Also see: https://blog.abbasmj.com/implementing-redis-task-queues-and-deploying-on-docker-compose
+version: "3.7"
+services:
+  redis:
+    image: redis:latest
+    ports:
+    - '6379:6379'
+    volumes:
+      - ./redis:/redis
+
+  images-app:
+    image: flask-app
+    container_name: images-app
+    build:
+      context: server-side/
+      dockerfile: Dockerfile
+    restart : always
+    ports:
+      - '127.0.0.1:5001:5001'
+    volumes:
+      - ./server-side:/server-side
+
+  workers:
+    image: flask-app:latest
+    depends_on:
+      - redis
+    command: rq worker --url redis://redis:6379
+    links:
+      - redis
+    volumes:
+      - ./server-side:/server-side
+    

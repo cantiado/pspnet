@@ -1,5 +1,13 @@
 <template>
   <div class="w-full flex flex-col justify-start items-center gap-3 p-5">
+    <!-- delete this once jobs are implemented -->
+    <a
+      href="http://127.0.0.1:5000/download"
+      class="p-5 bg-green-100 border-2 border-black"
+    >
+      Download csv</a
+    >
+    <!--  -->
     <h1 class="text-2xl font-bold">Current Jobs</h1>
     <div class="max-w-750 w-3/4 border" id="currentJobsTable">
       <div class="grid grid-cols-3 border-2 p-2">
@@ -41,7 +49,6 @@
               {{ job.datasetNotes ? job.datasetNotes : "None" }}
             </p>
           </div>
-          <button class="border bg-green-200 my-5">Download</button>
         </div>
       </div>
     </div>
@@ -83,15 +90,73 @@
           <p class="text-justify">
             Additional Notes: {{ job.datasetNotes ? job.datasetNotes : "None" }}
           </p>
+          <button class="border bg-green-200 my-5">Download</button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import { authStore } from '../store/authenticate';
-import { useRouter } from 'vue-router';
+<script setup>
+import { authStore } from "../store/authenticate";
+import { useRouter } from "vue-router";
+import { ref, onMounted, onBeforeMount } from "vue";
+import { getCurrentJobs } from "@/api";
+import { getFinishedJobs } from "@/api";
+
+const currentJobs = ref([
+]);
+
+const completedJobs = ref([
+]);
+
+const selectedCurrentJob = ref(-1);
+const selectedCompletedJob = ref(-1);
+
+const store = authStore();
+
+const getJobs = async () => {
+  const currentJobRes = await getCurrentJobs(localStorage.getItem('userToken'))
+  currentJobs.value = currentJobRes.data
+  const finishedJobRes = await getFinishedJobs(localStorage.getItem('userToken'))
+  completedJobs.value = finishedJobRes.data
+}
+
+//setInterval is not advised, can be bad if getJobstakes longer than the interval
+setInterval(getJobs, 1000)
+
+
+function setCurrentJob(id) {
+  selectedCurrentJob.value = id;
+}
+function setCompletedJob(id) {
+  selectedCompletedJob.value = id;
+}
+
+onBeforeMount(() => {
+  if (!store.isAuthenticated()) {
+    const router = useRouter();
+    router.push({ name: "login" });
+  }
+});
+
+onMounted(() => {
+  currentJobs.value.sort((jobA, jobB) => {
+    if (jobA.start < jobB.start) return -1;
+    if (jobA.start > jobB.start) return 1;
+    return 0;
+  });
+  completedJobs.value.sort((jobA, jobB) => {
+    if (jobA.end < jobB.end) return 1;
+    if (jobA.end > jobB.end) return -1;
+    return 0;
+  });
+});
+</script>
+
+<!-- <script>
+import { authStore } from "../store/authenticate";
+import { useRouter } from "vue-router";
 export default {
   data() {
     return {
@@ -182,10 +247,10 @@ export default {
     };
   },
   beforeMount() {
-    const store = authStore()
+    const store = authStore();
     if (!store.isAuthenticated()) {
-      const router = useRouter()
-      router.push({name: 'login'})
+      const router = useRouter();
+      router.push({ name: "login" });
     }
   },
   mounted() {
@@ -209,4 +274,4 @@ export default {
     },
   },
 };
-</script>
+</script> -->

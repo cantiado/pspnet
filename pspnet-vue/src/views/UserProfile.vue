@@ -1,110 +1,186 @@
 <!-- Author: Antonio Lang -->
 
 <template>
-  <div class="page">
-      <div class="user-info m-1">
-        <div>
-            <h1 class="text-4xl font-bold">{{ name }} </h1>
-            <div class="inline-flex flex-row">
-              <div class="p-2">Role: {{ role }}</div>
-              <!-- <div class="p-2">Created account on {{ create_date }}</div> -->
-              <div class="p-2">Verified Labeler: <span v-if="verified">Yes</span> <span v-else>No</span> </div>
-              <div class="p-2">No. of Contributions: {{ numImages }}</div>
-            </div>
-        </div>
-        <!-- Not used in current implementation -->
-        <!-- <div class="user-bio">
+  <div
+    class="w-full max-h-[79.5vh] flex flex-col justify-start items-center gap-3 p-5 overflow-auto"
+  >
+    <h1 class="text-4xl font-bold">{{ name }}</h1>
+    <div
+      class="flex flex-row gap-5 bg-slate-100 p-5 border border-slate-200 rounded-lg"
+    >
+      <span class="">Role: {{ role }}</span>
+      <!-- <div class="p-2">Created account on {{ create_date }}</div> -->
+      <span class=""> Verified Labeler: {{ verified ? "Yes" : "No" }} </span>
+      <span class="">No. of Contributions: {{ numImages }}</span>
+    </div>
+
+    <!-- Not used in current implementation -->
+    <!-- <div class="user-bio">
             <p>{{ user_bio }}</p>
-        </div> --> 
+        </div> -->
+    <h2 class="text-xl font-bold">Image Uploads</h2>
+    <div
+      class="w-full flex flex-col gap-3 border-4 border-[#663300] rounded-md p-3"
+    >
+      <div v-if="error" class="text-2xl font-bold">{{ error }}</div>
+      <div v-for="(value, index) in uploadData">
+        <UserImg
+          :imgURLs="value['paths']"
+          :numUploaded="value['count']"
+          :uploadID="index"
+          :labels="value['labels']"
+        />
       </div>
-      <div class="userImageGallery m-2">
-        <h2 class="text-lg font-bold">Image Uploads</h2>
-        <div class="container rounded-b">
-          <div v-if="error" class="text-2xl font-bold">{{ error }}</div>
-          <li v-for="(value, index) in uploadData">
-            <UserImg :imgURLs="value['paths']" :numUploaded="value['count']" :uploadID="index"/>
-          </li>
-        </div>
-      </div>
+    </div>
   </div>
 </template>
 
-<script>
-import UserImg from '../components/UserImg.vue'
-import { ref } from '@vue/reactivity'
-import { authStore } from '@/store/authenticate'
-import { onMounted } from '@vue/runtime-core'
-import axios from 'axios'
-import { useRouter } from 'vue-router'
-import b64toBlob from '@/composables/byteToBlob'
+<script setup>
+import UserImg from "../components/UserImg.vue";
+import { ref, onMounted, onBeforeMount } from "vue";
+import { authStore } from "@/store/authenticate";
+import axios from "axios";
+import { useRouter } from "vue-router";
+import b64toBlob from "@/composables/byteToBlob";
+
+const img_paths = ref(["../assets/sage.jpg"]);
+const verified = ref(false);
+
+const store = authStore();
+
+const name = ref("Anonymous User");
+const id = ref("");
+const error = ref("Loading...");
+const responseData = ref("");
+const numImages = ref(0);
+const img_data = ref("");
+const role = ref("Not Logged In");
+const uploadData = ref();
+
+onBeforeMount(() => {
+  if (!store.isAuthenticated()) {
+    const router = useRouter();
+    router.push({ name: "login" });
+  }
+});
+
+onMounted(async () => {
+  const data = await store.userData();
+  if (data) {
+    name.value = data.name;
+    id.value = data.id;
+    role.value = data.role;
+  }
+
+  const getImgURL = (imgBytes) => {
+    let tempArr = [];
+    for (var i = 0; i < imgBytes.length; i++) {
+      tempArr.push(URL.createObjectURL(b64toBlob(imgBytes[i])));
+    }
+    return tempArr;
+  };
+
+  const convertByUpload = (imageData) => {
+    Object.keys(uploadData.value).forEach(function (key, index) {
+      numImages.value += uploadData.value[key]["count"];
+      uploadData.value[key]["paths"] = getImgURL(imageData[key]["paths"]);
+    });
+  };
+
+  await axios
+    .post("http://127.0.0.1:5000/profile/", { id: data.id })
+    .then(
+      (response) => (
+        (responseData.value = response.data),
+        (uploadData.value = responseData.value),
+        console.log(responseData),
+        convertByUpload(response.data),
+        (error.value = null)
+      )
+    )
+    .catch((error.value = "Retrieving Data..."));
+});
+</script>
+
+<!-- <script>
+import UserImg from "../components/UserImg.vue";
+import { ref, onMounted, onBeforeMount } from "vue";
+import { authStore } from "@/store/authenticate";
+import axios from "axios";
+import { useRouter } from "vue-router";
+import b64toBlob from "@/composables/byteToBlob";
 
 export default {
-  name : 'ProfileView',
+  name: "ProfileView",
   data() {
     return {
-      img_paths: ['../assets/sage.jpg'],
+      img_paths: ["../assets/sage.jpg"],
       verified: false,
-    }
+    };
   },
-  setup(){
-    const store = authStore()
+  setup() {
+    const store = authStore();
 
-    const name = ref('Anonymous User')
-    const id = ref('')
-    const error = ref('Failed to Retrieve Data')
-    const responseData = ref('')
-    const numImages = ref(0)
-    const img_data = ref('')
-    const role = ref('Not Logged In')
-    const uploadData = ref()
+    const name = ref("Anonymous User");
+    const id = ref("");
+    const error = ref("Loading...");
+    const responseData = ref("");
+    const numImages = ref(0);
+    const img_data = ref("");
+    const role = ref("Not Logged In");
+    const uploadData = ref();
 
     onMounted(async () => {
-      const data = await store.userData()
+      const data = await store.userData();
       if (data) {
-        name.value = data.name
-        id.value = data.id
-        role.value = data.role
+        name.value = data.name;
+        id.value = data.id;
+        role.value = data.role;
       }
 
       const getImgURL = (imgBytes) => {
-            let tempArr = []
-            for (var i = 0; i < imgBytes.length; i++) {
-                tempArr.push(URL.createObjectURL(b64toBlob(imgBytes[i])))
-            }
-            return tempArr
+        let tempArr = [];
+        for (var i = 0; i < imgBytes.length; i++) {
+          tempArr.push(URL.createObjectURL(b64toBlob(imgBytes[i])));
         }
+        return tempArr;
+      };
 
-        const convertByUpload = (imageData) => {
-            Object.keys(uploadData.value).forEach(function(key, index) {
-                numImages.value += uploadData.value[key]['count']
-                uploadData.value[key]['paths'] = getImgURL(imageData[key]['paths'])
-            });
-        }
+      const convertByUpload = (imageData) => {
+        Object.keys(uploadData.value).forEach(function (key, index) {
+          numImages.value += uploadData.value[key]["count"];
+          uploadData.value[key]["paths"] = getImgURL(imageData[key]["paths"]);
+        });
+      };
 
       await axios
-        .post('http://127.0.0.1:5000/profile/', {id: data.id})
-        .then(response => (responseData.value = response.data,
-                           uploadData.value = responseData.value,
-                           console.log(responseData),
-                           convertByUpload(response.data),
-                           error.value = null))
-        .catch(error.value = "Failed to Retrieve Data")
-    })
-    return { name, numImages, error, uploadData, role }
+        .post("http://127.0.0.1:5000/profile/", { id: data.id })
+        .then(
+          (response) => (
+            (responseData.value = response.data),
+            (uploadData.value = responseData.value),
+            console.log(responseData),
+            convertByUpload(response.data),
+            (error.value = null)
+          )
+        )
+        .catch((error.value = "Failed to Retrieve Data"));
+    });
+    return { name, numImages, error, uploadData, role };
   },
-  components: {UserImg},
+  components: { UserImg },
   beforeMount() {
-    const store = authStore()
+    const store = authStore();
     if (!store.isAuthenticated()) {
-      const router = useRouter()
-      router.push({name: 'login'})
+      const router = useRouter();
+      router.push({ name: "login" });
     }
-  }
-}
-</script>
+  },
+};
+</script> -->
 
 <style>
-.flex {
+/* .flex {
   justify-content: center;
 }
 .container {
@@ -125,5 +201,5 @@ export default {
   border-radius: 15px;
   border-color: #663300;
   margin-bottom: 10px;
-}
+} */
 </style>

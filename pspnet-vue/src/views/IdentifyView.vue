@@ -44,23 +44,36 @@
         class="mt-3"
       />
       <div class="mt-3 flex flex-col gap-3">
-        <h1 class="text-lg font-bold">Dataset Information</h1>
+        <div class="flex flex-col items-center">
+          <h1 class="text-lg font-bold">Dataset Information</h1>
+          <button
+            @click="
+              () => {
+                datasetHelp = true;
+              }
+            "
+            class="px-3 w-fit flex flex-row justify-center gap-2 items-center text-sm"
+          >
+            Click for details
+            <InformationCircleIcon class="h-7 w-7" />
+          </button>
+        </div>
         <div class="grid grid-cols-2 gap-3 text-right">
           <label
             for="dataset-name"
-            class="min-w-max block font-medium text-gray-900 dark:text-white"
+            class="min-w-max block font-medium text-gray-900"
             >Dataset name:</label
           >
           <input
             v-model="datasetName"
             type="text"
             id="dataset-name"
-            placeholder="example-dataset-name"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Required"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1"
           />
           <label
             for="dataset-notes"
-            class="min-w-max block font-medium text-gray-900 dark:text-white"
+            class="min-w-max block font-medium text-gray-900"
             >Dataset notes:</label
           >
           <textarea
@@ -68,24 +81,53 @@
             type="text"
             id="dataset-notes"
             placeholder="Optional"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1"
           ></textarea>
           <label
             for="dataset-geoloc"
-            class="min-w-max block font-medium text-gray-900 dark:text-white"
+            class="min-w-max block font-medium text-gray-900"
             >Dataset geolocation:</label
           >
           <input
             v-model="datasetGeoloc"
             type="text"
             id="dataset-geoloc"
-            placeholder="Name, coords., etc."
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Optional"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1"
           />
+          <label
+            for="publications"
+            class="min-w-max block font-medium text-gray-900"
+            >Publications:</label
+          >
+          <input
+            v-model="publications"
+            type="text"
+            id="publications"
+            placeholder="Optional"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1"
+          />
+          <label
+            for="related-works"
+            class="min-w-max block font-medium text-gray-900"
+            >Related Works:</label
+          >
+          <textarea
+            v-model="relatedWorks"
+            type="text"
+            id="related-works"
+            placeholder="Optional"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1"
+          ></textarea>
         </div>
         <RadioGroup id="radio-visibility" v-model="visibility">
-          <RadioGroupLabel class="sr-only">Dataset visibility</RadioGroupLabel>
-          <div class="grid grid-cols-3 border-2">
+          <RadioGroupLabel class="min-w-max block font-medium text-gray-900"
+            >Visibility
+            <span class="text-gray-500 text-sm"
+              >(Required)</span
+            ></RadioGroupLabel
+          >
+          <div class="mt-2 grid grid-cols-2 border-2">
             <RadioGroupOption v-slot="{ checked }" value="public">
               <RadioGroupLabel
                 :class="{ 'bg-blue-200': checked }"
@@ -94,14 +136,14 @@
                 >Public</RadioGroupLabel
               >
             </RadioGroupOption>
-            <RadioGroupOption v-slot="{ checked }" value="shared">
+            <!-- <RadioGroupOption v-slot="{ checked }" value="shared">
               <RadioGroupLabel
                 :class="{ 'bg-blue-200': checked }"
                 class="block border"
                 as="span"
                 >Shared</RadioGroupLabel
               >
-            </RadioGroupOption>
+            </RadioGroupOption> -->
             <RadioGroupOption v-slot="{ checked }" value="private">
               <RadioGroupLabel
                 :class="{ 'bg-blue-200': checked }"
@@ -219,11 +261,7 @@
     </div>
   </div>
   <TransitionRoot appear :show="successfulSubmit" as="template">
-    <Dialog
-      as="div"
-      @close="reset"
-      class="relative z-10"
-    >
+    <Dialog as="div" @close="reset" class="relative z-10">
       <TransitionChild
         as="template"
         enter="duration-300 ease-out"
@@ -270,7 +308,11 @@
                 <button
                   type="button"
                   class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                  @click="reset"
+                  @click="
+                    () => {
+                      router.push({ name: 'jobs' });
+                    }
+                  "
                 >
                   Job Status
                 </button>
@@ -370,9 +412,253 @@
       </div>
     </Dialog>
   </TransitionRoot>
+  <TransitionRoot appear :show="datasetHelp" as="template">
+    <Dialog
+      as="div"
+      @close="
+        () => {
+          datasetHelp = false;
+        }
+      "
+      class="relative z-10"
+    >
+      <TransitionChild
+        as="template"
+        enter="duration-300 ease-out"
+        enter-from="opacity-0"
+        enter-to="opacity-100"
+        leave="duration-200 ease-in"
+        leave-from="opacity-100"
+        leave-to="opacity-0"
+      >
+        <div class="fixed inset-0 bg-black bg-opacity-25" />
+      </TransitionChild>
+
+      <div class="fixed inset-0 overflow-y-auto">
+        <div
+          class="flex min-h-full items-center justify-center p-4 text-center"
+        >
+          <TransitionChild
+            as="template"
+            enter="duration-300 ease-out"
+            enter-from="opacity-0 scale-95"
+            enter-to="opacity-100 scale-100"
+            leave="duration-200 ease-in"
+            leave-from="opacity-100 scale-100"
+            leave-to="opacity-0 scale-95"
+          >
+            <DialogPanel
+              class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+            >
+              <DialogTitle
+                as="h3"
+                class="text-lg font-medium leading-6 text-gray-900"
+              >
+                Dataset Information Descriptions
+              </DialogTitle>
+              <div class="mt-2 text-sm text-gray-500 flex flex-col gap-2">
+                <p>
+                  Dataset Name: Unique name for the dataset. Using an existing
+                  name will try to add the uploaded images to the dataset with
+                  the existing name.
+                </p>
+                <p>Dataset Notes: Additional information for the dataset.</p>
+                <p>
+                  Dataset Geolocation: Any format of location. (Ex: Reno, NV;
+                  Coordinates; etc.)
+                </p>
+                <p>
+                  Publications: Indication of any sponsorships, collaborations,
+                  organizations, etc.
+                </p>
+                <p>
+                  Related Works: Citations or references to other works,
+                  sources, etc.
+                </p>
+                <p>
+                  Visibility: For <em>Public</em>, everyone can view this
+                  dataset. For <em>Private</em>, only those with permission can
+                  view this dataset.
+                </p>
+              </div>
+
+              <div class="mt-4 flex flex-row gap-2 justify-start">
+                <button
+                  type="button"
+                  class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  @click="
+                    () => {
+                      datasetHelp = false;
+                    }
+                  "
+                >
+                  Close
+                </button>
+              </div>
+            </DialogPanel>
+          </TransitionChild>
+        </div>
+      </div>
+    </Dialog>
+  </TransitionRoot>
 </template>
 
-<script>
+<script setup>
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+  RadioGroup,
+  RadioGroupLabel,
+  RadioGroupOption,
+  RadioGroupDescription,
+  TransitionRoot,
+  TransitionChild,
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+} from "@headlessui/vue";
+import {
+  ChevronDownIcon,
+  InformationCircleIcon,
+} from "@heroicons/vue/20/solid";
+import ImageCard from "../components/ImageCard.vue";
+import FileList from "../components/FileList.vue";
+import { authStore } from "../store/authenticate";
+import { useRouter } from "vue-router";
+import { ref } from "vue";
+
+const uploadedImages = ref(false);
+const selectedModel = ref("");
+const models = ref([{ name: "YOLOv5" }]);
+const files = ref({});
+const FILETYPES = ref("image/jpeg"); //"image/png, image/jpeg"
+const datasetHelp = ref(false);
+const datasetName = ref("");
+const datasetNotes = ref("");
+const datasetGeoloc = ref("");
+const visibility = ref("");
+const successfulSubmit = ref(false);
+const errorMsg = ref("");
+const loading = ref(false);
+const publications = ref("");
+const relatedWorks = ref("");
+
+const store = authStore();
+const router = useRouter();
+
+var id = 0;
+
+function setModel(model) {
+  selectedModel.value = model.name;
+}
+
+function uploadImages(event) {
+  if (event.target.files.length != 0) {
+    uploadedImages.value = true;
+    for (let file of event.target.files) {
+      files.value[id] = {
+        name: file.name,
+        path: URL.createObjectURL(file),
+        object: file,
+      };
+      id++;
+    }
+    // console.log("after upload:", this.files);
+    modifyFileList();
+  }
+}
+
+function dropImages(event) {
+  event.preventDefault();
+  if (event.dataTransfer.items) {
+    [...event.dataTransfer.items].forEach((item, i) => {
+      if (item.kind === "file") {
+        const file = item.getAsFile();
+        if (FILETYPES.value.includes(file.type)) {
+          files.value[id] = {
+            name: file.name,
+            path: URL.createObjectURL(file),
+            object: file,
+          };
+          id++;
+        } else
+          console.log(`File ${file.name} is not of type "${this.FILETYPES}"`);
+      }
+    });
+    uploadedImages.value = true;
+  }
+  // console.log("after upload:", this.files);
+  modifyFileList();
+}
+
+function deleteFile(fileId) {
+  delete files.value[fileId];
+  if (Object.keys(files.value).length == 0) uploadedImages.value = false;
+  // console.log("after delete:", this.files);
+  modifyFileList();
+}
+
+function modifyFileList() {
+  const imageInput = document.getElementById("image-input");
+  var newFileList = new DataTransfer();
+  for (const fileId in files.value) {
+    newFileList.items.add(files.value[fileId].object);
+  }
+  imageInput.files = newFileList.files;
+}
+
+async function postImages() {
+  loading.value = true;
+  const url = "http://127.0.0.1:5001/identify";
+  const imageInput = document.getElementById("image-input");
+  const form = new FormData();
+  for (const image of imageInput.files) {
+    form.append("images", image);
+  }
+  form.set("dataset-name", datasetName.value);
+  form.set("dataset-notes", datasetNotes.value);
+  form.set("dataset-geoloc", datasetGeoloc.value);
+  form.set("visibility", visibility.value);
+  const userData = await store.userData();
+  console.log("user data", userData);
+  form.set("user-id", userData.id);
+  fetch(url, {
+    method: "POST",
+    mode: "no-cors",
+    body: form,
+  })
+    .then((res) => {
+      // console.log(res)
+      // console.log("successfully posted images");
+      errorMsg.value = "";
+      successfulSubmit.value = true;
+    })
+    .catch((err) => {
+      console.log(err);
+      errorMsg.value = "An error occured when submitting. Try again.";
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function reset() {
+  uploadedImages.value = false;
+  selectedModel.value = "";
+  files.value = {};
+  modifyFileList();
+  datasetName.value = "";
+  datasetNotes.value = "";
+  datasetGeoloc.value = "";
+  visibility.value = "";
+  successfulSubmit.value = false;
+  errorMsg.value = "";
+}
+</script>
+
+<!-- <script>
 import {
   Menu,
   MenuButton,
@@ -419,9 +705,9 @@ export default {
     return {
       uploadedImages: false,
       selectedModel: "",
-      models: [{ name: "Model 1" }, { name: "Model 2" }, { name: "Model3" }],
+      models: [{ name: "YOLOv5" }],
       files: {}, // { id: { name, path, object } }
-      FILETYPES: "image/png, image/jpeg",
+      FILETYPES: "image/jpeg",//"image/png, image/jpeg",
       datasetName: "",
       datasetNotes: "",
       datasetGeoloc: "",
@@ -540,4 +826,4 @@ export default {
     },
   },
 };
-</script>
+</script> -->

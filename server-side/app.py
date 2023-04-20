@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
@@ -16,6 +16,7 @@ import io
 from base64 import encodebytes
 import PIL.Image as pimg
 
+import os
 
 
 app = Flask(__name__)
@@ -31,6 +32,8 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USERNAME'] = "pspnetcs426@gmail.com"
 app.config['MAIL_PASSWORD'] = "waiccpkrmgjpescr"
 app.config['TESTING'] = False
+
+app.config['DOWNLOAD'] = 'images'
 
 
 CORS(app, resources={r"/*":{'origins':"*"}})
@@ -86,19 +89,53 @@ class Dataset(db.Model):
   description = db.Column(db.String[40], nullable=True)
   location = db.Column(db.String[50], nullable=True)
   visibility = db.Column(db.String[10], default='public')
+  num_images = db.Column(db.Integer, default=0)
+  num_uploads = db.Column(db.Integer, default=0)
+  ds_size = db.Column(db.Float, default=0.0)
   
-  def __init__(self, dataset_name, dataset_description=None, location=None, visibility='public') -> None:
+  
+  def __init__(self, dataset_name, dataset_description=None, location=None, visibility='public',
+               num_images=0, num_uploads=0, ds_size=0.0) -> None:
     self.name = dataset_name
     self.description = dataset_description
     self.location = location
     self.visibility = visibility
+    self.num_images = num_images
+    self.num_uploads = num_uploads
+    self.ds_size = ds_size
 
 class Upload(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   uploader_id = db.Column(db.Integer, nullable=False)
+  dataset_name = db.Column(db.String[40], nullable=False)
+  upload_notes = db.Column(db.Text, nullable=True)
 
-  def __init__(self, uploader_id) -> None:
+  def __init__(self, uploader_id, dataset_name, notes) -> None:
     self.uploader_id = uploader_id
+    self.dataset_name = dataset_name
+    self.upload_notes = notes
+
+class JobRegistry(db.Model):
+  job_id = db.Column(db.Integer, primary_key=True)
+  uploader_id = db.Column(db.Integer, nullable=False)
+  dataset = db.Column(db.String(20), nullable=False)
+  uploadNote = db.Column(db.String(80), nullable=True)
+  geolocation = db.Column(db.String(20), nullable=True)
+  model = db.Column(db.String(20), nullable=False)
+  numimages = db.Column(db.Integer, nullable=False)
+  starttime = db.Column(db.String(20), nullable=False)
+  finishtime = db.Column(db.String(20), nullable=True)
+  
+  def __init__(self, job_id, uploader_id, dataset, uploadNote, geolocation, model, numimages, startime):
+    self.job_id = job_id
+    self.uploader_id = uploader_id
+    self.dataset = dataset
+    self.uploadNote = uploadNote
+    self.geolocation = geolocation
+    self.model = model
+    self.numimages = numimages
+    self.starttime = startime
+
 
 
 #creates wrapper function for routes that require authorized tokens. 
@@ -234,12 +271,15 @@ def profile():
 
   for unique_upload_id in user_uploads:
     upload_img_paths = []
-    result = db.session.query(Image.path).filter_by(upload_id=unique_upload_id[0]).all()
+    img_labels = []
+    result = db.session.query(Image.path, Image.label).filter_by(upload_id=unique_upload_id[0]).all()
     for path in result:
       upload_img_paths.append(img_from_path(path[0]))
+      img_labels.append(path[1])
 
     response_data[str(unique_upload_id[0])] = {
       'paths': upload_img_paths,
+      'labels': img_labels,
       'count': len(upload_img_paths)
     }
   return jsonify(response_data), 201
@@ -251,16 +291,20 @@ def explore_data():
   unique_visible = []
   visibile_descr = []
   visiblie_location = []
+  visible_count = []
 
   # retrieve data where the last contribution to the dataset was public
   for dataset in unique_ds:
     query_data = db.session.query(Dataset.description, Dataset.location, 
-                                  Dataset.visibility).filter(Dataset.name==dataset[0]
-                                                             ).order_by(Dataset.id.desc()).first()
+                                  Dataset.visibility, Dataset.num_images). \
+                                  filter(Dataset.name==dataset[0]
+                                        ).order_by(Dataset.id.desc()).first()
+    print(query_data)
     if query_data[2] == 'public':
       unique_visible.append(dataset[0])
       visibile_descr.append(query_data[0])
       visiblie_location.append(query_data[1])
+      visible_count.append(query_data[3])
   response_data = {}
   combined_encoded = []
   response_data['ds_info'] = {}
@@ -271,13 +315,12 @@ def explore_data():
     for img_path in paths:
       encoded_imgs.append(img_from_path(img_path[0]))
     combined_encoded.append(encoded_imgs)
-    img_count = images.count()
+    img_count = visible_count[index]
     response_data['ds_info'][str(dataset)] = {'count': img_count,
                                               'paths': encoded_imgs,
                                               'description': visibile_descr[index],
                                               'location': visiblie_location[index],
                                               'show' : True}
-    response_data['images'] = combined_encoded
   return jsonify(response_data), 201
 
 @app.route('/datasets/', methods = ['GET', 'POST'])
@@ -289,19 +332,38 @@ def dataset_prev_data():
     paths.append(img_path[0].replace('/src/assets/',''))
   return jsonify(paths), 201
 
-@app.route('/datasetview/', methods = ['GET', 'POST'])
-def dataset_view_data():
-  ds_name = request.get_json()
-  response_data = {}
-  paths = []
-  labels = []
-  img_paths = db.session.query(Image.path, Image.label).filter_by(dataset_name = ds_name['ds_name'])
-  for img_path in img_paths:
-    paths.append(img_from_path(img_path[0]))
-    labels.append(img_path[1])
-  response_data['images'] = paths
-  response_data['labels'] = labels
-  return jsonify(response_data), 201
+@app.route('/datasetview/<dsName>/', methods = ['GET'])
+def dataset_view_data(dsName):
+  ds_data = db.session.query(Dataset.num_images, Dataset.ds_size, Dataset.visibility). \
+    filter_by(name = dsName).order_by(Dataset.id.desc()).first()
+  if ds_data[2] != 'public':
+    return jsonify(dict({'status': "Private dataset"})), 401
+  combined_data = {}
+  combined_upload_data = []
+  ds_upload_list = db.session.query \
+    (Upload.id,Upload.uploader_id, Upload.upload_notes)\
+      .filter_by(dataset_name = dsName)
+  for upload in ds_upload_list:
+    upload_data = {}
+    uploader_name = db.session.query(User.firstname, User.lastname).filter_by(id = upload[1]).all()
+    parsed_name = uploader_name[0][0] + ' ' + uploader_name[0][1][0:1] + '.'
+    upload_data['user'] = parsed_name
+    paths = []
+    labels = []
+    img_data = db.session.query(Image.path, Image.label).filter_by(upload_id = upload[0])
+    upload_data['count'] = img_data.count()
+    for img_datum in img_data:
+      paths.append(img_from_path(img_datum[0]))
+      labels.append(img_datum[1])
+    upload_data['images'] = paths
+    upload_data['labels'] = labels
+    upload_data['notes'] = upload[2]
+    combined_upload_data.append(upload_data)
+  combined_data['upload_data'] = combined_upload_data
+  combined_data['num_images'] = ds_data[0]
+  combined_data['ds_size'] = ds_data[1]
+  combined_data['status'] = "Success"
+  return jsonify(combined_data), 201
 
 # function adapted from:
 # https://stackoverflow.com/questions/64065587/how-to-return-multiple-images-with-flask
@@ -362,7 +424,51 @@ def changePass(user):
   
 
   return {'message' : 'success'}, 201
+
+@app.route('/getCurrentJobs/', methods = ['GET'])
+@token_required
+def getCurrentJobs(user):
+  current_jobs = JobRegistry.query.filter_by(finishtime = None).filter_by(uploader_id=user.id).all()
+  jobs_data = [{
+    'id' : job.job_id,
+    'datasetName' : job.dataset,
+    'datasetNotes' : job.uploadNote,
+    'datasetGeoloc' : job.geolocation,
+    'visibility' : 'yes',
+    'model' : job.model,
+    'numImages' : job.numimages,
+    'start' : job.starttime,
+    'eta' : job.finishtime
+  } for job in current_jobs]
+  return jsonify(jobs_data), 201
   
+@app.route('/getFinishedJobs/', methods = ['GET'])
+@token_required
+def getFinishedJobs(user):
+  all_user_jobs = JobRegistry.query.filter_by(uploader_id=user.id).all()
+  finished_jobs = []
+  for job in all_user_jobs:
+    if job.finishtime != None:
+      finished_jobs.append(job)
+
+  jobs_data = [{
+    'id' : job.job_id,
+    'datasetName' : job.dataset,
+    'datasetNotes' : job.uploadNote,
+    'datasetGeoloc' : job.geolocation,
+    'visibility' : 'yes',
+    'model' : job.model,
+    'numImages' : job.numimages,
+    'start' : job.starttime,
+    'end' : job.finishtime
+  } for job in finished_jobs]
+  return jsonify(jobs_data), 201
+  
+# @token_required
+@app.route('/download', methods = ['GET'])
+def download():
+  path = os.path.join(app.root_path, app.config['DOWNLOAD'], '1','predictions.csv')
+  return send_file(path, as_attachment=True)
 
 if __name__ == "__main__":
   app.run(debug=True)

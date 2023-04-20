@@ -9,8 +9,9 @@ import GallaryView from "../views/GallaryView.vue";
 import JobsView from "../views/JobsView.vue";
 import Explore from "../views/ExploreDataView.vue";
 import AboutView from "../views/AboutView.vue";
-import ResetView from "../views/ResetView"
-import ForgotView from "../views/ForgotView"
+import ResetView from "../views/ResetView";
+import ForgotView from "../views/ForgotView";
+import CollectionsView from "../views/CollectionsView.vue";
 
 const routes = [
   {
@@ -63,6 +64,11 @@ const routes = [
         component: () => import("../components/DatasetSection.vue"),
       },
       {
+        path: "model",
+        name: "model",
+        component: () => import("../components/ModelSection.vue"),
+      },
+      {
         path: "research",
         name: "research",
         component: () => import("../components/ResearchSection.vue"),
@@ -112,6 +118,45 @@ const routes = [
     path: "/explore",
     name: "explore",
     component: Explore,
+    // children: [
+    //   {
+    //     path: "",
+    //     name: "explore",
+    //     component: Explore
+    //   },
+    //   {
+    //     path: "/:id",
+    //     name: "singleDataset",
+    //     component: () => import("../components/DatasetView.vue"),
+    //   }
+    // ]
+  },
+  {
+    path: "/explore/:dsName",
+    name: "singleDataset",
+    component: () => import("../components/DatasetView.vue"),
+    props: true,
+  },
+  {
+    path: "/collections",
+    component: CollectionsView,
+    children: [
+      {
+        path: "",
+        name: "collections",
+        component: () => import("../components/MyCollections.vue"),
+      },
+      {
+        path: "shared",
+        name: "shared",
+        component: () => import("../components/SharedCollections.vue"),
+      },
+      {
+        path: "affiliates",
+        name: "affiliates",
+        component: () => import("../components/Affiliates.vue"),
+      },
+    ],
   },
 ];
 

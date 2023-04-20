@@ -86,16 +86,18 @@
             Additional Notes: {{ job.datasetNotes ? job.datasetNotes : "None" }}
           </p>
           <div class="flex-row space-x-4">
-            <button class="border bg-green-200 my-5">Download</button>
+            <a :href="'http://127.0.0.1:5000/download/' + job.id">
+              <button class="px-3 py-1 border bg-green-200 my-5">Download CSV</button>
+            </a>
             <router-link :to="{name :'singleDataset', params: {dsName: job.datasetName}, props: true }">
-              <button class="border bg-green-200 my-5">View Dataset</button>
+              <button class="px-3 py-1 border bg-green-200 my-5">View Dataset</button>
             </router-link>
           </div>
         </div>
-        <a
+        <!-- <a
           :href="'http://127.0.0.1:5000/download/' + job.id"
           class="border bg-green-200 my-5">
-          Download csv</a>
+          Download csv</a> -->
       </div>
     </div>
   </div>

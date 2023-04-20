@@ -30,7 +30,7 @@ app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USERNAME'] = "pspnetcs426@gmail.com"
-app.config['MAIL_PASSWORD'] = "waiccpkrmgjpescr"
+app.config['MAIL_PASSWORD'] = ""
 app.config['TESTING'] = False
 
 app.config['DOWNLOAD'] = 'images'
@@ -464,11 +464,12 @@ def getFinishedJobs(user):
   } for job in finished_jobs]
   return jsonify(jobs_data), 201
   
-# @token_required
-@app.route('/download', methods = ['GET'])
-def download():
-  path = os.path.join(app.root_path, app.config['DOWNLOAD'], '1','predictions.csv')
-  return send_file(path, as_attachment=True)
+@app.route('/download/<job_id>', methods = ['GET'])
+def download(job_id):
+  
+    path = os.path.join(app.root_path, app.config['DOWNLOAD'], job_id ,'predictions{}.csv'.format(job_id))
+    return send_file(path, as_attachment=True)
+  
 
 if __name__ == "__main__":
   app.run(debug=True)

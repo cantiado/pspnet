@@ -1,12 +1,7 @@
 <template>
   <div class="w-full flex flex-col justify-start items-center gap-3 p-5">
     <!-- delete this once jobs are implemented -->
-    <a
-      href="http://127.0.0.1:5000/download"
-      class="p-5 bg-green-100 border-2 border-black"
-    >
-      Download csv</a
-    >
+    
     <!--  -->
     <h1 class="text-2xl font-bold">Current Jobs</h1>
     <div class="max-w-750 w-3/4 border" id="currentJobsTable">
@@ -92,6 +87,10 @@
           </p>
           <button class="border bg-green-200 my-5">Download</button>
         </div>
+        <a
+          :href="'http://127.0.0.1:5000/download/' + job.id"
+          class="border bg-green-200 my-5">
+          Download csv</a>
       </div>
     </div>
   </div>

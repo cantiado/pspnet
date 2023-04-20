@@ -35,7 +35,7 @@
               class="italic border rounded p-1 border-[#b9e0a5]">
               Labels Verified</div>
               <button 
-              v-else="!value['verified']" 
+              v-else-if="role==='Principal Investigator'" 
               @click="value['verified'] = updateLabels(imgData, dsName,value['id'])"
               class="border rounded p-1 border-black">
               Verify Labels
@@ -63,6 +63,7 @@ import { ref } from "vue";
 import UserImg from "./UserImg.vue";
 import { onMounted } from "vue";
 import b64toBlob from "@/composables/byteToBlob";
+import { authStore } from '@/store/authenticate'
 
 export default {
   props: {
@@ -79,6 +80,8 @@ export default {
     const numUploads = ref(0);
     const numContributers = ref(0);
     const dsSize = ref(0);
+    const store = authStore()
+    const role = ref(0);
 
     const getURLs = (imgBytes) => {
       var returnURLs = [];
@@ -87,6 +90,10 @@ export default {
       }
       return returnURLs;
     };
+
+    const checkRole = () => {
+      console.log(store)
+    }
 
     const updateLabels = (imgData, dsName, uploadID) => {
       var URL = "http://127.0.0.1:5000/datasetview/".concat(dsName).concat("/").concat(uploadID)
@@ -101,6 +108,7 @@ export default {
     };
 
     onMounted(async () => {
+      const data = await store.userData();
       if (dsName.value) {
         await axios
           .get("http://127.0.0.1:5000/datasetview/" + dsName.value + "/")
@@ -118,9 +126,12 @@ export default {
           )
           .catch((error.value = "Failed to retreive data"));
       }
+      if (data) {
+        role.value = data.role;
+      }
     });
 
-    return { imgData, numImages, numUploads, numContributers, dsSize, updateLabels };
+    return { imgData, numImages, numUploads, numContributers, dsSize, updateLabels, role };
   },
   components: { UserImg },
 };

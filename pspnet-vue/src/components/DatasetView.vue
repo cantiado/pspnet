@@ -1,3 +1,5 @@
+<!-- Author: Antonio Lang, styled by Carl Antiado -->
+
 <template>
   <div class="w-full h-[79vh] flex flex-row">
     <div class="basis-1/4 p-5 bg-slate-50">
@@ -28,6 +30,17 @@
             <span>Number of Images: {{ value["count"] }}</span>
             <span>Submitted By: {{ value["user"] }}</span>
             <span v-if="value['notes']">Notes: {{ value["notes"] }}</span>
+            <div 
+              v-if="value['verified']" 
+              class="italic border rounded p-1 border-[#b9e0a5]">
+              Labels Verified</div>
+              <button 
+              v-else-if="role==='Principal Investigator'" 
+              @click="value['verified'] = updateLabels(imgData, dsName,value['id'])"
+              class="border rounded p-1 border-black">
+              Verify Labels
+            </button>
+            <!-- check user role to display verified button -->
           </div>
           <div class="flex flex-row flex-wrap gap-5">
             <div v-for="(img_value, img_index) in value['images']">
@@ -50,6 +63,7 @@ import { ref } from "vue";
 import UserImg from "./UserImg.vue";
 import { onMounted } from "vue";
 import b64toBlob from "@/composables/byteToBlob";
+import { authStore } from '@/store/authenticate'
 
 export default {
   props: {
@@ -66,6 +80,8 @@ export default {
     const numUploads = ref(0);
     const numContributers = ref(0);
     const dsSize = ref(0);
+    const store = authStore()
+    const role = ref(0);
 
     const getURLs = (imgBytes) => {
       var returnURLs = [];
@@ -75,6 +91,16 @@ export default {
       return returnURLs;
     };
 
+    const checkRole = () => {
+      console.log(store)
+    }
+
+    const updateLabels = (imgData, dsName, uploadID) => {
+      var URL = "http://127.0.0.1:5000/datasetview/".concat(dsName).concat("/").concat(uploadID)
+      axios.get(URL)
+      return true
+    };
+
     const convertByUpload = (imageData) => {
       for (var i = 0; i < imageData.length; i++) {
         imgData.value[i]["images"] = getURLs(imageData[i]["images"]);
@@ -82,6 +108,7 @@ export default {
     };
 
     onMounted(async () => {
+      const data = await store.userData();
       if (dsName.value) {
         await axios
           .get("http://127.0.0.1:5000/datasetview/" + dsName.value + "/")
@@ -99,9 +126,12 @@ export default {
           )
           .catch((error.value = "Failed to retreive data"));
       }
+      if (data) {
+        role.value = data.role;
+      }
     });
 
-    return { imgData, numImages, numUploads, numContributers, dsSize };
+    return { imgData, numImages, numUploads, numContributers, dsSize, updateLabels, role };
   },
   components: { UserImg },
 };

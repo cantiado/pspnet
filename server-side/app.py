@@ -109,6 +109,7 @@ class Upload(db.Model):
   uploader_id = db.Column(db.Integer, nullable=False)
   dataset_name = db.Column(db.String[40], nullable=False)
   upload_notes = db.Column(db.Text, nullable=True)
+  verified = db.Column(db.Boolean, default=False)
 
   def __init__(self, uploader_id, dataset_name, notes) -> None:
     self.uploader_id = uploader_id
@@ -341,7 +342,7 @@ def dataset_view_data(dsName):
   combined_data = {}
   combined_upload_data = []
   ds_upload_list = db.session.query \
-    (Upload.id,Upload.uploader_id, Upload.upload_notes)\
+    (Upload.id, Upload.uploader_id, Upload.upload_notes, Upload.verified)\
       .filter_by(dataset_name = dsName)
   for upload in ds_upload_list:
     upload_data = {}
@@ -358,12 +359,22 @@ def dataset_view_data(dsName):
     upload_data['images'] = paths
     upload_data['labels'] = labels
     upload_data['notes'] = upload[2]
+    upload_data['verified'] = upload[3]
+    upload_data['id'] = upload[0]
     combined_upload_data.append(upload_data)
   combined_data['upload_data'] = combined_upload_data
   combined_data['num_images'] = ds_data[0]
   combined_data['ds_size'] = ds_data[1]
   combined_data['status'] = "Success"
   return jsonify(combined_data), 201
+
+@app.route('/datasetview/<dsName>/<uploadID>', methods = ['GET'])
+def update_verified_upload(dsName, uploadID):
+  print(uploadID)
+  db.session.query(Upload).filter(Upload.id == uploadID)\
+    .update({Upload.verified: True}, synchronize_session = False)
+  db.session.commit()
+  return jsonify("hello_world"), 201
 
 # function adapted from:
 # https://stackoverflow.com/questions/64065587/how-to-return-multiple-images-with-flask

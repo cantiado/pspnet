@@ -85,7 +85,12 @@
           <p class="text-justify">
             Additional Notes: {{ job.datasetNotes ? job.datasetNotes : "None" }}
           </p>
-          <button class="border bg-green-200 my-5">Download</button>
+          <div class="flex-row space-x-4">
+            <button class="border bg-green-200 my-5">Download</button>
+            <router-link :to="{name :'singleDataset', params: {dsName: job.datasetName}, props: true }">
+              <button class="border bg-green-200 my-5">View Dataset</button>
+            </router-link>
+          </div>
         </div>
         <a
           :href="'http://127.0.0.1:5000/download/' + job.id"

@@ -299,7 +299,6 @@ def explore_data():
                                   Dataset.visibility, Dataset.num_images). \
                                   filter(Dataset.name==dataset[0]
                                         ).order_by(Dataset.id.desc()).first()
-    print(query_data)
     if query_data[2] == 'public':
       unique_visible.append(dataset[0])
       visibile_descr.append(query_data[0])
@@ -368,6 +367,7 @@ def dataset_view_data(dsName):
   return jsonify(combined_data), 201
 
 @app.route('/datasetview/<dsName>/<uploadID>', methods = ['GET'])
+@token_required
 def update_verified_upload(dsName, uploadID):
   db.session.query(Upload).filter(Upload.id == uploadID)\
     .update({Upload.verified: True}, synchronize_session = False)

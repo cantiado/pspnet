@@ -26,7 +26,6 @@
             Download
           </button>
           </li>
-          <!-- <li>Download</li> -->
         </ul>
       </div>
     </div>

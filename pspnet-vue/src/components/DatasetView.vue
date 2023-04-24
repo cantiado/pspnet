@@ -19,6 +19,14 @@
           <!-- <li># Contributors: {{ numContributers }}</li> -->
           <!-- <li># Modifications: </li> -->
           <li>Size of Dataset: {{ dsSize }} MB</li>
+          <li>
+            <button class="rounded px-3 py-2 bg-[#b9e0a5] text-white"
+            :href="url"
+            @click.prevent="downloadDataset(dsName)">
+            Download
+          </button>
+          </li>
+          <!-- <li>Download</li> -->
         </ul>
       </div>
     </div>
@@ -82,6 +90,21 @@ export default {
     const dsSize = ref(0);
     const store = authStore()
     const role = ref(0);
+    const baseDownloadURL = ref("http://127.0.0.1:5000/datasetview/")
+
+
+    const downloadDataset = (dsName) => {
+      var downloadURL = baseDownloadURL.value.concat(dsName).concat("/download/")
+      axios.get(downloadURL, { responseType: 'blob' })
+      .then(response => {
+        const blob = new Blob([response.data], {type: 'zip'})
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.download = dsName + ".zip"
+        link.click()
+        URL.revokeObjectURL(link.href)
+      }).catch(console.error)
+    }
 
     const getURLs = (imgBytes) => {
       var returnURLs = [];
@@ -120,8 +143,7 @@ export default {
               (numUploads.value = response.data["upload_data"].length),
               (numImages.value = response.data["num_images"]),
               (dsSize.value = response.data["ds_size"]),
-              console.log(responseData.value),
-              console.log(imgData.value)
+              console.log("Data received")
             )
           )
           .catch((error.value = "Failed to retreive data"));
@@ -131,7 +153,8 @@ export default {
       }
     });
 
-    return { imgData, numImages, numUploads, numContributers, dsSize, updateLabels, role };
+    return { imgData, numImages, numUploads, numContributers, 
+      dsSize, updateLabels, role, url : baseDownloadURL, downloadDataset };
   },
   components: { UserImg },
 };

@@ -9,14 +9,13 @@ from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from email_validator import validate_email, EmailNotValidError
 from threading import Thread
 
-import jwt
-import datetime
-
-import io
 from base64 import encodebytes
+import datetime
+import io
+import jwt
 import PIL.Image as pimg
-
 import os
+import zipfile
 
 
 app = Flask(__name__)
@@ -370,11 +369,27 @@ def dataset_view_data(dsName):
 
 @app.route('/datasetview/<dsName>/<uploadID>', methods = ['GET'])
 def update_verified_upload(dsName, uploadID):
-  print(uploadID)
   db.session.query(Upload).filter(Upload.id == uploadID)\
     .update({Upload.verified: True}, synchronize_session = False)
   db.session.commit()
-  return jsonify("hello_world"), 201
+  return jsonify("Success!"), 201
+
+@app.route('/datasetview/<dsName>/download/', methods=['GET'])
+def download_dataset(dsName):
+  upload_ids = db.session.query(Upload.id)\
+    .filter(Upload.dataset_name == dsName).all()
+  dir = os.getcwd()
+  image_file = io.BytesIO()
+  with zipfile.ZipFile(image_file, 'w') as zf:
+    for upload in upload_ids:
+      upload_path = os.path.join(dir, "images", str(upload[0]))
+      for root, dirs, file_paths in os.walk(upload_path):
+        for file_path in file_paths:
+          zf.write(os.path.join(upload_path, file_path),
+                   arcname=os.path.join("Upload "+str(upload[0]), file_path), 
+                   compress_type=zipfile.ZIP_DEFLATED)
+  image_file.seek(0)
+  return send_file(image_file, download_name=f"{dsName}.zip", as_attachment=True), 201
 
 # function adapted from:
 # https://stackoverflow.com/questions/64065587/how-to-return-multiple-images-with-flask

@@ -428,13 +428,17 @@ def img_from_path(image_path):
 def view_project(projectName):
   response_data = {}
   project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
-  datasets = db.session.query(Dataset.id, Dataset.name).filter(Dataset.project_id==project_id).all()
+  # fix line below -> compare text in the field
+  datasets = db.session.query(Dataset.id, Dataset.name, Dataset.project_id).all()
   for dataset_info in datasets:
-    dataset_name = dataset_info[1]
-    preview_img = db.session.query(Image.path).filter(Image.dataset_name==dataset_name).first()[0]
-    img = img_from_path(preview_img)
-    response_data[dataset_name] = img
-  print(response_data)
+    if dataset_info[2] is None:
+      continue
+    project_ids = dataset_info[2].split()
+    if str(project_id) in project_ids:
+      dataset_name = dataset_info[1]
+      preview_img = db.session.query(Image.path).filter(Image.dataset_name==dataset_name).first()[0]
+      img = img_from_path(preview_img)
+      response_data[dataset_name] = img
   return response_data, 200
 
 @app.route('/collections/<projectName>/addUsers/', methods=['POST'])

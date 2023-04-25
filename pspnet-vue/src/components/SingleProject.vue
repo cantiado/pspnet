@@ -46,25 +46,24 @@
     <div>
       <h2 class="text-left font-bold text-lg mb-3">Datasets</h2>
       <div class="grid grid-cols-4 gap-4">
-        <!-- <CollectionDataset
-          datasetName="my-really-long-dataset-name-is-really-long"
-        />
-        <CollectionDataset datasetName="another dataset" /> -->
-        <CollectionDataset
-          datasetName="myFirstDataset"
-          @clicked="openDataset"
-        />
-        <!-- <CollectionDataset datasetName="03/29/23" />
-        <CollectionDataset datasetName="???????????ranoutofnames" /> -->
+        <div v-for="(key, value) in datasetData">
+          <CollectionDataset
+            :datasetName="value"
+            :image-src="key"
+            @clicked="openDataset"
+          />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import axios from 'axios';
 import CollectionDataset from "../components/CollectionDataset.vue";
 import router from "@/router";
+import b64toBlob from "@/composables/byteToBlob";
 
 const props = defineProps({
   projectName: String,
@@ -77,6 +76,8 @@ function openDataset(datasetName) {
 const emailInput = ref("");
 const errorMessage = ref("");
 const successMessage = ref("");
+const error = ref("");
+const datasetData = ref([]);
 
 function submitEmails() {
   successMessage.value = "";
@@ -110,4 +111,28 @@ function checkEmailValidity() {
   }
   return true;
 }
+
+function getImgURL(imgBytes) {
+  return URL.createObjectURL(b64toBlob(imgBytes));
+};
+
+function convertByDataset() {
+  Object.keys(datasetData.value).forEach(function (key, index) {
+    datasetData.value[key] = getImgURL(datasetData.value[key]);
+  });
+};
+
+onMounted(async () => {
+  const url = ref("http://127.0.0.1:5000/collections/".concat(props.projectName))
+  console.log(url.value)
+  await axios.get(url.value)
+    .then(
+      (response) => (
+        console.log(response.data),
+        datasetData.value = response.data,
+        convertByDataset()
+      )
+    )
+    .catch(error.value = "Error");
+});
 </script>

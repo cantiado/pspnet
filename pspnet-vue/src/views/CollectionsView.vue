@@ -197,4 +197,19 @@ function selectAffiliates() {
   viewOption.value = 2;
 }
 
+onMounted(async () => {
+  const data = await authStore().userData();
+  if (data) {
+    await axios.post("http://127.0.0.1:5000/collections/", {id:data.id})
+      .then(
+        (response) => (
+          (projectData.value = response.data['projects']),
+          // (datasetData.value = response.data['datasets']),
+          console.log(projectData.value)
+        )
+      )
+      .catch(error.value = "Error");
+  }
+});
+
 </script>

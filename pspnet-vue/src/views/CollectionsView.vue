@@ -37,7 +37,7 @@
     </div>
   </div>
   <TransitionRoot appear :show="viewModal" as="template">
-    <Dialog as="div" @close="" class="relative z-10">
+    <Dialog as="div" @close="closeModal" class="relative z-10">
       <TransitionChild
         as="template"
         enter="duration-300 ease-out"
@@ -81,7 +81,9 @@
                     id="project-name-input"
                     name="project-name-input"
                   />
-                  <span v-if="errorMsg" class="text-red-500">{{ errorMsg }}</span>
+                  <span v-if="errorMsg" class="text-red-500">{{
+                    errorMsg
+                  }}</span>
                 </div>
               </div>
 
@@ -120,9 +122,10 @@
 
 <script setup>
 import router from "@/router";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onBeforeMount } from "vue";
 import axios from "axios";
 import { authStore } from "@/store/authenticate";
+import { useRouter } from "vue-router";
 import {
   TransitionRoot,
   TransitionChild,
@@ -130,6 +133,15 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/vue";
+import { authStore } from "../store/authenticate";
+
+const store = authStore();
+onBeforeMount(() => {
+  if (!store.isAuthenticated()) {
+    const router = useRouter();
+    router.push({ name: "login" });
+  }
+});
 
 const newProjectName = ref("");
 const viewModal = ref(false);
@@ -153,17 +165,17 @@ const errorMsg = ref("");
 function createNewProject() {
   const valid = verifyProjectName(newProjectName.value);
   if (!valid) {
-    errorMsg.value = "Invalid project name!"
-    return
+    errorMsg.value = "Invalid project name!";
+    return;
   }
   errorMsg.value = "";
-  closeModal()
+  closeModal();
 }
 
 function verifyProjectName(name) {
   const nameInDB = ref(false)
   // if (name.indexOf(';') > -1) {
-  //   return false
+  //   return false;
   // }
   axios.post("http://127.0.0.1:5000/collections/", 
   { project_name : name , user_id : userID.value })

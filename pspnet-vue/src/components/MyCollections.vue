@@ -142,7 +142,6 @@ import { authStore } from "@/store/authenticate";
 
 const projectData = ref([]);
 const error = ref("");
-import { ref } from "vue";
 import {
   TransitionRoot,
   TransitionChild,

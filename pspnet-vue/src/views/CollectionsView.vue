@@ -133,7 +133,6 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/vue";
-import { authStore } from "../store/authenticate";
 
 const store = authStore();
 onBeforeMount(() => {

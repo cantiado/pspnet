@@ -81,7 +81,9 @@
                     id="project-name-input"
                     name="project-name-input"
                   />
-                  <span v-if="errorMsg" class="text-red-500">{{ errorMsg }}</span>
+                  <span v-if="errorMsg" class="text-red-500">{{
+                    errorMsg
+                  }}</span>
                 </div>
               </div>
 
@@ -120,7 +122,8 @@
 
 <script setup>
 import router from "@/router";
-import { ref } from "vue";
+import { ref, onBeforeMount } from "vue";
+import { useRouter } from "vue-router";
 import {
   TransitionRoot,
   TransitionChild,
@@ -128,6 +131,15 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/vue";
+import { authStore } from "../store/authenticate";
+
+const store = authStore();
+onBeforeMount(() => {
+  if (!store.isAuthenticated()) {
+    const router = useRouter();
+    router.push({ name: "login" });
+  }
+});
 
 const newProjectName = ref("");
 const viewModal = ref(false);
@@ -147,15 +159,15 @@ const errorMsg = ref("");
 function createNewProject() {
   const valid = verifyProjectName(viewModal.value);
   if (!valid) {
-    errorMsg.value = "Invalid project name!"
-    return
+    errorMsg.value = "Invalid project name!";
+    return;
   }
   errorMsg.value = "";
-  closeModal()
+  closeModal();
 }
 
 function verifyProjectName(name) {
-  return false
+  return false;
 }
 
 const viewOption = ref(0);

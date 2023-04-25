@@ -44,6 +44,7 @@ export default {
     const routeNames = [
       'Profile',
       'Jobs',
+      'Collections',
       'Settings'
     ]
 

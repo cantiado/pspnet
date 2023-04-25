@@ -412,7 +412,6 @@ def img_from_path(image_path):
 
 @app.route('/collections/<projectName>/', methods=['GET', 'POST'])
 def view_project(projectName):
-  print("in route")
   if request.method == 'GET':
     response_data = {}
     project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
@@ -428,7 +427,6 @@ def view_project(projectName):
         response_data[dataset_name] = img
     return response_data, 200
   if request.method == 'POST': # handle add/remove
-    print("in post")
     project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
     data = request.form.to_dict(flat=False)
     operation = data['operation'][0]
@@ -437,13 +435,20 @@ def view_project(projectName):
     for email in user_emails:
       ids_from_emails.append(db.session.query(User.id).filter(User.email==email).first()[0])
     saved_ids = db.session.query(Project.shared_user_ids).filter(Project.name==projectName).first()[0]
+    existing_ids = []
     if saved_ids is not None: 
       saved_ids = saved_ids.split(',')
+      existing_ids = set([str(id) for id in saved_ids])
       saved_ids += ids_from_emails
     else: saved_ids = ids_from_emails
     saved_ids = [str(id) for id in saved_ids]
+    saved_ids = list(set(saved_ids))
+    new_ids = list(set(saved_ids)-existing_ids)
+    for new_id in new_ids:
+      new_email = db.session.query(User.email).filter(User.id==int(new_id)).first()[0]
+      print(new_email)
+      # send email to newly-invited researcher(s)
     shared_user_ids = ",".join(saved_ids)
-    print(shared_user_ids)
     if operation == "add":
       db.session.query(Project).filter(Project.id==project_id)\
         .update({Project.shared_user_ids:shared_user_ids}, synchronize_session=False)

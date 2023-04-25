@@ -412,7 +412,8 @@ def img_from_path(image_path):
 
 @app.route('/collections/<projectName>/', methods=['GET', 'POST'])
 def view_project(projectName):
-  if request.method == 'GET':
+  if request.method == 'GET': 
+    '''gets single-image preview for datasets in a project'''
     response_data = {}
     project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
     datasets = db.session.query(Dataset.id, Dataset.name, Dataset.project_id).all()
@@ -429,46 +430,34 @@ def view_project(projectName):
   if request.method == 'POST': # handle add/remove
     project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
     data = request.form.to_dict(flat=False)
-    operation = data['operation'][0]
+    operation = data['operation'][0] # add or remove operation
     user_emails = data['emails']
     ids_from_emails = []
-    for email in user_emails:
+    for email in user_emails: # queries for the email associated with each user
       ids_from_emails.append(db.session.query(User.id).filter(User.email==email).first()[0])
     saved_ids = db.session.query(Project.shared_user_ids).filter(Project.name==projectName).first()[0]
     existing_ids = []
-    if saved_ids is not None: 
+    if saved_ids is not None: # check for any already-shared users
       saved_ids = saved_ids.split(',')
-      existing_ids = set([str(id) for id in saved_ids])
+      existing_ids = set([str(id) for id in saved_ids]) # set of already-added IDs
       saved_ids += ids_from_emails
     else: saved_ids = ids_from_emails
     saved_ids = [str(id) for id in saved_ids]
     saved_ids = list(set(saved_ids))
-    new_ids = list(set(saved_ids)-existing_ids)
+    new_ids = list(set(saved_ids)-existing_ids) # set of newly-added IDs
     for new_id in new_ids:
       new_email = db.session.query(User.email).filter(User.id==int(new_id)).first()[0]
       print(new_email)
       # send email to newly-invited researcher(s)
-    shared_user_ids = ",".join(saved_ids)
+    shared_user_ids = ",".join(saved_ids) # converts field back to DB format
     if operation == "add":
+      '''adds the newly given IDs to the project'''
       db.session.query(Project).filter(Project.id==project_id)\
         .update({Project.shared_user_ids:shared_user_ids}, synchronize_session=False)
       db.session.commit()
     if operation == "remove":
       pass
     return jsonify(success=True), 200
-
-# @app.route('/collections/<projectName>/addUsers/', methods=['POST'])
-# def add_users(projectName):
-#   form_info = request.form.to_dict()
-#   user_emails = form_info['user-emails']
-#   user_ids = []
-#   success = {}
-#   for user_email in user_emails:
-#     # query User table for matches
-#     # add_status = True if query not None
-#     # success = {user_email : add_status}
-#     pass
-#   return jsonify(success=True), 201
 
 @app.route('/collections/<projectName>/addDataset/', methods=['POST'])
 def add_dataset(projectName):
@@ -489,7 +478,8 @@ def get_collections():
                       # datasets: [{dataset-name : one byte-string image}, {etc:etc},...]}
   
   form_info = request.get_json()
-  if 'project_name' in form_info:
+  if 'project_name' in form_info: # checks for type of POST request
+    '''POST request to create a new project'''
     project_name = form_info['project_name']
     owner = form_info['user_id']
     project_exists = db.session.query(Project).filter(Project.name==project_name).first() is not None
@@ -499,6 +489,7 @@ def get_collections():
     db.session.add(new_project)
     db.session.commit()
     return jsonify({"success": True}), 201
+  '''POST request to receive the list of user-owned projects'''
   return_data = {}
   projects = []
   user_id = form_info['id']

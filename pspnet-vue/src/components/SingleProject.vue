@@ -95,33 +95,21 @@ async function submitEmails() {
   for (const email of emails) {
     // send invite to each email
   }
-  // console.log(emails)
   const form = new FormData();
   for (const email of emails) {
     console.log(email)
     form.append("emails", email);
   }
-  // form.set("emails", emails);
   form.set("operation", "add");
-  // console.log(form);
-
-  // const response = await axios.post("http://127.0.0.1:5000/collections/".concat(props.projectName),
-  // {"operation" : "add", "user_emails" : emails})
-  // console.log(response)
-  // .then(
-  //   (response) => (
-  //     console.log(response.data)
-  //   )
-  // ).catch(console.log("Error"))
+  
   const response = await fetch("http://127.0.0.1:5000/collections/".concat(props.projectName),
   {
     method: 'POST',
     mode: "no-cors",
-    // body: form,
     headers: {
       "Content-Type": "application/json",
     },
-    body: form //JSON.stringify({"operation" : "add", "user_emails" : emails})
+    body: form
   });
   console.log(response)
   successMessage.value = "Successfully invited!";

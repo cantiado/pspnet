@@ -68,7 +68,7 @@ class Image(db.Model):
   location = db.Column(db.String[30], nullable=True)
   verifier_id = db.Column(db.Integer, nullable=True)
   upload_id = db.Column(db.Integer, nullable=False)
-  dataset_name = db.Column(db.String[20], nullable=True)
+  dataset_name = db.Column(db.String[20], nullable=False)
 
   def __init__(self, path, uploader_id, upload_id, dataset_name,
                verifier_id=None, label=None, location=None, access=0):
@@ -91,6 +91,7 @@ class Dataset(db.Model):
   num_images = db.Column(db.Integer, default=0)
   num_uploads = db.Column(db.Integer, default=0)
   ds_size = db.Column(db.Float, default=0.0)
+  project_id = db.Column(db.Text, nullable=True)
   
   
   def __init__(self, dataset_name, dataset_description=None, location=None, visibility='public',
@@ -136,7 +137,16 @@ class JobRegistry(db.Model):
     self.numimages = numimages
     self.starttime = startime
 
+class Project(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String(40), unique=True)
+  dataset_ids = db.Column(db.Text, nullable=True)
+  owner_id = db.Column(db.Integer, nullable=False)
+  shared_user_ids = db.Column(db.Text, nullable=True)
 
+  def __init__(self, project_name, owner_id) -> None:
+    self.name = project_name
+    self.owner_id = owner_id
 
 #creates wrapper function for routes that require authorized tokens. 
 #code adapted from blog post https://stackabuse.com/single-page-apps-with-vue-js-and-flask-jwt-authentication/
@@ -320,7 +330,7 @@ def explore_data():
                                               'description': visibile_descr[index],
                                               'location': visiblie_location[index],
                                               'show' : True}
-  return jsonify(response_data), 201
+  return jsonify(response_data), 200
 
 @app.route('/datasets/', methods = ['GET', 'POST'])
 def dataset_prev_data():
@@ -364,7 +374,7 @@ def dataset_view_data(dsName):
   combined_data['num_images'] = ds_data[0]
   combined_data['ds_size'] = ds_data[1]
   combined_data['status'] = "Success"
-  return jsonify(combined_data), 201
+  return jsonify(combined_data), 200
 
 @app.route('/datasetview/<dsName>/<uploadID>', methods = ['GET'])
 @token_required
@@ -372,7 +382,7 @@ def update_verified_upload(dsName, uploadID):
   db.session.query(Upload).filter(Upload.id == uploadID)\
     .update({Upload.verified: True}, synchronize_session = False)
   db.session.commit()
-  return jsonify("Success!"), 201
+  return jsonify("Success!"), 200
 
 @app.route('/datasetview/<dsName>/download/', methods=['GET'])
 def download_dataset(dsName):
@@ -389,7 +399,7 @@ def download_dataset(dsName):
                    arcname=os.path.join("Upload "+str(upload[0]), file_path), 
                    compress_type=zipfile.ZIP_DEFLATED)
   image_file.seek(0)
-  return send_file(image_file, download_name=f"{dsName}.zip", as_attachment=True), 201
+  return send_file(image_file, download_name=f"{dsName}.zip", as_attachment=True), 200
 
 # function adapted from:
 # https://stackoverflow.com/questions/64065587/how-to-return-multiple-images-with-flask
@@ -400,6 +410,70 @@ def img_from_path(image_path):
   encoded_img = encodebytes(byte_array.getvalue()).decode('ascii')
   return encoded_img
 
+
+@app.route('/collections/newProject/', methods=['POST'])
+def create_project():
+  form_info = request.form.to_dict()
+  project_name = form_info['project-name']
+  owner = form_info['user-id']
+  project_exists = db.session.query(Project).filter_by(Project.name==project_name).all()[0] is not None
+  if project_exists:
+    return jsonify("Project name already exists"), 400
+  new_project = Project(project_name, owner)
+  db.session.add(new_project)
+  db.session.commit()
+  return jsonify(success=True), 201
+
+@app.route('/collections/<projectName>/', methods=['GET'])
+def view_project(projectName):
+  response_data = {}
+  project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
+  datasets = db.session.query(Dataset.id, Dataset.name).filter(Dataset.project_id==project_id).all()
+  for dataset_info in datasets:
+    dataset_name = dataset_info[1]
+    preview_img = db.session.query(Image.path).filter(Image.dataset_name==dataset_name).first()[0]
+    img = img_from_path(preview_img)
+    response_data[dataset_name] = img
+  print(response_data)
+  return response_data, 200
+
+@app.route('/collections/<projectName>/addUsers/', methods=['POST'])
+def add_users(projectName):
+  form_info = request.form.to_dict()
+  user_emails = form_info['user-emails']
+  user_ids = []
+  success = {}
+  for user_email in user_emails:
+    # query User table for matches
+    # add_status = True if query not None
+    # success = {user_email : add_status}
+    pass
+  return jsonify(success=True), 201
+
+@app.route('/collections/<projectName>/removeUsers/', methods=['POST'])
+def remove_users(projectName):
+  form_info = request.form.to_dict()
+  user_emails = form_info['user-emails']
+  return jsonify("Hello world"), 201
+
+@app.route('/collections/<projectName>/addDataset/', methods=['POST'])
+def add_dataset(projectName):
+  form_info = request.form.to_dict()
+  datasets = form_info['datasets']
+  project_id = db.session.query(Project.id)\
+    .filter(Project.name==projectName).all()[0]
+  # query Datasets for named datasets
+  # keep success dict for statuses
+  # update project_id field for each dataset
+
+@app.route('/collections/', methods=['GET'])
+@token_required
+def get_collections():
+  # param: user_id
+  # return: dictionary {projects: [list,of,projects], 
+                      # datasets: [{dataset-name : one byte-string image}, {etc:etc},...]}
+  user_id = None
+  return jsonify("Not implemented"), 204
 
 #route responsible for forgot password
 @app.route('/forgotpass/', methods = ['POST'])

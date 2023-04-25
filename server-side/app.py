@@ -410,55 +410,60 @@ def img_from_path(image_path):
   encoded_img = encodebytes(byte_array.getvalue()).decode('ascii')
   return encoded_img
 
-
-# @app.route('/collections/newProject/', methods=['POST'])
-# def create_project():
-#   form_info = request.form.to_dict()
-#   project_name = form_info['project-name']
-#   owner = form_info['user-id']
-#   project_exists = db.session.query(Project).filter_by(Project.name==project_name).all()[0] is not None
-#   if project_exists:
-#     return jsonify("Project name already exists"), 400
-#   new_project = Project(project_name, owner)
-#   db.session.add(new_project)
-#   db.session.commit()
-#   return jsonify(success=True), 201
-
-@app.route('/collections/<projectName>/', methods=['GET'])
+@app.route('/collections/<projectName>/', methods=['GET', 'POST'])
 def view_project(projectName):
-  response_data = {}
-  project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
-  # fix line below -> compare text in the field
-  datasets = db.session.query(Dataset.id, Dataset.name, Dataset.project_id).all()
-  for dataset_info in datasets:
-    if dataset_info[2] is None:
-      continue
-    project_ids = dataset_info[2].split()
-    if str(project_id) in project_ids:
-      dataset_name = dataset_info[1]
-      preview_img = db.session.query(Image.path).filter(Image.dataset_name==dataset_name).first()[0]
-      img = img_from_path(preview_img)
-      response_data[dataset_name] = img
-  return response_data, 200
+  print("in route")
+  if request.method == 'GET':
+    response_data = {}
+    project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
+    datasets = db.session.query(Dataset.id, Dataset.name, Dataset.project_id).all()
+    for dataset_info in datasets:
+      if dataset_info[2] is None:
+        continue
+      project_ids = dataset_info[2].split(',')
+      if str(project_id) in project_ids:
+        dataset_name = dataset_info[1]
+        preview_img = db.session.query(Image.path).filter(Image.dataset_name==dataset_name).first()[0]
+        img = img_from_path(preview_img)
+        response_data[dataset_name] = img
+    return response_data, 200
+  if request.method == 'POST': # handle add/remove
+    print("in post")
+    project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
+    data = request.form.to_dict(flat=False)
+    operation = data['operation'][0]
+    user_emails = data['emails']
+    ids_from_emails = []
+    for email in user_emails:
+      ids_from_emails.append(db.session.query(User.id).filter(User.email==email).first()[0])
+    saved_ids = db.session.query(Project.shared_user_ids).filter(Project.name==projectName).first()[0]
+    if saved_ids is not None: 
+      saved_ids = saved_ids.split(',')
+      saved_ids += ids_from_emails
+    else: saved_ids = ids_from_emails
+    saved_ids = [str(id) for id in saved_ids]
+    shared_user_ids = ",".join(saved_ids)
+    print(shared_user_ids)
+    if operation == "add":
+      db.session.query(Project).filter(Project.id==project_id)\
+        .update({Project.shared_user_ids:shared_user_ids}, synchronize_session=False)
+      db.session.commit()
+    if operation == "remove":
+      pass
+    return jsonify(success=True), 200
 
-@app.route('/collections/<projectName>/addUsers/', methods=['POST'])
-def add_users(projectName):
-  form_info = request.form.to_dict()
-  user_emails = form_info['user-emails']
-  user_ids = []
-  success = {}
-  for user_email in user_emails:
-    # query User table for matches
-    # add_status = True if query not None
-    # success = {user_email : add_status}
-    pass
-  return jsonify(success=True), 201
-
-@app.route('/collections/<projectName>/removeUsers/', methods=['POST'])
-def remove_users(projectName):
-  form_info = request.form.to_dict()
-  user_emails = form_info['user-emails']
-  return jsonify("Hello world"), 201
+# @app.route('/collections/<projectName>/addUsers/', methods=['POST'])
+# def add_users(projectName):
+#   form_info = request.form.to_dict()
+#   user_emails = form_info['user-emails']
+#   user_ids = []
+#   success = {}
+#   for user_email in user_emails:
+#     # query User table for matches
+#     # add_status = True if query not None
+#     # success = {user_email : add_status}
+#     pass
+#   return jsonify(success=True), 201
 
 @app.route('/collections/<projectName>/addDataset/', methods=['POST'])
 def add_dataset(projectName):

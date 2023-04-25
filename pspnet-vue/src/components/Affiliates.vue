@@ -27,21 +27,36 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from 'vue'
+import axios from "axios";
+import { authStore } from "@/store/authenticate";
 
 const affiliates = ref([]);
 
 // Seeding affiliates
-const seedAffiliate = {
-  name: "First Last",
-  email: "someEmail@gmail.com",
-  role: "researcher",
-  projects: ["proj1", "proj2", "proj3"],
-  datasets: ["ds1", "ds2", "ds3", "ds4"],
-};
-var seededAffiliates = [];
-for (let i = 0; i < 25; i++) {
-  seededAffiliates.push(seedAffiliate);
-}
-affiliates.value = seededAffiliates;
+// const seedAffiliate = {
+//   name: "First Last",
+//   email: "someEmail@gmail.com",
+//   role: "researcher",
+//   projects: ["proj1", "proj2", "proj3"],
+//   datasets: ["ds1", "ds2", "ds3", "ds4"],
+// };
+// var seededAffiliates = [];
+// for (let i = 0; i < 25; i++) {
+//   seededAffiliates.push(seedAffiliate);
+// }
+// affiliates.value = seededAffiliates;
+
+onMounted(async () => {
+  const data = await authStore().userData();
+  if (data) {
+    await axios.post("http://127.0.0.1:5000/collections/affiliates/", {id:data.id})
+    .then(
+      (response) => (
+        affiliates.value = response.data['affiliates'],
+        console.log(response.data)
+      )
+    ).catch(console.log("Error"))
+  }
+});
 </script>

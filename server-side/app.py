@@ -410,6 +410,32 @@ def img_from_path(image_path):
   encoded_img = encodebytes(byte_array.getvalue()).decode('ascii')
   return encoded_img
 
+@app.route('/collections/affiliates/', methods=['POST'])
+def get_affiliates():
+  '''get set of all researchers/users a User is associated with'''
+  frontend_data = request.get_json()
+  user_id = frontend_data['id']
+  user_ids_in_projects = db.session.query(Project.owner_id, Project.shared_user_ids).all()
+  u_ID_list = []
+  for u_IDs in user_ids_in_projects:
+    if u_IDs[0] != user_id:
+      u_ID_list.append(str(u_IDs[0]))
+    if u_IDs[1] is not None: u_ID_list += u_IDs[1].split(',')
+  print(u_ID_list)
+  unique_IDs = set(u_ID_list)
+  unique_IDs -= {str(user_id)}
+  
+  user_data = []
+  for unique in unique_IDs:
+    user_info = db.session.query(User.firstname, User.lastname, User.email, User.role)\
+    .filter(User.id==int(unique)).first()
+    name = " ".join([user_info[0], user_info[1]])
+    structured_info = {'name' : name,
+                       'email' : user_info[2],
+                       'role' : user_info[3]}
+    user_data.append(structured_info)
+  return jsonify({'affiliates' : user_data}), 201
+
 @app.route('/collections/<projectName>/', methods=['GET', 'POST'])
 def view_project(projectName):
   if request.method == 'GET': 

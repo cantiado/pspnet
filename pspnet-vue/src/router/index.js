@@ -147,6 +147,12 @@ const routes = [
         component: () => import("../components/MyCollections.vue"),
       },
       {
+        path: ":projectName",
+        name: "singleProject",
+        component: () => import("../components/SingleProject.vue"),
+        props: true,
+      },
+      {
         path: "shared",
         name: "shared",
         component: () => import("../components/SharedCollections.vue"),

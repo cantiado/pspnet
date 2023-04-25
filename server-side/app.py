@@ -419,14 +419,15 @@ def view_project(projectName):
     datasets = db.session.query(Dataset.id, Dataset.name, Dataset.project_id).all()
     for dataset_info in datasets:
       if dataset_info[2] is None:
-        continue
+        continue # skip if dataset is not a part of any project
       project_ids = dataset_info[2].split(',')
-      if str(project_id) in project_ids:
+      if str(project_id) in project_ids: # check if dataset is associated with a project
         dataset_name = dataset_info[1]
         preview_img = db.session.query(Image.path).filter(Image.dataset_name==dataset_name).first()[0]
-        img = img_from_path(preview_img)
+        img = img_from_path(preview_img) # gets byte string for preview image
         response_data[dataset_name] = img
     return response_data, 200
+  
   if request.method == 'POST': # handle add/remove
     project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
     data = request.form.to_dict(flat=False)
@@ -491,7 +492,8 @@ def get_shared():
 def get_collections():
   # param: user_id
   # return: dictionary {projects: [list,of,projects], 
-                      # datasets: [{dataset-name : one byte-string image}, {etc:etc},...]}
+                      # datasets: [{dataset-name : one byte-string image},
+                      #            {etc:etc},...]}
   
   form_info = request.get_json()
   if 'project_name' in form_info: # checks for type of POST request

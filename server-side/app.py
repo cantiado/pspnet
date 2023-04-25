@@ -470,6 +470,22 @@ def add_dataset(projectName):
   # update project_id field for each dataset
   # return 201
 
+@app.route('/collections/shared', methods=['POST'])
+# token required
+def get_shared():
+  frontend_data = request.get_json()
+  return_data = {}
+  projects = []
+  user_id = frontend_data['id']
+  user_projects = db.session.query(Project.name, Project.shared_user_ids) \
+    .filter(Project.owner_id.contains(str(user_id))).all()
+  for project_info in user_projects:
+    if project_info[1] is None: continue
+    elif str(user_id) in project_info[1].split(','):
+      projects.append(project_info[0])
+  return_data['projects'] = projects
+  return jsonify(return_data), 201
+
 @app.route('/collections/', methods=['POST'])
 # @token_required
 def get_collections():

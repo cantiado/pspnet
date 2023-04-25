@@ -130,7 +130,7 @@ import {
 } from "@headlessui/vue";
 
 const newProjectName = ref("");
-const viewModal = ref(true);
+const viewModal = ref(false);
 
 function openModal() {
   viewModal.value = true;

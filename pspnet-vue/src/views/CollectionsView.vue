@@ -120,7 +120,9 @@
 
 <script setup>
 import router from "@/router";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import axios from "axios";
+import { authStore } from "@/store/authenticate";
 import {
   TransitionRoot,
   TransitionChild,
@@ -131,6 +133,10 @@ import {
 
 const newProjectName = ref("");
 const viewModal = ref(false);
+const projectData = ref();
+const datasetData = ref();
+const error = ref();
+const userID = ref();
 
 function openModal() {
   viewModal.value = true;
@@ -145,7 +151,7 @@ function closeModal() {
 const errorMsg = ref("");
 
 function createNewProject() {
-  const valid = verifyProjectName(viewModal.value);
+  const valid = verifyProjectName(newProjectName.value);
   if (!valid) {
     errorMsg.value = "Invalid project name!"
     return
@@ -155,7 +161,20 @@ function createNewProject() {
 }
 
 function verifyProjectName(name) {
-  return false
+  const nameInDB = ref(false)
+  // if (name.indexOf(';') > -1) {
+  //   return false
+  // }
+  axios.post("http://127.0.0.1:5000/collections/", 
+  { project_name : name , user_id : userID.value })
+  .then(
+    (response) => (
+      console.log(response.data),
+      nameInDB.value = !response.data['success']
+    )
+    .catch(console.log(error))
+  )
+  return nameInDB.value
 }
 
 const viewOption = ref(0);
@@ -177,4 +196,20 @@ function selectSharedCollections() {
 function selectAffiliates() {
   viewOption.value = 2;
 }
+
+onMounted(async () => {
+  const data = await authStore().userData();
+  userID.value = data.id
+  if (data) {
+    await axios.post("http://127.0.0.1:5000/collections/", {id:data.id})
+      .then(
+        (response) => (
+          (projectData.value = response.data['projects']),
+          // (datasetData.value = response.data['datasets']),
+          console.log(projectData.value)
+        )
+      )
+      .catch(error.value = "Error");
+  }
+});
 </script>

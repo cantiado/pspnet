@@ -411,18 +411,18 @@ def img_from_path(image_path):
   return encoded_img
 
 
-@app.route('/collections/newProject/', methods=['POST'])
-def create_project():
-  form_info = request.form.to_dict()
-  project_name = form_info['project-name']
-  owner = form_info['user-id']
-  project_exists = db.session.query(Project).filter_by(Project.name==project_name).all()[0] is not None
-  if project_exists:
-    return jsonify("Project name already exists"), 400
-  new_project = Project(project_name, owner)
-  db.session.add(new_project)
-  db.session.commit()
-  return jsonify(success=True), 201
+# @app.route('/collections/newProject/', methods=['POST'])
+# def create_project():
+#   form_info = request.form.to_dict()
+#   project_name = form_info['project-name']
+#   owner = form_info['user-id']
+#   project_exists = db.session.query(Project).filter_by(Project.name==project_name).all()[0] is not None
+#   if project_exists:
+#     return jsonify("Project name already exists"), 400
+#   new_project = Project(project_name, owner)
+#   db.session.add(new_project)
+#   db.session.commit()
+#   return jsonify(success=True), 201
 
 @app.route('/collections/<projectName>/', methods=['GET'])
 def view_project(projectName):
@@ -465,15 +465,34 @@ def add_dataset(projectName):
   # query Datasets for named datasets
   # keep success dict for statuses
   # update project_id field for each dataset
+  # return 201
 
-@app.route('/collections/', methods=['GET'])
-@token_required
+@app.route('/collections/', methods=['POST'])
+# @token_required
 def get_collections():
   # param: user_id
   # return: dictionary {projects: [list,of,projects], 
                       # datasets: [{dataset-name : one byte-string image}, {etc:etc},...]}
-  user_id = None
-  return jsonify("Not implemented"), 204
+  
+  form_info = request.get_json()
+  if 'project_name' in form_info:
+    project_name = form_info['project_name']
+    owner = form_info['user_id']
+    project_exists = db.session.query(Project).filter(Project.name==project_name).first() is not None
+    if project_exists:
+      return jsonify({"success":False, "message": "Project name already exists"}), 400
+    new_project = Project(project_name, owner)
+    db.session.add(new_project)
+    db.session.commit()
+    return jsonify({"success": True}), 201
+  return_data = {}
+  projects = []
+  user_id = form_info['id']
+  user_projects = db.session.query(Project.name).filter(Project.owner_id==user_id).all()
+  for project in user_projects:
+    projects.append(project[0])
+  return_data['projects'] = projects
+  return jsonify(return_data), 201
 
 #route responsible for forgot password
 @app.route('/forgotpass/', methods = ['POST'])

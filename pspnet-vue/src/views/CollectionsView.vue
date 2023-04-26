@@ -185,8 +185,7 @@ async function verifyProjectName(name) {
       console.log(response.data),
       nameInDB.value = !response.data['success']
     )
-    .catch(console.log(error))
-  )
+  ).catch(console.log(error))
   return nameInDB.value
 }
 

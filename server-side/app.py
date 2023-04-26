@@ -336,15 +336,17 @@ def explore_data():
 @app.route('/explore/<dsName>/save/', methods=['POST'])
 # @token_requireds
 def save_dataset(dsName):
+  """Saves a dataset to a User's saved list
+  
+  :param dsName: name of the dataset
+  :param user_id: User's ID
+  """
   user_id = request.get_json()['id']
   new_save_id = db.session.query(Dataset.id).filter(Dataset.name==dsName).first()[0]
   saved_ds = db.session.query(User.saved_ds_ids).filter(User.id==user_id).first()[0]
   if saved_ds is None: dataset_IDs = [str(new_save_id)]
   else: 
-    print(f"Saved[0] has: {(saved_ds[0].split(',')).append('test')}")
     dataset_IDs = saved_ds[0].split(',') + [str(new_save_id)]
-    print(f"in else with : {dataset_IDs}")
-  print(dataset_IDs)
   joined_ids = ','.join(dataset_IDs)
   db.session.query(User).filter(User.id==user_id)\
     .update({User.saved_ds_ids : joined_ids},synchronize_session=False)
@@ -362,6 +364,7 @@ def dataset_prev_data():
 
 @app.route('/datasetview/<dsName>/', methods = ['GET'])
 def dataset_view_data(dsName):
+  """Gets all image and metadata associated with a Dataset"""
   ds_data = db.session.query(Dataset.num_images, Dataset.size, Dataset.visibility). \
     filter_by(name = dsName).order_by(Dataset.id.desc()).first()
   if ds_data[2] != 'public':
@@ -398,6 +401,7 @@ def dataset_view_data(dsName):
 @app.route('/datasetview/<dsName>/<uploadID>', methods = ['GET'])
 @token_required
 def update_verified_upload(dsName, uploadID):
+  """Updates the verified boolean to True for an Upload"""
   db.session.query(Upload).filter(Upload.id == uploadID)\
     .update({Upload.verified: True}, synchronize_session = False)
   db.session.commit()
@@ -405,6 +409,10 @@ def update_verified_upload(dsName, uploadID):
 
 @app.route('/datasetview/<dsName>/download/', methods=['GET'])
 def download_dataset(dsName):
+  """Creates zip file with all of a dataset's files
+  
+  :param dsName: name of the desired dataset
+  """
   upload_ids = db.session.query(Upload.id)\
     .filter(Upload.dataset_name == dsName).all()
   dir = os.getcwd()
@@ -414,10 +422,11 @@ def download_dataset(dsName):
       upload_path = os.path.join(dir, "images", str(upload[0]))
       for root, dirs, file_paths in os.walk(upload_path):
         for file_path in file_paths:
+          # adds all files in each upload into zip
           zf.write(os.path.join(upload_path, file_path),
                    arcname=os.path.join("Upload "+str(upload[0]), file_path), 
                    compress_type=zipfile.ZIP_DEFLATED)
-  image_file.seek(0)
+  image_file.seek(0) # reset head for reading
   return send_file(image_file, download_name=f"{dsName}.zip", as_attachment=True), 200
 
 # function adapted from:
@@ -431,20 +440,23 @@ def img_from_path(image_path):
 
 @app.route('/collections/affiliates/', methods=['POST'])
 def get_affiliates():
-  '''get set of all researchers/users a User is associated with'''
+  """Get set of all researchers/users a User is associated with
+  
+  :return list of dictionaries: contains structured information about affiliated researchers
+  """
   frontend_data = request.get_json()
   user_id = frontend_data['id']
   user_ids_in_projects = db.session.query(Project.owner_id, Project.shared_user_ids).all()
   u_ID_list = []
   for u_IDs in user_ids_in_projects:
-    if u_IDs[1] is not None: 
+    if u_IDs[1] is not None: # checks for shared users on project
       users_in_project = u_IDs[1].split(',') + [str(u_IDs[0])]
-      if str(user_id) in users_in_project: u_ID_list += users_in_project
+      if str(user_id) in users_in_project: u_ID_list += users_in_project # add all U_ID if user in the project
   unique_IDs = set(u_ID_list)
-  unique_IDs -= {str(user_id)}
+  unique_IDs -= {str(user_id)} # remove own user from set
   
   user_data = []
-  for unique in unique_IDs:
+  for unique in unique_IDs: # query for affiliated user data, add to list
     user_info = db.session.query(User.firstname, User.lastname, User.email, User.role)\
     .filter(User.id==int(unique)).first()
     name = " ".join([user_info[0], user_info[1]])
@@ -456,6 +468,7 @@ def get_affiliates():
 
 @app.route('/collections/<projectName>/', methods=['GET', 'POST'])
 def view_project(projectName):
+  """Handle GET and POST requests related to a given Project"""
   if request.method == 'GET': 
     '''gets single-image preview for datasets in a project'''
     response_data = {}
@@ -515,6 +528,9 @@ def view_project(projectName):
 @app.route('/collections/shared', methods=['POST'])
 # token required
 def get_shared():
+  """Returns all Projects shared with a given user
+  :param user_ID: from frontend
+  """
   frontend_data = request.get_json()
   return_data = {}
   projects = []
@@ -531,11 +547,14 @@ def get_shared():
 @app.route('/collections/', methods=['POST'])
 # @token_required
 def get_collections():
-  # param: user_id
-  # return: dictionary {projects: [list,of,projects], 
-                      # datasets: [{dataset-name : one byte-string image},
-                      #            {etc:etc},...],
-                      # public_datasets: [dataset_names]}
+  """Handles POST requests for Collections page
+
+  :param user_ID: 
+  :return dict: {projects: [list,of,projects], 
+                 datasets: [{dataset-name : one byte-string image},
+                            {etc:etc},...],
+                 public_datasets: [dataset_names]}
+  """
   
   form_info = request.get_json()
   if 'project_name' in form_info: # checks for type of POST request
@@ -590,7 +609,7 @@ def get_collections():
           .update({Dataset.project_ids : joined_p_ids }, synchronize_session=False)
       db.session.commit()
 
-      return jsonify("something"), 201
+      return jsonify("Success!"), 201
 
 #route responsible for forgot password
 @app.route('/forgotpass/', methods = ['POST'])

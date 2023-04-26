@@ -102,17 +102,28 @@ async function submitEmails() {
   }
   form.set("operation", "add");
   
-  const response = await fetch("http://127.0.0.1:5000/collections/".concat(props.projectName),
-  {
-    method: 'POST',
-    mode: "no-cors",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: form
-  });
-  console.log(response)
-  successMessage.value = "Successfully invited!";
+  const url = "http://127.0.0.1:5000/collections/".concat(props.projectName).concat('/')
+  await axios.post(url,
+  {emails : emails, operation : "add"})
+  .then(
+    (response) => {
+      console.log(response.data),
+      successMessage.value = "Successfully invited!"
+    }
+  ).catch(console.log())
+
+  // const response = await fetch("http://127.0.0.1:5000/collections/".concat(props.projectName).concat('/'),
+  // {
+  //   method: 'POST',
+  //   mode: "no-cors",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   // body: {emails : emails, operation : "add"}
+  //   body: form
+  // });
+  // console.log(response)
+  // successMessage.value = "Successfully invited!";
 }
 
 function checkEmailValidity() {

@@ -494,13 +494,18 @@ def view_project(projectName):
   
   if request.method == 'POST': # handle add/remove
     project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
-    data = request.form.to_dict(flat=False)
-    operation = data['operation'][0] # add or remove operation
+    data = request.get_json()
+    operation = data['operation'] # add or remove operation
     
     user_emails = data['emails']
+    successful_add = dict.fromkeys(user_emails, False)
     ids_from_emails = []
     for email in user_emails: # queries for the email associated with each user
-      ids_from_emails.append(db.session.query(User.id).filter(User.email==email).first()[0])
+      query_return = db.session.query(User.id).filter(User.email==email).first()
+      if query_return is not None:
+        ids_from_emails.append(query_return[0])
+        successful_add[email] = True
+      
     saved_ids = db.session.query(Project.shared_user_ids).filter(Project.name==projectName).first()[0]
     existing_ids = set()
     if saved_ids is not None: # check for any already-shared users
@@ -523,7 +528,7 @@ def view_project(projectName):
       db.session.commit()
     if operation == "remove":
       pass
-    return jsonify(success=True), 200
+    return jsonify(successful_add), 201
 
 @app.route('/collections/shared', methods=['POST'])
 def get_shared():

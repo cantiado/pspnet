@@ -161,32 +161,32 @@ function closeModal() {
 
 const errorMsg = ref("");
 
-function createNewProject() {
-  const valid = verifyProjectName(newProjectName.value);
+async function createNewProject() {
+  const valid = await verifyProjectName(newProjectName.value);
   if (!valid) {
     errorMsg.value = "Invalid project name!";
     return;
   }
+  console.log(valid)
   errorMsg.value = "";
   closeModal();
 }
 
 async function verifyProjectName(name) {
-  const nameInDB = ref(false)
-  // if (name.indexOf(';') > -1) {
-  //   return false;
-  // }
-  console.log(userID.value)
-  axios.post("http://127.0.0.1:5000/collections/", 
+  const validName = ref(false)
+  if (name.indexOf(';') > -1) {
+    return false;
+  }
+  await axios.post("http://127.0.0.1:5000/collections/", 
   { project_name : name, 
     user_id : userID.value })
   .then(
     (response) => (
       console.log(response.data),
-      nameInDB.value = !response.data['success']
+      validName.value = response.data['success']
     )
-  ).catch(console.log(error))
-  return nameInDB.value
+  ).catch(console.log(error.value))
+  return validName.value
 }
 
 const viewOption = ref(0);

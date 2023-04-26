@@ -31,7 +31,6 @@
               @click.prevent="saveDataset()">
               Save Dataset
             </button>
-          <!-- :href="saveURL" -->
           </li>
         </ul>
       </div>
@@ -120,6 +119,7 @@ export default {
       .then(
         (response) => {
           console.log(response.data)
+          success = response.data['success']
         }
       )
       .catch(console.log(""))

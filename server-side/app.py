@@ -351,7 +351,7 @@ def save_dataset(dsName):
   db.session.query(User).filter(User.id==user_id)\
     .update({User.saved_ds_ids : joined_ids},synchronize_session=False)
   db.session.commit()
-  return jsonify("Success!"), 201
+  return jsonify({"success" : True}), 201
 
 @app.route('/datasets/', methods = ['GET', 'POST'])
 def dataset_prev_data():
@@ -559,12 +559,11 @@ def get_collections():
   form_info = request.get_json()
   if 'project_name' in form_info: # checks for type of POST request
     '''POST request to create a new project'''
-    print(form_info)
     project_name = form_info['project_name']
     owner = form_info['user_id']
     project_exists = db.session.query(Project).filter(Project.name==project_name).first() is not None
     if project_exists:
-      return jsonify({"success":False, "message": "Project name already exists"}), 400
+      return jsonify({"success":False, "message": "Project name already exists"}), 201
     new_project = Project(project_name, owner)
     db.session.add(new_project)
     db.session.commit()

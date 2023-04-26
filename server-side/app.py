@@ -437,10 +437,9 @@ def get_affiliates():
   user_ids_in_projects = db.session.query(Project.owner_id, Project.shared_user_ids).all()
   u_ID_list = []
   for u_IDs in user_ids_in_projects:
-    if u_IDs[0] != user_id:
-      u_ID_list.append(str(u_IDs[0]))
-    if u_IDs[1] is not None: u_ID_list += u_IDs[1].split(',')
-  print(u_ID_list)
+    if u_IDs[1] is not None: 
+      users_in_project = u_IDs[1].split(',') + [str(u_IDs[0])]
+      if str(user_id) in users_in_project: u_ID_list += users_in_project
   unique_IDs = set(u_ID_list)
   unique_IDs -= {str(user_id)}
   
@@ -490,7 +489,7 @@ def view_project(projectName):
     for email in user_emails: # queries for the email associated with each user
       ids_from_emails.append(db.session.query(User.id).filter(User.email==email).first()[0])
     saved_ids = db.session.query(Project.shared_user_ids).filter(Project.name==projectName).first()[0]
-    existing_ids = []
+    existing_ids = set()
     if saved_ids is not None: # check for any already-shared users
       saved_ids = saved_ids.split(',')
       existing_ids = set([str(id) for id in saved_ids]) # set of already-added IDs

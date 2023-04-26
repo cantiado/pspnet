@@ -120,21 +120,26 @@ def identify():
   upload_img_size = os.path.getsize(job_folder) / 100
   # query to get data from previous entries of the dataset
   ds_data = db.session.query(Dataset.num_images, Dataset.num_uploads,
-                             Dataset.ds_size).filter_by(name = dataset_name). \
+                             Dataset.size, Dataset.id).filter_by(name = dataset_name). \
                               order_by(Dataset.id.desc()).first()
   total_images = numImages
   total_size = upload_img_size
   total_uploads = 1
-  if ds_data is not None:
-    total_images += ds_data[0]
-    total_uploads += ds_data[1]
-    total_size += ds_data[2]
-  new_dataset = Dataset(dataset_name, dataset_description, 
-                        dataset_location, visibility, total_images,
-                        total_uploads, total_size)
-  db.session.add(new_dataset)
+  if ds_data is not None: # update existing entry
+    db.session.query(Dataset).filter(Dataset.id==ds_data[3]) \
+      .update({Dataset.num_images : total_images+ds_data[0],
+               Dataset.num_uploads : ds_data[1]+1,
+               Dataset.size : total_size+ds_data[2]}, synchronize_session=False)
+    # total_images += ds_data[0]
+    # total_uploads += ds_data[1]
+    # total_size += ds_data[2]
+  else:
+    new_dataset = Dataset(dataset_name, dataset_description, 
+                          dataset_location, visibility, total_images,
+                          total_uploads, total_size)
+    db.session.add(new_dataset)
   db.session.commit()
-  new_dataset.numimages = numImages
+  # new_dataset.numimages = numImages
   #commands here give global environment path to project for deployment on any machine
   FILE = Path(__file__).resolve()
   path = FILE.parents[0]
@@ -155,7 +160,7 @@ def identify():
   #the finishtime should be set to null
 
 
-  db.session.add(new_dataset)
+  # db.session.add(new_dataset)
   db.session.commit()
 
   return "Success!"

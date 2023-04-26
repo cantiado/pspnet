@@ -90,19 +90,19 @@ class Dataset(db.Model):
   visibility = db.Column(db.String[10], default='public')
   num_images = db.Column(db.Integer, default=0)
   num_uploads = db.Column(db.Integer, default=0)
-  ds_size = db.Column(db.Float, default=0.0)
-  project_id = db.Column(db.Text, nullable=True)
+  size = db.Column(db.Float, default=0.0)
+  project_ids = db.Column(db.Text, nullable=True)
   
   
   def __init__(self, dataset_name, dataset_description=None, location=None, visibility='public',
-               num_images=0, num_uploads=0, ds_size=0.0) -> None:
+               num_images=0, num_uploads=0, size=0.0) -> None:
     self.name = dataset_name
     self.description = dataset_description
     self.location = location
     self.visibility = visibility
     self.num_images = num_images
     self.num_uploads = num_uploads
-    self.ds_size = ds_size
+    self.size = size
 
 class Upload(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -343,7 +343,7 @@ def dataset_prev_data():
 
 @app.route('/datasetview/<dsName>/', methods = ['GET'])
 def dataset_view_data(dsName):
-  ds_data = db.session.query(Dataset.num_images, Dataset.ds_size, Dataset.visibility). \
+  ds_data = db.session.query(Dataset.num_images, Dataset.size, Dataset.visibility). \
     filter_by(name = dsName).order_by(Dataset.id.desc()).first()
   if ds_data[2] != 'public':
     return jsonify(dict({'status': "Private dataset"})), 401
@@ -441,23 +441,31 @@ def view_project(projectName):
   if request.method == 'GET': 
     '''gets single-image preview for datasets in a project'''
     response_data = {}
+    # response_data['project_dataests'] = {}
     project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
-    datasets = db.session.query(Dataset.id, Dataset.name, Dataset.project_id).all()
+    datasets = db.session.query(Dataset.id, Dataset.name, Dataset.project_id, Dataset.visibility).all()
+    public_datasets = []
+    # project_datasets = []
     for dataset_info in datasets:
-      if dataset_info[2] is None:
-        continue # skip if dataset is not a part of any project
+      if dataset_info[3]=='public': public_datasets.append(dataset_info[1])
+      if dataset_info[2] is None : continue # skip if dataset is not a part of any project
       project_ids = dataset_info[2].split(',')
       if str(project_id) in project_ids: # check if dataset is associated with a project
         dataset_name = dataset_info[1]
+        # project_datasets.append(dataset_name)
         preview_img = db.session.query(Image.path).filter(Image.dataset_name==dataset_name).first()[0]
         img = img_from_path(preview_img) # gets byte string for preview image
         response_data[dataset_name] = img
+        # response_data['project_dataests'][dataset_name] = img
+    # public_outside_project = list(set(public_datasets)-set(project_datasets))
+    # response_data['available_datasets'] = public_outside_project
     return response_data, 200
   
   if request.method == 'POST': # handle add/remove
     project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
     data = request.form.to_dict(flat=False)
     operation = data['operation'][0] # add or remove operation
+    
     user_emails = data['emails']
     ids_from_emails = []
     for email in user_emails: # queries for the email associated with each user
@@ -486,17 +494,6 @@ def view_project(projectName):
       pass
     return jsonify(success=True), 200
 
-@app.route('/collections/<projectName>/addDataset/', methods=['POST'])
-def add_dataset(projectName):
-  form_info = request.form.to_dict()
-  datasets = form_info['datasets']
-  project_id = db.session.query(Project.id)\
-    .filter(Project.name==projectName).all()[0]
-  # query Datasets for named datasets
-  # keep success dict for statuses
-  # update project_id field for each dataset
-  # return 201
-
 @app.route('/collections/shared', methods=['POST'])
 # token required
 def get_shared():
@@ -519,7 +516,8 @@ def get_collections():
   # param: user_id
   # return: dictionary {projects: [list,of,projects], 
                       # datasets: [{dataset-name : one byte-string image},
-                      #            {etc:etc},...]}
+                      #            {etc:etc},...],
+                      # public_datasets: [dataset_names]}
   
   form_info = request.get_json()
   if 'project_name' in form_info: # checks for type of POST request
@@ -534,14 +532,30 @@ def get_collections():
     db.session.commit()
     return jsonify({"success": True}), 201
   '''POST request to receive the list of user-owned projects'''
-  return_data = {}
-  projects = []
-  user_id = form_info['id']
-  user_projects = db.session.query(Project.name).filter(Project.owner_id==user_id).all()
-  for project in user_projects:
-    projects.append(project[0])
-  return_data['projects'] = projects
-  return jsonify(return_data), 201
+  if 'id' in form_info:
+    return_data = {}
+    projects = []
+    user_id = form_info['id']
+    public_datasets = db.session.query(Dataset.name).filter(Dataset.visibility=='public').all()
+    public_datasets = list(set([dataset[0] for dataset in public_datasets]))
+    user_projects = db.session.query(Project.name).filter(Project.owner_id==user_id).all()
+    for project in user_projects:
+      projects.append(project[0])
+    return_data['projects'] = projects
+    return_data['public_datasets'] = public_datasets
+    return jsonify(return_data), 201
+  if 'datasets' in form_info:
+      '''Add list of datasets to a project'''
+      # param: list of dataset names, project name
+      datasets_to_add = form_info['datasets']
+      project_name = form_info['project']
+      existing_projects = db.session.query(Dataset.project_id)
+      print(f"Datasets: {datasets_to_add}\nProject: {project_name}")
+      # for each dataset, add the project_id to the dataset
+        # read the current set of projects
+        # add the new project into the set
+        # update table entry
+      return jsonify("something"), 201
 
 #route responsible for forgot password
 @app.route('/forgotpass/', methods = ['POST'])

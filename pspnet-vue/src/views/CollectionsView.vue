@@ -177,7 +177,7 @@ async function verifyProjectName(name) {
   if (name.indexOf(';') > -1) {
     return false;
   }
-  await axios.post("http://127.0.0.1:5000/collections/", 
+  await axios.post("http://127.0.0.1:5000/collections/newProject/", 
   { project_name : name, 
     user_id : userID.value })
   .then(

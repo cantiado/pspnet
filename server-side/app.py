@@ -544,6 +544,25 @@ def get_shared():
   return_data['projects'] = projects
   return jsonify(return_data), 201
 
+@app.route('/collections/newProject/', methods=['POST'])
+def create_project():
+  '''POST request to create a new project
+  
+  :param project_name:
+  :param user_id:
+  :return boolean of success or failure
+  '''
+  form_info = request.get_json()
+  project_name = form_info['project_name']
+  owner = form_info['user_id']
+  project_exists = db.session.query(Project).filter(Project.name==project_name).first() is not None
+  if project_exists:
+    return jsonify({"success":False, "message": "Project name already exists"}), 201
+  new_project = Project(project_name, owner)
+  db.session.add(new_project)
+  db.session.commit()
+  return jsonify({"success": True}), 201
+
 @app.route('/collections/', methods=['POST'])
 # @token_required
 def get_collections():
@@ -557,17 +576,6 @@ def get_collections():
   """
   
   form_info = request.get_json()
-  if 'project_name' in form_info: # checks for type of POST request
-    '''POST request to create a new project'''
-    project_name = form_info['project_name']
-    owner = form_info['user_id']
-    project_exists = db.session.query(Project).filter(Project.name==project_name).first() is not None
-    if project_exists:
-      return jsonify({"success":False, "message": "Project name already exists"}), 201
-    new_project = Project(project_name, owner)
-    db.session.add(new_project)
-    db.session.commit()
-    return jsonify({"success": True}), 201
   '''POST request to receive the list of user-owned projects'''
   if 'id' in form_info:
     return_data = {}

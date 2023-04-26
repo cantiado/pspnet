@@ -21,10 +21,15 @@
           <li>Size of Dataset: {{ dsSize }} MB</li>
           <li>
             <button class="rounded px-3 py-2 bg-[#b9e0a5] text-white"
-            :href="url"
-            @click.prevent="downloadDataset(dsName)">
-            Download
-          </button>
+              :href="url"
+              @click.prevent="downloadDataset(dsName)">
+              Download
+            </button>
+            <button class="rounded px-3 py-2 bg-[#b9e0a5] text-white"
+              @click.prevent="saveDataset()">
+              Save Dataset
+            </button>
+          <!-- :href="saveURL" -->
           </li>
         </ul>
       </div>
@@ -89,7 +94,9 @@ export default {
     const dsSize = ref(0);
     const store = authStore()
     const role = ref(0);
+    const userID = ref();
     const baseDownloadURL = ref("http://127.0.0.1:5000/datasetview/")
+    const saveURL = ref("http://127.0.0.1:5000/explore/"+dsName.value+"/save/")
 
 
     const downloadDataset = (dsName) => {
@@ -103,6 +110,18 @@ export default {
         link.click()
         URL.revokeObjectURL(link.href)
       }).catch(console.error)
+    }
+
+    const saveDataset = () => {
+      var success = false;
+      axios.post(saveURL.value, {id: userID.value})
+      .then(
+        (response) => {
+          console.log(response.data)
+        }
+      )
+      .catch(console.log(""))
+      return success
     }
 
     const getURLs = (imgBytes) => {
@@ -149,11 +168,13 @@ export default {
       }
       if (data) {
         role.value = data.role;
+        userID.value = data.id;
       }
     });
 
     return { imgData, numImages, numUploads, numContributers, 
-      dsSize, updateLabels, role, url : baseDownloadURL, downloadDataset };
+      dsSize, updateLabels, role, url : baseDownloadURL, 
+      downloadDataset, saveURL, saveDataset };
   },
   components: { UserImg },
 };

@@ -443,7 +443,7 @@ def view_project(projectName):
     response_data = {}
     # response_data['project_dataests'] = {}
     project_id = db.session.query(Project.id).filter(Project.name==projectName).first()[0]
-    datasets = db.session.query(Dataset.id, Dataset.name, Dataset.project_id, Dataset.visibility).all()
+    datasets = db.session.query(Dataset.id, Dataset.name, Dataset.project_ids, Dataset.visibility).all()
     public_datasets = []
     # project_datasets = []
     for dataset_info in datasets:
@@ -522,6 +522,7 @@ def get_collections():
   form_info = request.get_json()
   if 'project_name' in form_info: # checks for type of POST request
     '''POST request to create a new project'''
+    print(form_info)
     project_name = form_info['project_name']
     owner = form_info['user_id']
     project_exists = db.session.query(Project).filter(Project.name==project_name).first() is not None
@@ -549,12 +550,19 @@ def get_collections():
       # param: list of dataset names, project name
       datasets_to_add = form_info['datasets']
       project_name = form_info['project']
-      existing_projects = db.session.query(Dataset.project_id)
-      print(f"Datasets: {datasets_to_add}\nProject: {project_name}")
-      # for each dataset, add the project_id to the dataset
-        # read the current set of projects
-        # add the new project into the set
-        # update table entry
+      project_id = db.session.query(Project.id).filter(Project.name==project_name).first()[0]
+      dataset_query = db.session.query(Dataset.project_ids)
+      for dataset_name in datasets_to_add:
+        p_ids = dataset_query.filter(Dataset.name==dataset_name).first()[0]
+        if p_ids is None: p_ids = [str(project_id)]
+        else:
+          p_ids = p_ids.split(',')
+          if str(project_id) not in p_ids: p_ids.append(str(project_id))
+        joined_p_ids = ','.join(p_ids)
+        db.session.query(Dataset).filter(Dataset.name==dataset_name)\
+          .update({Dataset.project_ids : joined_p_ids }, synchronize_session=False)
+      db.session.commit()
+
       return jsonify("something"), 201
 
 #route responsible for forgot password

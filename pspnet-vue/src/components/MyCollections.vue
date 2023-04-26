@@ -71,7 +71,7 @@
                     class="border-2 flex flex-col w-full max-h-[50vh] overflow-y-auto overflow-x-hidden"
                   >
                     <li
-                      v-for="(dataset, index) in datasets"
+                      v-for="(dataset, index) in publicDatasets"
                       class="border w-full px-2 py-1"
                       :class="{
                         'bg-blue-100': selectedDatasetIndices.has(index),
@@ -85,7 +85,7 @@
                     class="border-2 flex flex-col w-full max-h-[50vh] overflow-y-auto overflow-x-hidden"
                   >
                     <li
-                      v-for="(project, index) in projects"
+                      v-for="(project, index) in projectData"
                       class="border w-full px-2 py-1"
                       :class="{ 'bg-blue-100': selectedProjectIndex == index }"
                       @click="selectProjectIndex(index)"
@@ -141,7 +141,9 @@ import axios from "axios";
 import { authStore } from "@/store/authenticate";
 
 const projectData = ref([]);
+const publicDatasets = ref([]);
 const error = ref("");
+
 import {
   TransitionRoot,
   TransitionChild,
@@ -195,7 +197,8 @@ onMounted(async () => {
         (response) => (
           (projectData.value = response.data['projects']),
           // (datasetData.value = response.data['datasets']),
-          console.log(projectData.value)
+          publicDatasets.value = response.data['public_datasets'],
+          console.log(response.data)
         )
       )
       .catch(error.value = "Error");
@@ -214,14 +217,21 @@ function closeModal() {
 
 function addDatasetsToProject() {
   console.log("click");
-  const selectedDatasetNames = datasets.filter((name, index) => {
+  const selectedDatasetNames = publicDatasets.value.filter((name, index) => {
     if (selectedDatasetIndices.value.has(index)) {
       return name;
     }
   });
-  const selectedProjectName = projects[selectedProjectIndex.value];
+  const selectedProjectName = projectData.value[selectedProjectIndex.value];
   console.log(selectedDatasetNames, selectedProjectName);
-  // do something with the dataset names and project name
+
+  axios.post("http://127.0.0.1:5000/collections/" , 
+    {project : selectedProjectName, datasets : selectedDatasetNames})
+  .then(
+    (response) => (
+      console.log()
+    )
+  ).catch(console.log("error"))
   closeModal();
 }
 </script>

@@ -171,13 +171,15 @@ function createNewProject() {
   closeModal();
 }
 
-function verifyProjectName(name) {
+async function verifyProjectName(name) {
   const nameInDB = ref(false)
   // if (name.indexOf(';') > -1) {
   //   return false;
   // }
+  console.log(userID.value)
   axios.post("http://127.0.0.1:5000/collections/", 
-  { project_name : name , user_id : userID.value })
+  { project_name : name, 
+    user_id : userID.value })
   .then(
     (response) => (
       console.log(response.data),
@@ -210,6 +212,7 @@ function selectAffiliates() {
 
 onMounted(async () => {
   const data = await authStore().userData();
+  userID.value = data.id
   if (data) {
     await axios.post("http://127.0.0.1:5000/collections/", {id:data.id})
       .then(

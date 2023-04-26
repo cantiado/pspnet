@@ -16,7 +16,7 @@
         @click="openModal"
         class="text-sm border-2 border-green-100 bg-green-200 hover:bg-green-300 px-2 py-1 rounded-lg"
       >
-        + Add Dataset to Project
+        + Add Public Dataset to Project
       </button>
     </div>
     <div class="grid grid-cols-4 gap-4">
@@ -204,7 +204,7 @@ onMounted(async () => {
       .then(
         (response) => (
           projectData.value = response.data['projects'],
-          datasetData.value = response.data['datasets'],
+          datasetData.value = response.data['saved_datasets'],
           publicDatasets.value = response.data['public_datasets'],
           imgToURL()
         )

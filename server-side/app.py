@@ -526,7 +526,6 @@ def view_project(projectName):
     return jsonify(success=True), 200
 
 @app.route('/collections/shared', methods=['POST'])
-# token required
 def get_shared():
   """Returns all Projects shared with a given user
   :param user_ID: from frontend
@@ -589,40 +588,38 @@ def add_datasets_to_project():
   return jsonify({"success" : True}), 201
 
 @app.route('/collections/', methods=['POST'])
-# @token_required
 def get_collections():
-  """Handles POST requests for Collections page
+  """Gets backend data to populate Collections page
 
   :param user_ID: 
   :return dict: {projects: [list,of,projects], 
-                 datasets: [{dataset-name : one byte-string image},
+                 saved_datasets: [{dataset-name : one byte-string image},
                             {etc:etc},...],
                  public_datasets: [dataset_names]}
   """
   
   form_info = request.get_json()
-  '''POST request to receive the list of user-owned projects'''
-  if 'id' in form_info:
-    return_data = {}
-    projects = []
-    saved_datasets = {}
-    user_id = form_info['id']
-    saved_ds = db.session.query(User.saved_ds_ids).filter(User.id==user_id).first()[0]
-    if saved_ds is not None: dataset_IDs = saved_ds.split(',')
-    else: dataset_IDs = []
-    for saved_id in dataset_IDs:
-      saved_ds_name = db.session.query(Dataset.name).filter(Dataset.id==int(saved_id)).first()[0]
-      saved_ds_img = db.session.query(Image.path).filter(Image.dataset_name==saved_ds_name).first()[0]
-      saved_datasets[saved_ds_name] = img_from_path(saved_ds_img)
-    public_datasets = db.session.query(Dataset.name).filter(Dataset.visibility=='public').all()
-    public_datasets = list(set([dataset[0] for dataset in public_datasets]))
-    user_projects = db.session.query(Project.name).filter(Project.owner_id==user_id).all()
-    for project in user_projects:
-      projects.append(project[0])
-    return_data['projects'] = projects
-    return_data['datasets'] = saved_datasets
-    return_data['public_datasets'] = public_datasets
-    return jsonify(return_data), 201
+  return_data = {}
+  my_projects = []
+  user_saved_datasets = {}
+  user_id = form_info['id']
+  user_saved_ds = db.session.query(User.saved_ds_ids).filter(User.id==user_id).first()[0]
+  if user_saved_ds is not None: saved_dataset_IDs = user_saved_ds.split(',')
+  else: saved_dataset_IDs = []
+  for saved_id in saved_dataset_IDs:
+    # gets a preview image for each user-saved dataset
+    saved_ds_name = db.session.query(Dataset.name).filter(Dataset.id==int(saved_id)).first()[0]
+    saved_ds_img = db.session.query(Image.path).filter(Image.dataset_name==saved_ds_name).first()[0]
+    user_saved_datasets[saved_ds_name] = img_from_path(saved_ds_img)
+  public_datasets = db.session.query(Dataset.name).filter(Dataset.visibility=='public').all()
+  public_datasets = list(set([dataset[0] for dataset in public_datasets]))
+  user_projects = db.session.query(Project.name).filter(Project.owner_id==user_id).all()
+  for project in user_projects:
+    my_projects.append(project[0])
+  return_data['projects'] = my_projects
+  return_data['saved_datasets'] = user_saved_datasets
+  return_data['public_datasets'] = public_datasets
+  return jsonify(return_data), 201
 
 #route responsible for forgot password
 @app.route('/forgotpass/', methods = ['POST'])

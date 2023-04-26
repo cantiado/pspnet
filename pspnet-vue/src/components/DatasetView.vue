@@ -20,12 +20,14 @@
           <!-- <li># Modifications: </li> -->
           <li>Size of Dataset: {{ dsSize }} MB</li>
           <li>
-            <button class="rounded px-3 py-2 bg-[#b9e0a5] text-white"
+            <button class="rounded px-3 py-2 bg-[#b9e0a5] text-white m-1"
               :href="url"
               @click.prevent="downloadDataset(dsName)">
               Download
             </button>
-            <button class="rounded px-3 py-2 bg-[#b9e0a5] text-white"
+          </li>
+          <li>
+            <button v-if="userID > 0" class="rounded px-3 py-2 bg-[#b9e0a5] text-white m-1"
               @click.prevent="saveDataset()">
               Save Dataset
             </button>
@@ -94,7 +96,7 @@ export default {
     const dsSize = ref(0);
     const store = authStore()
     const role = ref(0);
-    const userID = ref();
+    const userID = ref(0);
     const baseDownloadURL = ref("http://127.0.0.1:5000/datasetview/")
     const saveURL = ref("http://127.0.0.1:5000/explore/"+dsName.value+"/save/")
 
@@ -174,7 +176,7 @@ export default {
 
     return { imgData, numImages, numUploads, numContributers, 
       dsSize, updateLabels, role, url : baseDownloadURL, 
-      downloadDataset, saveURL, saveDataset };
+      downloadDataset, saveDataset, userID };
   },
   components: { UserImg },
 };

@@ -11,7 +11,7 @@
       </div>
     </div>
     <div class="flex flex-row items-center gap-3 border-b-2 pb-3">
-      <h1 class="text-2xl font-bold">My Datasets</h1>
+      <h1 class="text-2xl font-bold">Saved Datasets</h1>
       <button
         @click="openModal"
         class="text-sm border-2 border-green-100 bg-green-200 hover:bg-green-300 px-2 py-1 rounded-lg"
@@ -21,8 +21,9 @@
     </div>
     <div class="grid grid-cols-4 gap-4">
       <CollectionDataset
-        v-for="dataset in datasets"
-        :datasetName="dataset"
+        v-for="(key, value) in datasetData"
+        :datasetName="value"
+        :image-src="key"
         @clicked="openDataset"
       />
     </div>
@@ -139,8 +140,10 @@ import CollectionProject from "../components/CollectionProject.vue";
 import { ref, onMounted } from 'vue'
 import axios from "axios";
 import { authStore } from "@/store/authenticate";
+import b64toBlob from "@/composables/byteToBlob";
 
 const projectData = ref([]);
+const datasetData = ref([]);
 const publicDatasets = ref([]);
 const error = ref("");
 
@@ -189,15 +192,23 @@ function openDataset(datasetName) {
   router.push({ name: "singleDataset", params: { dsName: datasetName } });
 }
 
+function imgToURL() {
+  Object.keys(datasetData.value).forEach(function (key, index) {
+    datasetData.value[key] = URL.createObjectURL(b64toBlob(datasetData.value[key]))
+    // datasetData.value[key] = getImgURL(datasetData.value[key]);
+  });
+};
+
 onMounted(async () => {
   const data = await authStore().userData();
   if (data) {
     await axios.post("http://127.0.0.1:5000/collections/", {id:data.id})
       .then(
         (response) => (
-          (projectData.value = response.data['projects']),
-          // (datasetData.value = response.data['datasets']),
+          projectData.value = response.data['projects'],
+          datasetData.value = response.data['datasets'],
           publicDatasets.value = response.data['public_datasets'],
+          imgToURL(),
           console.log(response.data)
         )
       )

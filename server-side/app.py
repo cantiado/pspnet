@@ -334,12 +334,17 @@ def explore_data():
   return jsonify(response_data), 200
 
 @app.route('/explore/<dsName>/save/', methods=['POST'])
+# @token_requireds
 def save_dataset(dsName):
   user_id = request.get_json()['id']
   new_save_id = db.session.query(Dataset.id).filter(Dataset.name==dsName).first()[0]
   saved_ds = db.session.query(User.saved_ds_ids).filter(User.id==user_id).first()[0]
   if saved_ds is None: dataset_IDs = [str(new_save_id)]
-  else: dataset_IDs = saved_ds[0].split(',').append(str(new_save_id))
+  else: 
+    print(f"Saved[0] has: {(saved_ds[0].split(',')).append('test')}")
+    dataset_IDs = saved_ds[0].split(',') + [str(new_save_id)]
+    print(f"in else with : {dataset_IDs}")
+  print(dataset_IDs)
   joined_ids = ','.join(dataset_IDs)
   db.session.query(User).filter(User.id==user_id)\
     .update({User.saved_ds_ids : joined_ids},synchronize_session=False)
@@ -553,8 +558,9 @@ def get_collections():
     saved_datasets = {}
     user_id = form_info['id']
     saved_ds = db.session.query(User.saved_ds_ids).filter(User.id==user_id).first()[0]
-    if saved_ds is not None: dataset_IDs = saved_ds[0].split(',')
-    for saved_id in saved_ds:
+    if saved_ds is not None: dataset_IDs = saved_ds.split(',')
+    else: dataset_IDs = []
+    for saved_id in dataset_IDs:
       saved_ds_name = db.session.query(Dataset.name).filter(Dataset.id==int(saved_id)).first()[0]
       saved_ds_img = db.session.query(Image.path).filter(Image.dataset_name==saved_ds_name).first()[0]
       saved_datasets[saved_ds_name] = img_from_path(saved_ds_img)

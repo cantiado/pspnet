@@ -184,7 +184,6 @@ function selectProjectIndex(index) {
 }
 
 function openProject(projectName) {
-  // console.log(projectName);
   router.push({ name: "singleProject", params: { projectName } });
 }
 
@@ -195,7 +194,6 @@ function openDataset(datasetName) {
 function imgToURL() {
   Object.keys(datasetData.value).forEach(function (key, index) {
     datasetData.value[key] = URL.createObjectURL(b64toBlob(datasetData.value[key]))
-    // datasetData.value[key] = getImgURL(datasetData.value[key]);
   });
 };
 
@@ -208,8 +206,7 @@ onMounted(async () => {
           projectData.value = response.data['projects'],
           datasetData.value = response.data['datasets'],
           publicDatasets.value = response.data['public_datasets'],
-          imgToURL(),
-          console.log(response.data)
+          imgToURL()
         )
       )
       .catch(error.value = "Error");
@@ -226,7 +223,7 @@ function closeModal() {
   selectedProjectIndex.value = -1;
 }
 
-function addDatasetsToProject() {
+async function addDatasetsToProject() {
   console.log("click");
   const selectedDatasetNames = publicDatasets.value.filter((name, index) => {
     if (selectedDatasetIndices.value.has(index)) {
@@ -234,13 +231,12 @@ function addDatasetsToProject() {
     }
   });
   const selectedProjectName = projectData.value[selectedProjectIndex.value];
-  console.log(selectedDatasetNames, selectedProjectName);
 
-  axios.post("http://127.0.0.1:5000/collections/" , 
+  await axios.post("http://127.0.0.1:5000/collections/addDatasets/" , 
     {project : selectedProjectName, datasets : selectedDatasetNames})
   .then(
     (response) => (
-      console.log()
+      console.log(response.data['success'])
     )
   ).catch(console.log("error"))
   closeModal();

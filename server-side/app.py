@@ -563,6 +563,31 @@ def create_project():
   db.session.commit()
   return jsonify({"success": True}), 201
 
+@app.route('/collections/addDatasets/', methods=['POST'])
+def add_datasets_to_project():
+  
+  form_info = request.get_json()
+  '''Add list of datasets to a project
+  
+  :param datasets: list of dataset names
+  :param project: project name to add datasets to'''
+  datasets_to_add = form_info['datasets']
+  project_name = form_info['project']
+  project_id = db.session.query(Project.id).filter(Project.name==project_name).first()[0]
+  dataset_query = db.session.query(Dataset.project_ids)
+  for dataset_name in datasets_to_add:
+    p_ids = dataset_query.filter(Dataset.name==dataset_name).first()[0]
+    if p_ids is None: p_ids = [str(project_id)]
+    else:
+      p_ids = p_ids.split(',')
+      if str(project_id) not in p_ids: p_ids.append(str(project_id))
+    joined_p_ids = ','.join(p_ids)
+    db.session.query(Dataset).filter(Dataset.name==dataset_name)\
+      .update({Dataset.project_ids : joined_p_ids }, synchronize_session=False)
+  db.session.commit()
+
+  return jsonify({"success" : True}), 201
+
 @app.route('/collections/', methods=['POST'])
 # @token_required
 def get_collections():
@@ -598,25 +623,6 @@ def get_collections():
     return_data['datasets'] = saved_datasets
     return_data['public_datasets'] = public_datasets
     return jsonify(return_data), 201
-  if 'datasets' in form_info:
-      '''Add list of datasets to a project'''
-      # param: list of dataset names, project name
-      datasets_to_add = form_info['datasets']
-      project_name = form_info['project']
-      project_id = db.session.query(Project.id).filter(Project.name==project_name).first()[0]
-      dataset_query = db.session.query(Dataset.project_ids)
-      for dataset_name in datasets_to_add:
-        p_ids = dataset_query.filter(Dataset.name==dataset_name).first()[0]
-        if p_ids is None: p_ids = [str(project_id)]
-        else:
-          p_ids = p_ids.split(',')
-          if str(project_id) not in p_ids: p_ids.append(str(project_id))
-        joined_p_ids = ','.join(p_ids)
-        db.session.query(Dataset).filter(Dataset.name==dataset_name)\
-          .update({Dataset.project_ids : joined_p_ids }, synchronize_session=False)
-      db.session.commit()
-
-      return jsonify("Success!"), 201
 
 #route responsible for forgot password
 @app.route('/forgotpass/', methods = ['POST'])

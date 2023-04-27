@@ -82,33 +82,7 @@ def token_required(f):
     
   return authorize
 
-def token_required(f):
-  @wraps(f)
-  def authorize(*args, **kwargs):
-    token = request.headers.get('token')
 
-    invalid_msg = {
-      'message' : 'Invalid token.',
-      'authenticated' : False
-    }
-    expired_msg = {
-      'message' : 'Expired token.',
-      'authenticated' : False
-    }
-    try:
-      data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-      user = User.query.filter_by(id=data['sub']).first()
-      if not user:
-        raise RuntimeError('User not found')
-      return f(user, *args, **kwargs)
-    except ExpiredSignatureError:
-      return jsonify(expired_msg), 401
-    except (InvalidTokenError, Exception) as e:
-      print(str(e))
-      #return jsonify(invalid_msg), 401
-      return jsonify({'error' : str(e)}), 401
-    
-  return authorize
 
 def YOLOv5(path, job_id):
   #executes yolo prediction model on images/jobs folder...
@@ -247,31 +221,6 @@ def identify():
 
   return "Success!"
 
-@app.route('/getCurrentJobs/', methods = ['GET'])
-@token_required
-def getCurrentJobs(user):
-  
-  current_jobs = JobRegistry.query.filter_by(finishtime = None).filter_by(uploader_id=user.id).all()
-  jobs_data = []
-
-  for job in current_jobs:
-    redis_job = Job.fetch(str(job.job_id), connection=r)
-
-    print(redis_job.get_position())
-
-    single_data = {
-      'id' : job.job_id,
-      'datasetName' : job.dataset,
-      'datasetNotes' : job.uploadNote,
-      'datasetGeoloc' : job.geolocation,
-      'visibility' : 'yes',
-      'model' : job.model,
-      'numImages' : job.numimages,
-      'start' : job.starttime,
-      'eta' : str('executing' if redis_job.get_position() == None else redis_job.get_position() + 1)
-    }
-    jobs_data.append(single_data)
-  return jsonify(jobs_data), 200
 
 @app.route('/getCurrentJobs/', methods = ['GET'])
 @token_required

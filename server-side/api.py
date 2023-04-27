@@ -4,10 +4,12 @@ import pandas as pd
 
 from flask import Flask, render_template
 
-from app import app, db
+from app import app, db, mail
 from app import JobRegistry
 from app import User, Image
-from app import new_thread_email, send_email
+from flask_mail import Mail, Message
+from threading import Thread
+
 
 #YOLOv5 predictions folder
 def YOLOv5(path, job_id):
@@ -82,6 +84,8 @@ def bookKeeping(job_id, path, job_folder):
   #calls to shutil function to move prediction file job_folder then removes the labels directory
   shutilFunction(job_id, job_folder, path)
 
+
+
 def job_callback(job, connection, result, *args, **kwargs):
   #first thing is to get the associated job registry object
   with app.app_context():
@@ -90,12 +94,28 @@ def job_callback(job, connection, result, *args, **kwargs):
 
     #next get user associated with job and send an email
     user = User.query.filter_by(id=finished_job.uploader_id).first()
-    send_email('PSPNet Job Completed',
-              sender= app.config['MAIL_USERNAME'],
+
+    msg = Message()
+    msg.subject = 'PSPNet Job Completed'
+    msg.sender = "pspnetcs426@gmail.com" 
+    msg.recipients = [user.email]
+    msg.body = render_template('job_completed.txt', description=finished_job.uploadNote, name=finished_job.dataset)
+    msg.html = render_template('job_completed.txt', description=finished_job.uploadNote, name=finished_job.dataset)
+
+    mail.send(msg)
+
+
+    ''' send_email('PSPNet Job Completed',
+              sender= "pspnetcs426@gmail.com",
               recipients= [user.email], 
               text=render_template('job_completed.txt', description=finished_job.uploadNote, name=user.firstname),
               html=render_template('job_completed.html', description=finished_job.uploadNote, name=user.firstname ))
+    '''
+
+
     db.session.commit()
+  
+
 
 if __name__ == "__main__":
   app.run(port=5002, debug=True)

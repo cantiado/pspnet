@@ -91,6 +91,7 @@ def job_callback(job, connection, result, *args, **kwargs):
   with app.app_context():
     finished_job = JobRegistry.query.filter_by(job_id = job.id).first()
     finished_job.finishtime = job.ended_at
+    # finished_job.runtime = job.ended_at - job.enqueued_at
 
     #next get user associated with job and send an email
     user = User.query.filter_by(id=finished_job.uploader_id).first()

@@ -127,6 +127,7 @@ class JobRegistry(db.Model):
   numimages = db.Column(db.Integer, nullable=False)
   starttime = db.Column(db.String(20), nullable=False)
   finishtime = db.Column(db.String(20), nullable=True)
+  # runtime = db.Column(db.String(20), nullable=True)
   
   def __init__(self, job_id, uploader_id, dataset, uploadNote, geolocation, model, numimages, startime):
     self.job_id = job_id

@@ -1,6 +1,7 @@
 import axios from 'axios'
 
 const url = 'http://127.0.0.1:5000/'
+const ml_url = 'http://127.0.0.1:5001/'
 
 export function authenticate(userData){
   return axios.post(url + 'login/', userData)
@@ -47,7 +48,7 @@ export function getFinishedJobs(jwt){
 }
 
 export function getCurrentJobs(jwt){
-  return axios.get(url + 'getCurrentJobs/', {headers : {token : jwt}})
+  return axios.get(ml_url + 'getCurrentJobs/', {headers : {token : jwt}})
 }
 
 export async function getDatasetImgs(ds_name) {

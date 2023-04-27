@@ -8,7 +8,7 @@
       <div class="grid grid-cols-3 border-2 p-2">
         <span class="font-bold">Job ID</span>
         <span class="font-bold">Dataset Name</span>
-        <span class="font-bold">ETA</span>
+        <span class="font-bold">Position in Queue</span>
       </div>
       <div v-for="job in currentJobs" class="border" :key="job.id">
         <button
@@ -99,7 +99,7 @@
 <script setup>
 import { authStore } from "../store/authenticate";
 import { useRouter } from "vue-router";
-import { ref, onMounted, onBeforeMount } from "vue";
+import { ref, onMounted, onBeforeMount, onBeforeUnmount} from "vue";
 import { getCurrentJobs } from "@/api";
 import { getFinishedJobs } from "@/api";
 
@@ -114,15 +114,24 @@ const selectedCompletedJob = ref(-1);
 
 const store = authStore();
 
+
 const getJobs = async () => {
-  const currentJobRes = await getCurrentJobs(localStorage.getItem('userToken'))
-  currentJobs.value = currentJobRes.data
-  const finishedJobRes = await getFinishedJobs(localStorage.getItem('userToken'))
-  completedJobs.value = finishedJobRes.data
+  try{
+    const currentJobRes = await getCurrentJobs(localStorage.getItem('userToken'))
+    currentJobs.value = currentJobRes.data
+    const finishedJobRes = await getFinishedJobs(localStorage.getItem('userToken'))
+    completedJobs.value = finishedJobRes.data
+  }catch(err){
+    console.log(err)
+  }
 }
 
 //setInterval is not advised, can be bad if getJobstakes longer than the interval
-setInterval(getJobs, 1000)
+const interval_id = setInterval(getJobs, 2000)
+
+onBeforeUnmount(() => {
+  clearInterval(interval_id)
+})
 
 
 function setCurrentJob(id) {
@@ -133,6 +142,7 @@ function setCompletedJob(id) {
 }
 
 onBeforeMount(() => {
+
   if (!store.isAuthenticated()) {
     const router = useRouter();
     router.push({ name: "login" });

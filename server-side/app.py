@@ -275,6 +275,12 @@ def updateUser(user):
 
 @app.route('/profile/', methods = ['GET', 'POST'])
 def profile():
+  """Returns data associated with the User's uploads
+  :param user_id: User's unique ID
+  :return upload data: {paths: byte-strings,
+                        labels: labels-by-image,
+                        count: num-images-in-upload} per upload
+  """
   response_data = {}
   user_id = request.get_json()['id']
 
@@ -297,6 +303,13 @@ def profile():
 
 @app.route('/explore/', methods=['GET'])
 def explore_data():
+  """GET for all dataset data to display on Explore
+  :return ds_info: Dictionary with {img count,
+                                    img byte strings, 
+                                    dataset description,
+                                    dataset location,
+                                    display variable } per dataset
+  """
   unique_ds = db.session.query(Dataset.name).filter(Dataset.visibility==
                                                     'public').distinct().all()
   unique_visible = []
@@ -530,20 +543,23 @@ def view_project(projectName):
       pass
     return jsonify(successful_add), 201
 
-@app.route('/collections/shared', methods=['POST'])
+@app.route('/collections/shared/', methods=['POST'])
 def get_shared():
   """Returns all Projects shared with a given user
+
   :param user_ID: from frontend
+  :return projects: list of project names shared to the user
   """
   frontend_data = request.get_json()
   return_data = {}
   projects = []
   user_id = frontend_data['id']
   user_projects = db.session.query(Project.name, Project.shared_user_ids) \
-    .filter(Project.owner_id.contains(str(user_id))).all()
+    .filter(Project.shared_user_ids.contains(str(user_id))).all()
+    # get all projects which are shared to the user
   for project_info in user_projects:
-    if project_info[1] is None: continue
-    elif str(user_id) in project_info[1].split(','):
+    if project_info[1] is None: continue # skip if not shared, potentially redundant
+    elif str(user_id) in project_info[1].split(','): 
       projects.append(project_info[0])
   return_data['projects'] = projects
   return jsonify(return_data), 201
@@ -571,10 +587,12 @@ def create_project():
 def add_datasets_to_project():
   
   form_info = request.get_json()
-  '''Add list of datasets to a project
+  """Add list of datasets to a project
   
   :param datasets: list of dataset names
-  :param project: project name to add datasets to'''
+  :param project: project name to add datasets to
+  :return True:
+  """
   datasets_to_add = form_info['datasets']
   project_name = form_info['project']
   project_id = db.session.query(Project.id).filter(Project.name==project_name).first()[0]

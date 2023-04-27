@@ -54,8 +54,9 @@ def csvCreation(job_id):
         listOne = [split[0], split[1], predictionNumber] #adds each id to a list
         listTwo.append(listOne) #appends the list into one larger list
         if x == 1:
-          print("running update label")
+          print("update label...")
           updateLabel(filename, job_id, split[1])
+    db.session.commit()
   
   #creates a new csv data frame containing top 5 classifications for each image
   prediction = pd.DataFrame(listTwo, columns=['CONFIDENCE_INTERVAL', 'SPECIES', 'PICTURE_ID'])  
@@ -68,7 +69,6 @@ def updateLabel(filename, job_id, label):
   # creates the Image.path, .txt is replaced with % for the LIKE query
   img_path = os.path.join('images',str(job_id), filename.replace('.txt','%'))
   db.session.query(Image).filter(Image.path.like(img_path)).update({Image.label: label}, synchronize_session = False)
-  db.session.commit()
 
 def bookKeeping(job_id, path, job_folder):
   #calls to yolov5 function to prediction images in jobs folder

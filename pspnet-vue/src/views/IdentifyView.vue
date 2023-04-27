@@ -621,6 +621,7 @@ async function postImages() {
   form.set("dataset-notes", datasetNotes.value);
   form.set("dataset-geoloc", datasetGeoloc.value);
   form.set("visibility", visibility.value);
+  form.set("timestamp", Date.now())
   const userData = await store.userData();
   console.log("user data", userData);
   form.set("user-id", userData.id);

@@ -8,7 +8,8 @@ def test_new_dataset():
     WHEN a new Dataset is created during image upload
     THEN check if the dataset has the proper data
     """
-    dataset = Dataset("Site 1 Dataset", "Nevada Wildfire Research")
+    dataset = Dataset("Nevada Wildfire Research", "Understanding wildfires")
 
-    assert dataset.dataset_name == "Site 1 Dataset"
-    assert dataset.project_name == "Nevada Wildfire Research"
+    assert dataset.name == "Nevada Wildfire Research"
+    assert dataset.description == "Understanding wildfires"
+    assert dataset.project_id == None

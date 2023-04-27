@@ -52,5 +52,17 @@ export function getCurrentJobs(jwt){
 }
 
 export async function getDatasetImgs(ds_name) {
-  return await axios.post(url + 'datasetview/')
+  return await axios.post(url + 'datasetview/' + ds_name + '/')
+}
+
+export async function collectionsDatasets(project_name) {
+  return await axios.post(url + 'collections/' + project_name + '/')
+}
+
+export async function newProject() {
+  return await axios.post(url + 'collections/newProject/')
+}
+
+export async function getCollections() {
+  return await axios.post(url + 'collections/')
 }

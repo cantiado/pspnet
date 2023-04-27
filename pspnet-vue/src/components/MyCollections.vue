@@ -1,6 +1,14 @@
 <template>
   <div class="text-left flex flex-col gap-3 h-full">
-    <h1 class="text-2xl font-bold border-b-2 pb-3">My Projects</h1>
+    <div class="flex flex-row items-center gap-3 border-b-2 pb-3">
+      <h1 class="text-2xl font-bold">My Projects</h1>
+      <button
+        @click="openModal"
+        class="text-sm border-2 border-green-100 bg-green-200 hover:bg-green-300 px-2 py-1 rounded-lg"
+      >
+        + Add Public Dataset to Project
+      </button>
+    </div>
     <div class="grid grid-cols-4 gap-4">
       <div v-for="name in projectData">
         <CollectionProject
@@ -10,15 +18,7 @@
 
       </div>
     </div>
-    <div class="flex flex-row items-center gap-3 border-b-2 pb-3">
-      <h1 class="text-2xl font-bold">Saved Datasets</h1>
-      <button
-        @click="openModal"
-        class="text-sm border-2 border-green-100 bg-green-200 hover:bg-green-300 px-2 py-1 rounded-lg"
-      >
-        + Add Public Dataset to Project
-      </button>
-    </div>
+    <h1 class="text-2xl font-bold border-b-2 pb-3">Saved Datasets</h1>
     <div class="grid grid-cols-4 gap-4">
       <CollectionDataset
         v-for="(key, value) in datasetData"

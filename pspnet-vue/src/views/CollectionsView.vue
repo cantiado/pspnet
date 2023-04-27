@@ -186,6 +186,9 @@ async function verifyProjectName(name) {
       validName.value = response.data['success']
     )
   ).catch(console.log(error.value))
+    if (validName.value) {
+      projectData.value.push(name);
+    }
   return validName.value
 }
 

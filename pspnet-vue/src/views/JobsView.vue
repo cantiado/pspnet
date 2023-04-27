@@ -1,7 +1,7 @@
 <template>
   <div class="w-full flex flex-col justify-start items-center gap-3 p-5">
     <!-- delete this once jobs are implemented -->
-    
+
     <!--  -->
     <h1 class="text-2xl font-bold">Current Jobs</h1>
     <div class="max-w-750 w-3/4 border" id="currentJobsTable">
@@ -73,6 +73,7 @@
           class="p-3 gap-2 border-t flex flex-col items-start bg-slate-50"
         >
           <span>Submitted: {{ job.start }}</span>
+          <span>Duration: {{ job.duration }} sec</span>
           <div class="flex flex-row gap-5">
             <span>Images: {{ job.numImages }}</span>
             <span>Model: {{ job.model }}</span>
@@ -87,10 +88,20 @@
           </p>
           <div class="flex-row space-x-4">
             <a :href="'http://127.0.0.1:5000/download/' + job.id">
-              <button class="px-3 py-1 border bg-green-200 my-5">Download CSV</button>
+              <button class="px-3 py-1 border bg-green-200 my-5">
+                Download CSV
+              </button>
             </a>
-            <router-link :to="{name :'singleDataset', params: {dsName: job.datasetName}, props: true }">
-              <button class="px-3 py-1 border bg-green-200 my-5">View Dataset</button>
+            <router-link
+              :to="{
+                name: 'singleDataset',
+                params: { dsName: job.datasetName },
+                props: true,
+              }"
+            >
+              <button class="px-3 py-1 border bg-green-200 my-5">
+                View Dataset
+              </button>
             </router-link>
           </div>
         </div>
@@ -106,40 +117,62 @@
 <script setup>
 import { authStore } from "../store/authenticate";
 import { useRouter } from "vue-router";
-import { ref, onMounted, onBeforeMount, onBeforeUnmount} from "vue";
+import { ref, onMounted, onBeforeMount, onBeforeUnmount } from "vue";
 import { getCurrentJobs } from "@/api";
 import { getFinishedJobs } from "@/api";
 
-const currentJobs = ref([
-]);
+const currentJobs = ref([]);
 
-const completedJobs = ref([
-]);
+const completedJobs = ref([]);
 
 const selectedCurrentJob = ref(-1);
 const selectedCompletedJob = ref(-1);
 
 const store = authStore();
 
-
 const getJobs = async () => {
-  try{
-    const currentJobRes = await getCurrentJobs(localStorage.getItem('userToken'))
-    currentJobs.value = currentJobRes.data
-    const finishedJobRes = await getFinishedJobs(localStorage.getItem('userToken'))
-    completedJobs.value = finishedJobRes.data
-  }catch(err){
-    console.log(err)
+  try {
+    const currentJobRes = await getCurrentJobs(
+      localStorage.getItem("userToken")
+    );
+    currentJobs.value = currentJobRes.data;
+    const finishedJobRes = await getFinishedJobs(
+      localStorage.getItem("userToken")
+    );
+    completedJobs.value = finishedJobRes.data;
+    for (const job of completedJobs.value) {
+      const endTime = new Date(job.end + " UTC");
+      job.end = `${endTime.getFullYear()}-${String(endTime.getMonth()).padStart(
+        2,
+        "0"
+      )}-${endTime.getDate()} \
+      ${String(endTime.getHours()).padStart(2, "0")}:${String(
+        endTime.getMinutes()
+      ).padStart(2, "0")}`;
+
+      const startTime = new Date(job.start + " UTC");
+      job.start = `${startTime.getFullYear()}-${String(
+        startTime.getMonth()
+      ).padStart(2, "0")}-${startTime.getDate()} \
+      ${String(startTime.getHours()).padStart(2, "0")}:${String(
+        startTime.getMinutes()
+      ).padStart(2, "0")}`;
+
+      job.duration = Math.round(
+        (endTime.getTime() - startTime.getTime()) / 1000
+      );
+    }
+  } catch (err) {
+    console.log(err);
   }
-}
+};
 
 //setInterval is not advised, can be bad if getJobstakes longer than the interval
-const interval_id = setInterval(getJobs, 2000)
+const interval_id = setInterval(getJobs, 2000);
 
 onBeforeUnmount(() => {
-  clearInterval(interval_id)
-})
-
+  clearInterval(interval_id);
+});
 
 function setCurrentJob(id) {
   selectedCurrentJob.value = id;
@@ -149,7 +182,6 @@ function setCompletedJob(id) {
 }
 
 onBeforeMount(() => {
-
   if (!store.isAuthenticated()) {
     const router = useRouter();
     router.push({ name: "login" });

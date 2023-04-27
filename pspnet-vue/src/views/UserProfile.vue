@@ -10,7 +10,7 @@
     >
       <span class="">Role: {{ role }}</span>
       <!-- <div class="p-2">Created account on {{ create_date }}</div> -->
-      <span class=""> Verified Labeler: {{ verified ? "Yes" : "No" }} </span>
+      <span class="">Verified Labeler: {{ verified ? "Yes" : "No" }} </span>
       <span class="">No. of Contributions: {{ numImages }}</span>
     </div>
 
@@ -20,8 +20,9 @@
         </div> -->
     <h2 class="text-xl font-bold">Image Uploads</h2>
     <div
-      class="w-full flex flex-col gap-3 border-4 border-[#663300] rounded-md p-3"
+    class="w-full flex flex-col gap-3 border-4 border-[#663300] rounded-md p-3"
     >
+      <h2 v-if="Object.keys(uploadData).length==0" class="text-xl font-bold">No Uploaded Images</h2>
       <div v-if="error" class="text-2xl font-bold">{{ error }}</div>
       <div v-for="(value, index) in uploadData">
         <UserImg
@@ -55,7 +56,7 @@ const responseData = ref("");
 const numImages = ref(0);
 const img_data = ref("");
 const role = ref("Not Logged In");
-const uploadData = ref();
+const uploadData = ref({});
 
 onBeforeMount(() => {
   if (!store.isAuthenticated()) {
@@ -70,6 +71,7 @@ onMounted(async () => {
     name.value = data.name;
     id.value = data.id;
     role.value = data.role;
+    if (role.value == "Principal Investigator") {verified.value = true;}
   }
 
   const getImgURL = (imgBytes) => {

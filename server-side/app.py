@@ -29,7 +29,7 @@ app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USERNAME'] = "pspnetcs426@gmail.com"
-app.config['MAIL_PASSWORD'] = ""
+app.config['MAIL_PASSWORD'] = "lvzuijgmkvbsuayw"
 app.config['TESTING'] = False
 
 app.config['DOWNLOAD'] = 'images'
@@ -533,6 +533,16 @@ def view_project(projectName):
       new_email = db.session.query(User.email).filter(User.id==int(new_id)).first()[0]
       print(new_email)
       # send email to newly-invited researcher(s)
+
+      #NOTE SEND EMAIL HERE
+      send_email(
+        "You've been added to a project",
+        sender=app.config['MAIL_USERNAME'],
+        recipients = [new_email],
+        text=render_template('researcher_added.txt'),
+        html=render_template('researcher_added.html'))
+
+
     shared_user_ids = ",".join(saved_ids) # converts field back to DB format
     if operation == "add":
       '''adds the newly given IDs to the project'''

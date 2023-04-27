@@ -1,7 +1,7 @@
-Hello {{ name }},
+Hello PSPNet User,
 
 Your job with the description: 
-{{ description }} 
+{{ description }} and name {{ name }} 
 has been completed. 
 
 PSPNet

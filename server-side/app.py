@@ -113,11 +113,15 @@ class Upload(db.Model):
     dataset_name = db.Column(db.String[40], nullable=False)
     upload_notes = db.Column(db.Text, nullable=True)
     verified = db.Column(db.Boolean, default=False)
+    timestamp = db.Column(db.String(20), nullable=False)
+    num_images = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, uploader_id, dataset_name, notes) -> None:
+    def __init__(self, uploader_id, dataset_name, notes, timestamp, num_images) -> None:
         self.uploader_id = uploader_id
         self.dataset_name = dataset_name
         self.upload_notes = notes
+        self.timestamp = timestamp
+        self.num_images = num_images
 
 
 class JobRegistry(db.Model):
@@ -404,16 +408,21 @@ def dataset_prev_data():
 
 
 @app.route('/datasetview/<dsName>/', methods=['GET'])
-def dataset_view_data(dsName):
-    """Gets all image and metadata associated with a Dataset"""
+def dataset_view_data(dsName) -> dict:
+    """Gets first 5 image per Upload and metadata associated with a Dataset
+    
+    :param dsName: name of the dataset
+    :return dataset_data: dict containing all upload data and dataset metadata"""
     ds_data = db.session.query(Dataset.num_images, Dataset.size, Dataset.visibility). \
         filter_by(name=dsName).order_by(Dataset.id.desc()).first()
     if ds_data[2] != 'public':
         return jsonify(dict({'status': "Private dataset"})), 401
     combined_data = {}
     combined_upload_data = []
-    ds_upload_list = db.session.query(Upload.id, Upload.uploader_id, Upload.upload_notes, Upload.verified)\
-        .filter_by(dataset_name=dsName)
+    ds_upload_list = db.session.query(
+        Upload.id, Upload.uploader_id, Upload.upload_notes, 
+        Upload.verified, Upload.num_images)\
+        .filter_by(dataset_name=dsName).all()
     for upload in ds_upload_list:
         upload_data = {}
         uploader_name = db.session.query(
@@ -424,8 +433,7 @@ def dataset_view_data(dsName):
         paths = []
         labels = []
         img_data = db.session.query(
-            Image.path, Image.label).filter_by(upload_id=upload[0])
-        upload_data['count'] = img_data.count()
+            Image.path, Image.label).filter_by(upload_id=upload[0]).limit(5).all()
         for img_datum in img_data:
             paths.append(img_from_path(img_datum[0]))
             labels.append(img_datum[1])
@@ -433,6 +441,7 @@ def dataset_view_data(dsName):
         upload_data['labels'] = labels
         upload_data['notes'] = upload[2]
         upload_data['verified'] = upload[3]
+        upload_data['count'] = upload[4]
         upload_data['id'] = upload[0]
         combined_upload_data.append(upload_data)
     combined_data['upload_data'] = combined_upload_data

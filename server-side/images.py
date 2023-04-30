@@ -149,7 +149,8 @@ def identify():
   dataset_location = form_info['dataset-geoloc']
   dataset_location = None if dataset_location == "" else dataset_location
   visibility = form_info['visibility']
-  new_upload = Upload(user_id, dataset_name, upload_notes)
+  timestamp = form_info['timestamp']
+  new_upload = Upload(user_id, dataset_name, upload_notes, timestamp, len(files))
   db.session.add(new_upload)
   db.session.commit()
 

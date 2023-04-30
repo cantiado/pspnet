@@ -40,13 +40,14 @@
     </div>
     <div class="basis-3/4 p-5 max-h-[79.5vh] overflow-auto">
       <div class="grid grid-cols-1 gap-3">
-        <div v-for="(value, index) in imgData" 
+        <div v-for="(value, index) in imgData.slice().reverse()"
           class="p-5 flex flex-col gap-5 border-2 rounded-lg"
           @click="openModal(value['id'])">
           <div class="flex flex-row items-center gap-5">
-            <h2 class="text-xl font-bold">Upload: {{ index + 1 }}</h2>
+            <h2 class="text-xl font-bold">Upload ID: {{ value['id'] }}</h2>
             <span>Number of Images: {{ value["count"] }}</span>
             <span>Submitted By: {{ value["user"] }}</span>
+            <span>Date: {{ value['timestamp'] }}</span>
             <span v-if="value['notes']">Notes: {{ value["notes"] }}</span>
             <div 
               v-if="value['verified']" 
@@ -135,7 +136,6 @@ export default {
     }
 
     function openModal(uploadID) {
-      console.log("Open view for: " + uploadID);
       modalUploadID.value = uploadID
       showUploadModal.value = true;
     };
@@ -169,6 +169,15 @@ export default {
         imgData.value[i]["images"] = getURLs(imageData[i]["images"]);
       }
     };
+    
+    const convertToDate = (upload) => {
+      console.log(upload)
+      const monthNames = ["January", "February", "March", "April","May","June","July","August","September","October","November","December"]
+      for (var i = 0; i < upload.length; i++) {
+        var timestamp = new Date(Number(upload[i]['timestamp']))
+        upload[i]['timestamp'] = String(timestamp.getFullYear()) + " " + monthNames[timestamp.getMonth()] + " " + String(timestamp.getDate())
+      }
+    };
 
     onMounted(async () => {
       const data = await store.userData();
@@ -183,6 +192,7 @@ export default {
               (numUploads.value = response.data["upload_data"].length),
               (numImages.value = response.data["num_images"]),
               (dsSize.value = response.data["ds_size"]),
+              convertToDate(response.data["upload_data"]),
               console.log("Data received")
             )
           )

@@ -421,7 +421,7 @@ def dataset_view_data(dsName) -> dict:
     combined_upload_data = []
     ds_upload_list = db.session.query(
         Upload.id, Upload.uploader_id, Upload.upload_notes, 
-        Upload.verified, Upload.num_images)\
+        Upload.verified, Upload.num_images, Upload.timestamp)\
         .filter_by(dataset_name=dsName).all()
     for upload in ds_upload_list:
         upload_data = {}
@@ -439,10 +439,11 @@ def dataset_view_data(dsName) -> dict:
             labels.append(img_datum[1])
         upload_data['images'] = paths
         upload_data['labels'] = labels
+        upload_data['id'] = upload[0]
         upload_data['notes'] = upload[2]
         upload_data['verified'] = upload[3]
         upload_data['count'] = upload[4]
-        upload_data['id'] = upload[0]
+        upload_data['timestamp'] = upload[5]
         combined_upload_data.append(upload_data)
     combined_data['upload_data'] = combined_upload_data
     combined_data['num_images'] = ds_data[0]

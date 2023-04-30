@@ -452,6 +452,18 @@ def dataset_view_data(dsName) -> dict:
 
 
 @app.route('/datasetview/<dsName>/<uploadID>/', methods=['GET'])
+def get_upload_images(dsName, uploadID):
+    img_data = []
+    label_data = []
+    images = db.session.query(Image.path, Image.label)\
+      .filter(Image.dataset_name==dsName, Image.upload_id==uploadID).all()
+    for image in images:
+        img_data.append(img_from_path(image[0]))
+        label_data.append(image[1])
+    return jsonify({'images' : img_data,
+                    'labels' : label_data}), 200
+
+@app.route('/datasetview/<dsName>/<uploadID>/updateLabel/', methods=['GET'])
 # @token_required
 def update_verified_upload(dsName, uploadID):
     """Updates the verified boolean to True for an Upload"""

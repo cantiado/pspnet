@@ -1,13 +1,14 @@
 <template>
   <div class="background" @click="closeView">
     <div class="window">
-      <div class="dsName text-2xl font-bold">{{ ds_name }}</div>
+      <div class="dsName text-2xl font-bold">{{ dsName }} - Upload ID: {{ uploadID }}</div>
       <div class="imgContainer inline-grid grid-cols-3 gap-3">
-        <div v-if="imgURLs" v-for="path in imgURLs" class="individualImg">
+        <div v-if="imgURLs" v-for="(path, index) in imgURLs" class="individualImg">
           <img
             class="object-cover h-48 w-48 p-1 bg-white border rounded max-w-sm"
             :src="path"
           />
+          <span>{{ imgLabels[index] }}</span>
         </div>
       </div>
     </div>
@@ -23,13 +24,14 @@ import b64toBlob from "@/composables/byteToBlob";
 
 export default {
   props: {
-    ds_name: String,
+    dsName: String,
+    uploadID: Number,
   },
   setup(props, { emit }) {
     const responseData = ref();
     const imgURLs = ref([]);
     const imgLabels = ref([]);
-    const ds_name = ref(props.ds_name);
+    const dsName = ref(props.dsName);
     const error = ref("");
 
     const getURLs = (imgBytes) => {
@@ -39,11 +41,12 @@ export default {
     };
 
     onMounted(async () => {
-      if (ds_name.value) {
+      var baseURL = "http://127.0.0.1:5000/datasetview/"
+      var extension = props.dsName.concat('/').concat(props.uploadID).concat('/')
+      var URL = baseURL.concat(extension)
+      if (dsName.value) {
         await axios
-          .post("http://127.0.0.1:5000/datasetview/", {
-            ds_name: ds_name.value,
-          })
+          .get(URL)
           .then(
             (response) => (
               (responseData.value = response.data),
@@ -60,7 +63,7 @@ export default {
       emit("closeModal", true);
     };
 
-    return { imgURLs, closeView, emit };
+    return { imgURLs, imgLabels, closeView, emit };
   },
   components: { UserImg },
 };

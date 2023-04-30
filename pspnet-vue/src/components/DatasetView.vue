@@ -1,6 +1,9 @@
 <!-- Author: Antonio Lang, styled by Carl Antiado -->
 
 <template>
+  <div v-if="showUploadModal">
+      <UploadPopup :dsName="dsName" :uploadID="modalUploadID" @closeModal="closeModal"/>
+  </div>
   <div class="w-full h-[79vh] flex flex-row">
     <div class="basis-1/4 p-5 bg-slate-50">
       <div class="flex flex-row items-center">
@@ -37,7 +40,9 @@
     </div>
     <div class="basis-3/4 p-5 max-h-[79.5vh] overflow-auto">
       <div class="grid grid-cols-1 gap-3">
-        <div v-for="(value, index) in imgData" class="p-5 flex flex-col gap-5 border-2 rounded-lg">
+        <div v-for="(value, index) in imgData" 
+          class="p-5 flex flex-col gap-5 border-2 rounded-lg"
+          @click="openModal(value['id'])">
           <div class="flex flex-row items-center gap-5">
             <h2 class="text-xl font-bold">Upload: {{ index + 1 }}</h2>
             <span>Number of Images: {{ value["count"] }}</span>
@@ -74,6 +79,7 @@
 import axios from "axios";
 import { ref } from "vue";
 import UserImg from "./UserImg.vue";
+import UploadPopup from "./UploadPopup.vue";
 import { onMounted } from "vue";
 import b64toBlob from "@/composables/byteToBlob";
 import { authStore } from '@/store/authenticate'
@@ -98,6 +104,8 @@ export default {
     const userID = ref(0);
     const baseDownloadURL = ref("http://127.0.0.1:5000/datasetview/")
     const saveURL = ref("http://127.0.0.1:5000/explore/"+dsName.value+"/save/")
+    const showUploadModal = ref(false)
+    const modalUploadID = ref()
 
 
     const downloadDataset = (dsName) => {
@@ -126,6 +134,16 @@ export default {
       return success
     }
 
+    function openModal(uploadID) {
+      console.log("Open view for: " + uploadID);
+      modalUploadID.value = uploadID
+      showUploadModal.value = true;
+    };
+
+    function closeModal(close) {
+      showUploadModal.value = false;
+    };
+
     const getURLs = (imgBytes) => {
       var returnURLs = [];
       for (var i = 0; i < imgBytes.length; i++) {
@@ -139,7 +157,9 @@ export default {
     }
 
     const updateLabels = (imgData, dsName, uploadID) => {
-      var URL = "http://127.0.0.1:5000/datasetview/".concat(dsName).concat("/").concat(uploadID)
+      var baseURL = "http://127.0.0.1:5000/datasetview/"
+      var extension = dsName.concat("/").concat(uploadID).concat('/').concat("updateLabel").concat('/')
+      var URL = baseURL.concat(extension)
       axios.get(URL)
       return true
     };
@@ -176,8 +196,9 @@ export default {
 
     return { imgData, numImages, numUploads, numContributers, 
       dsSize, updateLabels, role, url : baseDownloadURL, 
-      downloadDataset, saveDataset, userID };
+      downloadDataset, saveDataset, userID,
+      openModal, closeModal, showUploadModal, modalUploadID };
   },
-  components: { UserImg },
+  components: { UserImg, UploadPopup },
 };
 </script>

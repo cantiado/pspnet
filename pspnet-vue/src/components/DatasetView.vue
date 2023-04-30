@@ -171,7 +171,6 @@ export default {
     };
     
     const convertToDate = (upload) => {
-      console.log(upload)
       const monthNames = ["January", "February", "March", "April","May","June","July","August","September","October","November","December"]
       for (var i = 0; i < upload.length; i++) {
         var timestamp = new Date(Number(upload[i]['timestamp']))
@@ -192,8 +191,7 @@ export default {
               (numUploads.value = response.data["upload_data"].length),
               (numImages.value = response.data["num_images"]),
               (dsSize.value = response.data["ds_size"]),
-              convertToDate(response.data["upload_data"]),
-              console.log("Data received")
+              convertToDate(response.data["upload_data"])
             )
           )
           .catch((error.value = "Failed to retreive data"));

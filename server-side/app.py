@@ -113,6 +113,7 @@ class Upload(db.Model):
     dataset_name = db.Column(db.String[40], nullable=False)
     upload_notes = db.Column(db.Text, nullable=True)
     verified = db.Column(db.Boolean, default=False)
+    # verifier_id = db.Column(db.Integer, nullable=True)
     timestamp = db.Column(db.String(20), nullable=False)
     num_images = db.Column(db.Integer, nullable=False)
 
@@ -468,10 +469,11 @@ def get_upload_images(dsName, uploadID):
 # @token_required
 def update_verified_upload(dsName, uploadID):
     """Updates the verified boolean to True for an Upload"""
-    db.session.query(Upload).filter(Upload.id == uploadID)\
-      .update({Upload.verified: True}, synchronize_session=False)
+    upload = db.session.query(Upload).filter(Upload.id == uploadID).first()
+    
+    upload.verified = not upload.verified
     db.session.commit()
-    return jsonify("Success!"), 200
+    return jsonify({"verified" : upload.verified}), 200
 
 
 @app.route('/datasetview/<dsName>/download/', methods=['GET'])

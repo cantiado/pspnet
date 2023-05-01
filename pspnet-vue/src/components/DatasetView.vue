@@ -41,25 +41,34 @@
     <div class="basis-3/4 p-5 max-h-[79.5vh] overflow-auto">
       <div class="grid grid-cols-1 gap-3">
         <div v-for="(value, index) in imgData.slice().reverse()"
-          class="p-5 flex flex-col gap-5 border-2 rounded-lg"
-          @click="openModal(value['id'])">
+          class="p-5 flex flex-col gap-5 border-2 rounded-lg">
           <div class="flex flex-row items-center gap-5">
-            <h2 class="text-xl font-bold">Upload ID: {{ value['id'] }}</h2>
+            <h2 class="text-xl font-bold"
+            @click="openModal(value['id'])">
+            Upload ID: {{ value['id'] }}</h2>
             <span>Number of Images: {{ value["count"] }}</span>
             <span>Submitted By: {{ value["user"] }}</span>
             <span>Date: {{ value['timestamp'] }}</span>
             <span v-if="value['notes']">Notes: {{ value["notes"] }}</span>
-            <div 
-              v-if="value['verified']" 
-              class="italic border rounded p-1 border-[#b9e0a5]">
-              Labels Verified</div>
-              <button 
-              v-else-if="role==='Principal Investigator'" 
-              @click="value['verified'] = updateLabels(imgData, dsName,value['id'])"
+            
+            <button 
+              v-if="role==='Principal Investigator' && !value['verified']" 
+              @click="value['verified'] = updateLabels(value['verified'],value['id'],index)"
               class="border rounded p-1 border-black">
               Verify Labels
             </button>
-            <!-- check user role to display verified button -->
+            <button 
+              v-else-if="role==='Principal Investigator' && value['verified']" 
+              @click="value['verified'] = updateLabels(value['verified'],value['id'],index)"
+              class="italic border rounded p-1 border-[#b9e0a5]">
+              Labels Verified
+            </button>
+            <div 
+              v-else-if="value['verified']" 
+              class="italic border rounded p-1 border-[#b9e0a5]">
+              Labels Verified
+            </div>
+            <!-- check conditions for the button vs not -->
           </div>
           <div class="flex flex-row flex-wrap gap-5">
             <div v-for="(img_value, img_index) in value['images']">
@@ -156,12 +165,21 @@ export default {
       console.log(store)
     }
 
-    const updateLabels = (imgData, dsName, uploadID) => {
+    const updateLabels = async (verified, uploadID, index) => {
       var baseURL = "http://127.0.0.1:5000/datasetview/"
-      var extension = dsName.concat("/").concat(uploadID).concat('/').concat("updateLabel").concat('/')
+      var extension = dsName.value.concat("/").concat(uploadID).concat('/').concat("updateLabel").concat('/')
       var URL = baseURL.concat(extension)
-      axios.get(URL)
-      return true
+      var newLabel
+      await axios.get(URL).then(
+        (response) => (
+          newLabel = response.data['verified'],
+          imgData.value[imgData.value.length -1 - index]['verified'] = newLabel
+          // verified.value = newLabel)
+          // imgData.value[dsName][index]['verified'] = newLabel)
+          )
+          )
+        console.log(imgData.value)
+      return newLabel
     };
 
     const convertByUpload = (imageData) => {

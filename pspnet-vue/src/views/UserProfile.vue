@@ -26,9 +26,10 @@
       <div v-if="error" class="text-2xl font-bold">{{ error }}</div>
       <div v-for="(value, index) in uploadData">
         <UserImg
+          :datasetName="value['dataset']"
           :imgURLs="value['paths']"
           :numUploaded="value['count']"
-          :uploadID="index"
+          :uploadID="String(value['id'])"
           :labels="value['labels']"
         />
       </div>
@@ -83,10 +84,15 @@ onMounted(async () => {
   };
 
   const convertByUpload = (imageData) => {
-    Object.keys(uploadData.value).forEach(function (key, index) {
-      numImages.value += uploadData.value[key]["count"];
-      uploadData.value[key]["paths"] = getImgURL(imageData[key]["paths"]);
-    });
+    for (var i = 0; i < imageData.length; i++) {
+      numImages.value += uploadData.value[i]["count"];
+      uploadData.value[i]["paths"] = getImgURL(imageData[i]["paths"]);
+    }
+    // Object.keys(uploadData.value).forEach(function (key, index) {
+    //   numImages.value += uploadData.value[key]["count"];
+    //   uploadData.value[key]["paths"] = getImgURL(imageData[key]["paths"]);
+    // });
+    uploadData.value = uploadData.value.reverse()
   };
 
   await axios
@@ -95,9 +101,9 @@ onMounted(async () => {
       (response) => (
         (responseData.value = response.data),
         (uploadData.value = responseData.value),
-        console.log(responseData),
         convertByUpload(response.data),
-        (error.value = null)
+        (error.value = null),
+        console.log(uploadData.value)
       )
     )
     .catch((error.value = "Retrieving Data..."));

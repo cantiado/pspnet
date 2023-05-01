@@ -304,27 +304,30 @@ def profile():
                           labels: labels-by-image,
                           count: num-images-in-upload} per upload
     """
-    response_data = {}
+    upload_data = []
     user_id = request.get_json()['id']
 
     user_uploads = db.session.query(
-        Upload.id).filter_by(uploader_id=user_id).all()
+        Upload.id, Upload.num_images, Upload.dataset_name)\
+          .filter_by(uploader_id=user_id).all()
 
     for unique_upload_id in user_uploads:
         upload_img_paths = []
         img_labels = []
         result = db.session.query(Image.path, Image.label).filter_by(
-            upload_id=unique_upload_id[0]).all()
+            upload_id=unique_upload_id[0]).limit(5).all()
         for path in result:
             upload_img_paths.append(img_from_path(path[0]))
             img_labels.append(path[1])
 
-        response_data[str(unique_upload_id[0])] = {
-            'paths': upload_img_paths,
-            'labels': img_labels,
-            'count': len(upload_img_paths)
-        }
-    return jsonify(response_data), 201
+        upload_data.append({
+            'id' : unique_upload_id[0],
+            'paths' : upload_img_paths,
+            'labels' : img_labels,
+            'count' : unique_upload_id[1],
+            'dataset' : unique_upload_id[2]
+        })
+    return jsonify(upload_data), 201
 
 
 @app.route('/explore/', methods=['GET'])

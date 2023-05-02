@@ -43,9 +43,9 @@
         <div v-for="(value, index) in imgData.slice().reverse()"
           class="p-5 flex flex-col gap-5 border-2 rounded-lg">
           <div class="flex flex-row items-center gap-5">
-            <h2 class="text-xl font-bold"
+            <button class="text-xl font-bold border border-1 rounded p-1"
             @click="openModal(value['id'])">
-            Upload ID: {{ value['id'] }}</h2>
+            Upload ID: {{ value['id'] }}</button>
             <span>Number of Images: {{ value["count"] }}</span>
             <span>Submitted By: {{ value["user"] }}</span>
             <span>Date: {{ value['timestamp'] }}</span>

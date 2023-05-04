@@ -64,13 +64,58 @@
             class="min-w-max block font-medium text-gray-900"
             >Dataset name:</label
           >
-          <input
-            v-model="datasetName"
-            type="text"
-            id="dataset-name"
-            placeholder="Required"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1"
-          />
+          <div class="flex flex-col gap-3">
+            <input
+              v-model="datasetName"
+              type="text"
+              id="dataset-name"
+              placeholder="Required"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2 py-1"
+            />
+            <Menu v-if="publicDatasets.length" as="div" class="relative inline-block">
+              <div class="flex flex-row gap-4 text-right items-center">
+                <MenuButton
+                  id="menu-button-publicDatasets"
+                  class="inline-flex w-full justify-end rounded-md bg-gray-200 px-2 py-1 text-sm font-medium hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-opacity-75"
+                >
+                  <span class="flex w-full justify-center">
+                    Public Datasets
+                  </span>
+  
+                  <ChevronDownIcon
+                    class="ml-2 -mr-1 h-5 w-5"
+                    aria-hidden="true"
+                  />
+                </MenuButton>
+              </div>
+              <transition
+                enter-active-class="transition duration-100 ease-out"
+                enter-from-class="transform scale-95 opacity-0"
+                enter-to-class="transform scale-100 opacity-100"
+                leave-active-class="transition duration-75 ease-in"
+                leave-from-class="transform scale-100 opacity-100"
+                leave-to-class="transform scale-95 opacity-0"
+              >
+                <MenuItems
+                  class="absolute right-0 mt-2 w-full h-25 overflow-auto origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                >
+                  <div v-for="pDs in publicDatasets" class="px-1 py-1">
+                    <MenuItem v-slot="{ active }">
+                      <button
+                        @click="() => datasetName = pDs"
+                        :class="[
+                          active ? 'bg-green-200' : 'text-gray-900',
+                          'group flex w-full justify-center items-center rounded-md px-2 py-1 text-sm',
+                        ]"
+                      >
+                        {{ pDs }}
+                      </button>
+                    </MenuItem>
+                  </div>
+                </MenuItems>
+              </transition>
+            </Menu>
+          </div>
           <label
             for="dataset-notes"
             class="min-w-max block font-medium text-gray-900"
@@ -226,7 +271,11 @@
           "
           :disabled="!uploadedImages || !selectedModel || loading"
         >
-          <div v-if="loading" role="status" class="flex flex-row justify-center items-center">
+          <div
+            v-if="loading"
+            role="status"
+            class="flex flex-row justify-center items-center"
+          >
             <svg
               aria-hidden="true"
               class="w-6 h-6 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
@@ -545,7 +594,7 @@ import FileList from "../components/FileList.vue";
 import { authStore } from "../store/authenticate";
 import { useRouter } from "vue-router";
 import { ref, onMounted } from "vue";
-import axios from 'axios';
+import axios from "axios";
 
 const uploadedImages = ref(false);
 const selectedModel = ref("");
@@ -629,14 +678,15 @@ function modifyFileList() {
 }
 
 onMounted(async () => {
-  axios.get("http://127.0.0.1:5001/identify/")
-  .then(
-    (reponse) => (
-      publicDatasets.value = reponse.data['datasets'],
-      console.log(publicDatasets.value)
+  axios
+    .get("http://127.0.0.1:5001/identify/")
+    .then(
+      (reponse) => (
+        (publicDatasets.value = reponse.data["datasets"]),
+        console.log(publicDatasets.value)
+      )
     )
-  )
-  .catch(console.log("Error"))
+    .catch(console.log("Error"));
 });
 
 async function postImages() {

@@ -544,7 +544,8 @@ import ImageCard from "../components/ImageCard.vue";
 import FileList from "../components/FileList.vue";
 import { authStore } from "../store/authenticate";
 import { useRouter } from "vue-router";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import axios from 'axios';
 
 const uploadedImages = ref(false);
 const selectedModel = ref("");
@@ -561,6 +562,7 @@ const errorMsg = ref("");
 const loading = ref(false);
 const publications = ref("");
 const relatedWorks = ref("");
+const publicDatasets = ref([]);
 
 const store = authStore();
 const router = useRouter();
@@ -626,9 +628,20 @@ function modifyFileList() {
   imageInput.files = newFileList.files;
 }
 
+onMounted(async () => {
+  axios.get("http://127.0.0.1:5001/identify/")
+  .then(
+    (reponse) => (
+      publicDatasets.value = reponse.data['datasets'],
+      console.log(publicDatasets.value)
+    )
+  )
+  .catch(console.log("Error"))
+});
+
 async function postImages() {
   loading.value = true;
-  const url = "http://127.0.0.1:5001/identify";
+  const url = "http://127.0.0.1:5001/identify/";
   const imageInput = document.getElementById("image-input");
   const form = new FormData();
   for (const image of imageInput.files) {

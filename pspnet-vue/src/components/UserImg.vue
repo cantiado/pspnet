@@ -2,8 +2,9 @@
 
 <template>
   <div class="flex flex-col justify-start items-center gap-2 bg-slate-100 border border-slate-200 p-2">
-    <span class="text-lg"><b>Upload ID:</b> {{ uploadID }}</span>
-    <span># Images: {{ numUploaded }}</span>
+    <!-- <span class="text-lg"><b>Dataset:</b> {{ datasetName }}</span> -->
+    <span class="text-lg"><b>Dataset:</b> {{ datasetName }} <b>| Upload ID:</b> {{ uploadID }}</span>
+    <span>No. of Images: {{ numUploaded }}</span>
     <div class="flex flex-row justify-center flex-wrap gap-3">
       <div v-for="(imgURL, index) in imgURLs">
         <img
@@ -21,6 +22,7 @@
 <script>
 export default {
   props: {
+    datasetName: String,
     imgURLs: Array,
     numUploaded: Number,
     uploadID: String,

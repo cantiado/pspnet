@@ -1,6 +1,9 @@
 <!-- Author: Antonio Lang, styled by Carl Antiado -->
 
 <template>
+  <div v-if="showUploadModal">
+      <UploadPopup :dsName="dsName" :uploadID="modalUploadID" @closeModal="closeModal"/>
+  </div>
   <div class="w-full h-[79vh] flex flex-row">
     <div class="basis-1/4 p-5 bg-slate-50">
       <div class="flex flex-row items-center">
@@ -37,23 +40,35 @@
     </div>
     <div class="basis-3/4 p-5 max-h-[79.5vh] overflow-auto">
       <div class="grid grid-cols-1 gap-3">
-        <div v-for="(value, index) in imgData" class="p-5 flex flex-col gap-5 border-2 rounded-lg">
+        <div v-for="(value, index) in imgData.slice().reverse()"
+          class="p-5 flex flex-col gap-5 border-2 rounded-lg">
           <div class="flex flex-row items-center gap-5">
-            <h2 class="text-xl font-bold">Upload: {{ index + 1 }}</h2>
+            <button class="text-xl font-bold border border-1 rounded p-1"
+            @click="openModal(value['id'])">
+            Upload ID: {{ value['id'] }}</button>
             <span>Number of Images: {{ value["count"] }}</span>
             <span>Submitted By: {{ value["user"] }}</span>
+            <span>Date: {{ value['timestamp'] }}</span>
             <span v-if="value['notes']">Notes: {{ value["notes"] }}</span>
-            <div 
-              v-if="value['verified']" 
-              class="italic border rounded p-1 border-[#b9e0a5]">
-              Labels Verified</div>
-              <button 
-              v-else-if="role==='Principal Investigator'" 
-              @click="value['verified'] = updateLabels(imgData, dsName,value['id'])"
+            
+            <button 
+              v-if="role==='Principal Investigator' && !value['verified']" 
+              @click="value['verified'] = updateLabels(value['verified'],value['id'],index)"
               class="border rounded p-1 border-black">
               Verify Labels
             </button>
-            <!-- check user role to display verified button -->
+            <button 
+              v-else-if="role==='Principal Investigator' && value['verified']" 
+              @click="value['verified'] = updateLabels(value['verified'],value['id'],index)"
+              class="italic border rounded p-1 border-[#b9e0a5]">
+              Labels Verified
+            </button>
+            <div 
+              v-else-if="value['verified']" 
+              class="italic border rounded p-1 border-[#b9e0a5]">
+              Labels Verified
+            </div>
+            <!-- check conditions for the button vs not -->
           </div>
           <div class="flex flex-row flex-wrap gap-5">
             <div v-for="(img_value, img_index) in value['images']">
@@ -74,6 +89,7 @@
 import axios from "axios";
 import { ref } from "vue";
 import UserImg from "./UserImg.vue";
+import UploadPopup from "./UploadPopup.vue";
 import { onMounted } from "vue";
 import b64toBlob from "@/composables/byteToBlob";
 import { authStore } from '@/store/authenticate'
@@ -98,6 +114,8 @@ export default {
     const userID = ref(0);
     const baseDownloadURL = ref("http://127.0.0.1:5000/datasetview/")
     const saveURL = ref("http://127.0.0.1:5000/explore/"+dsName.value+"/save/")
+    const showUploadModal = ref(false)
+    const modalUploadID = ref()
 
 
     const downloadDataset = (dsName) => {
@@ -126,6 +144,15 @@ export default {
       return success
     }
 
+    function openModal(uploadID) {
+      modalUploadID.value = uploadID
+      showUploadModal.value = true;
+    };
+
+    function closeModal(close) {
+      showUploadModal.value = false;
+    };
+
     const getURLs = (imgBytes) => {
       var returnURLs = [];
       for (var i = 0; i < imgBytes.length; i++) {
@@ -138,15 +165,34 @@ export default {
       console.log(store)
     }
 
-    const updateLabels = (imgData, dsName, uploadID) => {
-      var URL = "http://127.0.0.1:5000/datasetview/".concat(dsName).concat("/").concat(uploadID)
-      axios.get(URL)
-      return true
+    const updateLabels = async (verified, uploadID, index) => {
+      var baseURL = "http://127.0.0.1:5000/datasetview/"
+      var extension = dsName.value.concat("/").concat(uploadID).concat('/').concat("updateLabel").concat('/')
+      var URL = baseURL.concat(extension)
+      var newLabel
+      await axios.get(URL).then(
+        (response) => (
+          newLabel = response.data['verified'],
+          imgData.value[imgData.value.length -1 - index]['verified'] = newLabel
+          // verified.value = newLabel)
+          // imgData.value[dsName][index]['verified'] = newLabel)
+          )
+          )
+        console.log(imgData.value)
+      return newLabel
     };
 
     const convertByUpload = (imageData) => {
       for (var i = 0; i < imageData.length; i++) {
         imgData.value[i]["images"] = getURLs(imageData[i]["images"]);
+      }
+    };
+    
+    const convertToDate = (upload) => {
+      const monthNames = ["January", "February", "March", "April","May","June","July","August","September","October","November","December"]
+      for (var i = 0; i < upload.length; i++) {
+        var timestamp = new Date(Number(upload[i]['timestamp']))
+        upload[i]['timestamp'] = String(timestamp.getFullYear()) + " " + monthNames[timestamp.getMonth()] + " " + String(timestamp.getDate())
       }
     };
 
@@ -163,7 +209,7 @@ export default {
               (numUploads.value = response.data["upload_data"].length),
               (numImages.value = response.data["num_images"]),
               (dsSize.value = response.data["ds_size"]),
-              console.log("Data received")
+              convertToDate(response.data["upload_data"])
             )
           )
           .catch((error.value = "Failed to retreive data"));
@@ -176,8 +222,9 @@ export default {
 
     return { imgData, numImages, numUploads, numContributers, 
       dsSize, updateLabels, role, url : baseDownloadURL, 
-      downloadDataset, saveDataset, userID };
+      downloadDataset, saveDataset, userID,
+      openModal, closeModal, showUploadModal, modalUploadID };
   },
-  components: { UserImg },
+  components: { UserImg, UploadPopup },
 };
 </script>

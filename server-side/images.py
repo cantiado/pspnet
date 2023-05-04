@@ -134,9 +134,12 @@ def csvCreation(job_id):
   prediction_ID = "predictions" + str(job_id) + ".csv" 
   prediction.to_csv(prediction_ID) #converts the dataframe to a csv
 
-@app.route("/identify", methods=["POST"])
+@app.route("/identify/", methods=["GET", "POST"])
 def identify():
-
+  if request.method == "GET":
+    public_ds = db.session.query(Dataset.name).filter(Dataset.visibility=='public').all()
+    datasets = [ds_query[0] for ds_query in public_ds]
+    return jsonify({'datasets' : datasets}), 200
 
   # files = request.files.to_dict(flat=False)["image-input"]
   files = request.files.to_dict(flat=False)["images"]
@@ -149,7 +152,8 @@ def identify():
   dataset_location = form_info['dataset-geoloc']
   dataset_location = None if dataset_location == "" else dataset_location
   visibility = form_info['visibility']
-  new_upload = Upload(user_id, dataset_name, upload_notes)
+  timestamp = form_info['timestamp']
+  new_upload = Upload(user_id, dataset_name, upload_notes, timestamp, len(files))
   db.session.add(new_upload)
   db.session.commit()
 

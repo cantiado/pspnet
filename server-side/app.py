@@ -113,11 +113,16 @@ class Upload(db.Model):
     dataset_name = db.Column(db.String[40], nullable=False)
     upload_notes = db.Column(db.Text, nullable=True)
     verified = db.Column(db.Boolean, default=False)
+    # verifier_id = db.Column(db.Integer, nullable=True)
+    timestamp = db.Column(db.String(20), nullable=False)
+    num_images = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, uploader_id, dataset_name, notes) -> None:
+    def __init__(self, uploader_id, dataset_name, notes, timestamp, num_images) -> None:
         self.uploader_id = uploader_id
         self.dataset_name = dataset_name
         self.upload_notes = notes
+        self.timestamp = timestamp
+        self.num_images = num_images
 
 
 class JobRegistry(db.Model):
@@ -299,27 +304,30 @@ def profile():
                           labels: labels-by-image,
                           count: num-images-in-upload} per upload
     """
-    response_data = {}
+    upload_data = []
     user_id = request.get_json()['id']
 
     user_uploads = db.session.query(
-        Upload.id).filter_by(uploader_id=user_id).all()
+        Upload.id, Upload.num_images, Upload.dataset_name)\
+          .filter_by(uploader_id=user_id).all()
 
     for unique_upload_id in user_uploads:
         upload_img_paths = []
         img_labels = []
         result = db.session.query(Image.path, Image.label).filter_by(
-            upload_id=unique_upload_id[0]).all()
+            upload_id=unique_upload_id[0]).limit(5).all()
         for path in result:
             upload_img_paths.append(img_from_path(path[0]))
             img_labels.append(path[1])
 
-        response_data[str(unique_upload_id[0])] = {
-            'paths': upload_img_paths,
-            'labels': img_labels,
-            'count': len(upload_img_paths)
-        }
-    return jsonify(response_data), 201
+        upload_data.append({
+            'id' : unique_upload_id[0],
+            'paths' : upload_img_paths,
+            'labels' : img_labels,
+            'count' : unique_upload_id[1],
+            'dataset' : unique_upload_id[2]
+        })
+    return jsonify(upload_data), 201
 
 
 @app.route('/explore/', methods=['GET'])
@@ -404,16 +412,21 @@ def dataset_prev_data():
 
 
 @app.route('/datasetview/<dsName>/', methods=['GET'])
-def dataset_view_data(dsName):
-    """Gets all image and metadata associated with a Dataset"""
+def dataset_view_data(dsName) -> dict:
+    """Gets first 5 image per Upload and metadata associated with a Dataset
+    
+    :param dsName: name of the dataset
+    :return dataset_data: dict containing all upload data and dataset metadata"""
     ds_data = db.session.query(Dataset.num_images, Dataset.size, Dataset.visibility). \
         filter_by(name=dsName).order_by(Dataset.id.desc()).first()
     if ds_data[2] != 'public':
         return jsonify(dict({'status': "Private dataset"})), 401
     combined_data = {}
     combined_upload_data = []
-    ds_upload_list = db.session.query(Upload.id, Upload.uploader_id, Upload.upload_notes, Upload.verified)\
-        .filter_by(dataset_name=dsName)
+    ds_upload_list = db.session.query(
+        Upload.id, Upload.uploader_id, Upload.upload_notes, 
+        Upload.verified, Upload.num_images, Upload.timestamp)\
+        .filter_by(dataset_name=dsName).all()
     for upload in ds_upload_list:
         upload_data = {}
         uploader_name = db.session.query(
@@ -424,16 +437,17 @@ def dataset_view_data(dsName):
         paths = []
         labels = []
         img_data = db.session.query(
-            Image.path, Image.label).filter_by(upload_id=upload[0])
-        upload_data['count'] = img_data.count()
+            Image.path, Image.label).filter_by(upload_id=upload[0]).limit(5).all()
         for img_datum in img_data:
             paths.append(img_from_path(img_datum[0]))
             labels.append(img_datum[1])
         upload_data['images'] = paths
         upload_data['labels'] = labels
+        upload_data['id'] = upload[0]
         upload_data['notes'] = upload[2]
         upload_data['verified'] = upload[3]
-        upload_data['id'] = upload[0]
+        upload_data['count'] = upload[4]
+        upload_data['timestamp'] = upload[5]
         combined_upload_data.append(upload_data)
     combined_data['upload_data'] = combined_upload_data
     combined_data['num_images'] = ds_data[0]
@@ -443,13 +457,26 @@ def dataset_view_data(dsName):
 
 
 @app.route('/datasetview/<dsName>/<uploadID>/', methods=['GET'])
+def get_upload_images(dsName, uploadID):
+    img_data = []
+    label_data = []
+    images = db.session.query(Image.path, Image.label)\
+      .filter(Image.dataset_name==dsName, Image.upload_id==uploadID).all()
+    for image in images:
+        img_data.append(img_from_path(image[0]))
+        label_data.append(image[1])
+    return jsonify({'images' : img_data,
+                    'labels' : label_data}), 200
+
+@app.route('/datasetview/<dsName>/<uploadID>/updateLabel/', methods=['GET'])
 # @token_required
 def update_verified_upload(dsName, uploadID):
     """Updates the verified boolean to True for an Upload"""
-    db.session.query(Upload).filter(Upload.id == uploadID)\
-      .update({Upload.verified: True}, synchronize_session=False)
+    upload = db.session.query(Upload).filter(Upload.id == uploadID).first()
+    
+    upload.verified = not upload.verified
     db.session.commit()
-    return jsonify("Success!"), 200
+    return jsonify({"verified" : upload.verified}), 200
 
 
 @app.route('/datasetview/<dsName>/download/', methods=['GET'])

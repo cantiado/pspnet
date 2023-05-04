@@ -136,24 +136,32 @@ const getJobs = async () => {
       localStorage.getItem("userToken")
     );
     currentJobs.value = currentJobRes.data;
+    for (const job of currentJobs.value) {
+      const startTime = new Date(job.start + " UTC");
+      job.start = `${startTime.getFullYear()}-${String(
+        startTime.getMonth() + 1
+      ).padStart(2, "0")}-${String(startTime.getDate()).padStart(2, "0")} \
+      ${String(startTime.getHours()).padStart(2, "0")}:${String(
+        startTime.getMinutes()
+      ).padStart(2, "0")}`;
+    }
     const finishedJobRes = await getFinishedJobs(
       localStorage.getItem("userToken")
     );
     completedJobs.value = finishedJobRes.data;
     for (const job of completedJobs.value) {
       const endTime = new Date(job.end + " UTC");
-      job.end = `${endTime.getFullYear()}-${String(endTime.getMonth()).padStart(
-        2,
-        "0"
-      )}-${endTime.getDate()} \
+      job.end = `${endTime.getFullYear()}-${String(
+        endTime.getMonth() + 1
+      ).padStart(2, "0")}-${String(endTime.getDate()).padStart(2, "0")} \
       ${String(endTime.getHours()).padStart(2, "0")}:${String(
         endTime.getMinutes()
       ).padStart(2, "0")}`;
 
       const startTime = new Date(job.start + " UTC");
       job.start = `${startTime.getFullYear()}-${String(
-        startTime.getMonth()
-      ).padStart(2, "0")}-${startTime.getDate()} \
+        startTime.getMonth() + 1
+      ).padStart(2, "0")}-${String(startTime.getDate()).padStart(2, "0")} \
       ${String(startTime.getHours()).padStart(2, "0")}:${String(
         startTime.getMinutes()
       ).padStart(2, "0")}`;
